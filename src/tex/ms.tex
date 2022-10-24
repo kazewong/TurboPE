@@ -26,20 +26,49 @@ We do one thing and one thing only, gravitational wave parameters estimation, an
 
 \section{Gravitational wave parameter estimation}
 
-\subsection{Heterodyned likelihood}
+\subsection{MCMC}
 
 \subsection{Waveform}
 
+\subsection{Heterodyned likelihood}
+
+The computational cost of evaluating a waveform model scales linearly with the number of sample points either in time or frequency domain.
+This introduces greater computational burden for longer-duration signals.
+To reduce the computational cost, there are a number of methods to reduce the number of basis points one would need to compute the likelihood faithfully \kw{cite}.
+We use heterodyned likelihood \kw{cite} (also named relative binning in \kw{cite}) in this work.
+
+\kw{Specify the idea of heterodyned likelihood here}.
+
 \section{FlowMC}
 
-\section{Gradient-based sampler}
+Since our likelihood function is coded in 
+\subsection{Gradient-based sampler}
 \label{sec:gradient}
 
-\section{Normalizing Flow}
+\texttt{Jax} allows us to compute the gradient of the likelihood function with respect to the parameters through automatic differentiation.
+This enables us to use gradient-based samplers such as Metropolis-adjusted Langevin algorithm (MALA) \kw{cite} and Hamiltonian Monte Carlo (HMC)\cite{kw}.
+The main advantage of gradient-based sampling methods over gradient-free sampling methods is the gradient information help decorrelates different parameters.
+This means gradient-based sampling methods allow longer jump in a high dimensional space.
+This is crucial for high dimensional problems \footnote{Gradient-free methods often have troubles dealing with problems with $>20$ dimensions.},
+since gradient-free methods would need small step size to have reasonable acceptance rate in a high dimensional space,
+which in turn leads to a more correlated samples hence slower convergence.
+
+\subsection{Normalizing Flow}
 \label{sec:flow}
 
-\section{Accelerators}
+While 
+
+\subsection{Accelerators}
 \label{sec:accelerators}
+
+
+\section{Checks}
+
+\begin{enumerate}
+    \item ppplot
+    \item real-event result
+\end{enumerate}
+
 
 \section{Discussion}
 
@@ -54,6 +83,8 @@ We do one thing and one thing only, gravitational wave parameters estimation, an
 
 \kw{Talk about future development}
 
+
+% Additional traits for having differentiable waveforms
 There are a number of future developments we are working on.
 While IMRPhenomD is a reasonable start, it lacks some qualitative features that other state-of-the-art models have,
 such as precession and eccentricity \kw{cite}.
@@ -62,12 +93,14 @@ Currently, we are working on building differentiable IMRPhenomX and NRSurrogate 
 Going forward, we encourage the waveform development community to leverage autodiff environment such as Jax when constructing new waveform models.
 Having a differentiable waveform model is not only beneficial for parameter estimation, but also for other applications such as calibrating waveforms to numerical relativity result, as detailed in \kw{cite}.
 
+% More features such as marginalization
 The features we have implemented are the barebone version of parameter estimation.
 We do not include marginalization schemes such as time, phase and calibration lines marginalization.
 Because of the performance of the sampler on accelerators, time and phase marginalization is not necessary,
 as the performance of our implementation is not significantly impacted by having two extra dimension.
 Other marginalization mode should be considered in the future.
 
+% JIT overhead
 Jax's JIT compilation drastically reduce the computational time to evaluate the likelihood.
 However, it comes with a compilation overhead when the likelihood is evaluated for the first time.
 We observed the compilation time could depends on the device where the code will be run.
@@ -79,13 +112,16 @@ This means the compilation overhead is dominating the wall-clock time of the spe
 To utilize our implementation to its full potential, we are looking into ways to reduce the compilation overhead,
 or to cache the compilation results to avoid paying the compilation overhead for every events.
 
+% Higher dimensional problems
+While standard GW analysis goes up to 17 dimension, 
 \begin{enumerate}
     \item Multi-device scaling?
     \item Other detectors configuration
     \item  Combining with noise inference
     \item Higher dimensional problems need HMC still
-
 \end{enumerate}
+
+
 
 \section{Acknowledgements}
 

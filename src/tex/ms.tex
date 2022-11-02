@@ -26,6 +26,8 @@ We do one thing and one thing only, gravitational wave parameters estimation, an
 
 \section{Gravitational wave parameter estimation}
 
+In this section we give a self-contained summary the gravitational-wave parameter estimation process.
+
 \subsection{MCMC}
 
 \begin{align}
@@ -100,11 +102,13 @@ modes. This means the relative weights between modes will much longer to sample
 compared to the shape of each mode.
 
 Moreover, before we can use the sampling chain to estimate the quantity we care,
-the sampler often needs to first find the most probable region in the target space,
-which is a common process that is referred to "burn-in" in the literature.
-This means one would discard a certain amount of data generated from the beginning and only use the later part to estimate the quantities of interest.
-The burn-in phase of a gradient-based sampler is often as long as the sampling phase,
-which means a good portion of computation is not necessary helpful in estimating the target quantities.
+the sampler often needs to first find the most probable region in the target
+space, which is a common process that is referred to "burn-in" in the
+literature. This means one would discard a certain amount of data generated from
+the beginning and only use the later part to estimate the quantities of
+interest. The burn-in phase of a gradient-based sampler is often as long as the
+sampling phase, which means a good portion of computation is not necessary
+helpful in estimating the target quantities.
 
 Normalizing flow is a neural-network based technique that aims at learning a
 mapping between a simple distribution, such as a Gaussian distribution, to a
@@ -115,22 +119,53 @@ The core of normalizing flow is given by
 \begin{align}
     p_x(X) = p_z(Z) \prod_i \left| \frac{\partial f}{\partial x_i}\right|,
 \end{align}
-where $p_x(X)$ is the complex target distribution $p_z(Z)$ is the simple latent distribution,
-and $f$ is a series of invertible parameterized transform that connect the two distributions.
-For a detail discussion of the algorithm, we refer the readers to \kw{cite}.
+where $p_x(X)$ is the complex target distribution $p_z(Z)$ is the simple latent
+distribution, and $f$ is a series of invertible parameterized transform that
+connect the two distributions. For a detail discussion of the algorithm, we
+refer the readers to \kw{cite}.
 
-As mentioned in the previous subsection, one of the main issue gradient-based sampler is it does not explore local correlation and multi-modality well.
-This is exactly where the normalizing flow model can help.
-While the method would still work when there is only one independent local sampler chain, this method works much better when we employ a lot of independent chains.
-By looking across multiple chains, the normalizing flow learns the global landscape of the target distribution, hence we can use it as a \textit{proposal} distribution.
-This means independent chains can now jump between modes, or within a single mode that exhibits complex geometry that cannot be handled easily only through the local sampler,
-which greatly reduce both the burn-in time and sampling time.
+As mentioned in the previous subsection, one of the main issue gradient-based
+sampler is it does not explore local correlation and multi-modality well. This
+is exactly where the normalizing flow model can help. While the method would
+still work when there is only one independent local sampler chain, this method
+works much better when we employ a lot of independent chains. By looking across
+multiple chains, the normalizing flow learns the global landscape of the target
+distribution, hence we can use it as a \textit{proposal} distribution. This
+means independent chains can now jump between modes, or within a single mode
+that exhibits complex geometry that cannot be handled easily only through the
+local sampler, which greatly reduce both the burn-in time and sampling time.
 
 \kw{Mention how this helps gravitational wave, gives examples.}
 
 
 \subsection{Accelerators}
 \label{sec:accelerators}
+
+Modern accelerators such as GPUs and TPUs are designed to execute large scale
+dense computation. They are often much more cost-efficient than using many CPUs
+when it comes to solving problems that can be benefited from parallelization.
+The downside of these accelerators compared to CPUs is they can only perform a
+more restricted set of operation, and are often less performant when they are
+dealing with problem that are serial. Parameter estimation with MCMC is a serial
+problem, since each new sample generated from a chain depends on the last sample
+in the chain. This means naively putting the problem on an accelerator is more
+likely to harm the performance instead of improving it.
+
+In this work, the use of accelerators provides two independent perks that
+tremendously benefits the parameter estimation process. First, using
+accelerators allow us to run many independent chains at the same time, which
+benefits the training of the normalizing flow. Since we generate the data we use
+to train the normalizing flow on-the-fly, the more independent data we can feed
+to the training process, the higher chance the normalizing flow can learn a
+reasonable representation of the global landscape of the target distribution. If
+we only use a small amount of chains, we are limited to the correlated samples
+from each chain, so we have to run more sequential steps to get the same amount
+of independent data as compared to running more chains, where former option does
+not benefit from parallelization but the latter does. In another word, being
+able to use many independent chains help the normalizing flow learn the global
+landscape faster in WALL time.
+
+Another benefit i
 
 
 \section{Checks}
@@ -139,6 +174,9 @@ which greatly reduce both the burn-in time and sampling time.
     \item ppplot
     \item real-event result
 \end{enumerate}
+
+\kw{GW159014}
+\kw{GW170817}
 
 \section{Discussion}
 
@@ -166,6 +204,8 @@ constructing new waveform models. Having a differentiable waveform model is not
 only beneficial for parameter estimation, but also for other applications such
 as calibrating waveforms to numerical relativity result, as detailed in
 \kw{cite}.
+
+% Precessing waveforms and higher mode.
 
 % More features such as marginalization
 The features we have implemented are the barebone version of parameter

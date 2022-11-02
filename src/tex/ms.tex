@@ -58,6 +58,8 @@ refer the reader the reference \kw{}.
 
 \section{FlowMC}
 
+In this section, we provide a high level summary of how each component in \texttt{flowMC} benefits the sampling process and their interplay.
+
 Since our likelihood function is coded in 
 \subsection{Gradient-based sampler}
 \label{sec:gradient}
@@ -74,6 +76,8 @@ often have troubles dealing with problems with $>20$ dimensions.}, since
 gradient-free methods would need small step size to have reasonable acceptance
 rate in a high dimensional space, which in turn leads to a more correlated
 samples hence slower convergence.
+
+\kw{Show some examples of successful application of HMC}
 
 \subsection{Normalizing Flow}
 \label{sec:flow}
@@ -95,17 +99,34 @@ be trapped in one mode and take extremely long time to transverse between the
 modes. This means the relative weights between modes will much longer to sample
 compared to the shape of each mode.
 
+Moreover, before we can use the sampling chain to estimate the quantity we care,
+the sampler often needs to first find the most probable region in the target space,
+which is a common process that is referred to "burn-in" in the literature.
+This means one would discard a certain amount of data generated from the beginning and only use the later part to estimate the quantities of interest.
+The burn-in phase of a gradient-based sampler is often as long as the sampling phase,
+which means a good portion of computation is not necessary helpful in estimating the target quantities.
+
 Normalizing flow is a neural-network based technique that aims at learning a
 mapping between a simple distribution, such as a Gaussian distribution, to a
 complex distribution, often given in the form of data samples from a target
 distribution. Once the network is trained, one can evaluate the probability
 density of the complex distribution and samples from it very efficiently.
-
+The core of normalizing flow is given by
 \begin{align}
-    p(x) = p(z) \prod_i \left| \frac{\partial f}{\partial x_i}\right|
+    p_x(X) = p_z(Z) \prod_i \left| \frac{\partial f}{\partial x_i}\right|,
 \end{align}
-
+where $p_x(X)$ is the complex target distribution $p_z(Z)$ is the simple latent distribution,
+and $f$ is a series of invertible parameterized transform that connect the two distributions.
 For a detail discussion of the algorithm, we refer the readers to \kw{cite}.
+
+As mentioned in the previous subsection, one of the main issue gradient-based sampler is it does not explore local correlation and multi-modality well.
+This is exactly where the normalizing flow model can help.
+While the method would still work when there is only one independent local sampler chain, this method works much better when we employ a lot of independent chains.
+By looking across multiple chains, the normalizing flow learns the global landscape of the target distribution, hence we can use it as a \textit{proposal} distribution.
+This means independent chains can now jump between modes, or within a single mode that exhibits complex geometry that cannot be handled easily only through the local sampler,
+which greatly reduce both the burn-in time and sampling time.
+
+\kw{Mention how this helps gravitational wave, gives examples.}
 
 
 \subsection{Accelerators}

@@ -84,6 +84,7 @@ samples hence slower convergence.
 \subsection{Normalizing Flow}
 \label{sec:flow}
 
+% Problem with just HMC or MALA
 While gradient-based samplers have been shown to be superior in terms of
 performance when compared to other gradient-free algorithms in many practical
 examples\kw{cite}, there are still a number of classes of problems
@@ -101,6 +102,7 @@ be trapped in one mode and take extremely long time to transverse between the
 modes. This means the relative weights between modes will much longer to sample
 compared to the shape of each mode.
 
+% Long burn in too
 Moreover, before we can use the sampling chain to estimate the quantity we care,
 the sampler often needs to first find the most probable region in the target
 space, which is a common process that is referred to "burn-in" in the
@@ -110,6 +112,7 @@ interest. The burn-in phase of a gradient-based sampler is often as long as the
 sampling phase, which means a good portion of computation is not necessary
 helpful in estimating the target quantities.
 
+% Crux of normalizing flow
 Normalizing flow is a neural-network based technique that aims at learning a
 mapping between a simple distribution, such as a Gaussian distribution, to a
 complex distribution, often given in the form of data samples from a target
@@ -124,6 +127,7 @@ distribution, and $f$ is a series of invertible parameterized transform that
 connect the two distributions. For a detail discussion of the algorithm, we
 refer the readers to \kw{cite}.
 
+% How does it help our sampling
 As mentioned in the previous subsection, one of the main issue gradient-based
 sampler is it does not explore local correlation and multi-modality well. This
 is exactly where the normalizing flow model can help. While the method would
@@ -151,6 +155,8 @@ problem, since each new sample generated from a chain depends on the last sample
 in the chain. This means naively putting the problem on an accelerator is more
 likely to harm the performance instead of improving it.
 
+
+% More sample helps training normalizing flow
 In this work, the use of accelerators provides two independent perks that
 tremendously benefits the parameter estimation process. First, using
 accelerators allow us to run many independent chains at the same time, which
@@ -165,8 +171,18 @@ not benefit from parallelization but the latter does. In another word, being
 able to use many independent chains help the normalizing flow learn the global
 landscape faster in WALL time.
 
-Another benefit i
 
+% GPU helps pack a shit ton of waveform evaluation
+Another benefit accelerator brings is parallel evaluation of waveforms.
+The most expensive part of evaluating the likelihood is generating the waveform.
+This is especially significant when analysis long signals such as BNS merger,
+since the cost of evaluating the waveform scales linearly with the number of time samples.
+While the most accurate waveform model, numerical relativity, is a sequential process,
+most of the gravitational wave models used in PE are approximants, meaning they are fits to numerical relativity waveforms.
+These fitted form can be evaluated at any given time or frequency without the need to simulate the signals from an initial condition.
+This means generating a waveform from an approximant can in fact be benefited from parallelization.
+Together with heterodyned likelihood, we can evaluate the likelihood at $\mathcal{O}(10^7)$ different locations on an Nvidia A100 GPU.
+The high throughput of likelihood evaluations unlocks the potential of the \texttt{flowMC} sampling algorithms.
 
 \section{Checks}
 

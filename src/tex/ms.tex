@@ -17,7 +17,17 @@
 
 % Abstract with filler text
 \begin{abstract}
-We do one thing and one thing only, gravitational wave parameters estimation, and we do it in turbo mode.
+We present a light-weighted, flexible and high performance framework to estimate
+gravitational wave event parameters. By combining heterodyned likelihood,
+automatically differentiable and accelerators compatible waveforms, normali zing
+flow enhanced gradient-based MCMC, we achieve parameter estimation for real
+event like GW150914 and GW170817 within a minute of sampling time with little to
+no compromise. Our framework does not require pre-training or explicit
+reparameterization, and can be generalized to handle higher dimensional
+problems. We also discuss as near-real time parameter estimation have been shown
+to be possible by multiple groups, what are the trade-offs and future
+developments the community should be aware of. Our code for generating the
+manuscript and running the analysis is publically available on github.
 \end{abstract}
 
 % Main body with filler text
@@ -173,16 +183,19 @@ landscape faster in WALL time.
 
 
 % GPU helps pack a shit ton of waveform evaluation
-Another benefit accelerator brings is parallel evaluation of waveforms.
-The most expensive part of evaluating the likelihood is generating the waveform.
-This is especially significant when analysis long signals such as BNS merger,
-since the cost of evaluating the waveform scales linearly with the number of time samples.
-While the most accurate waveform model, numerical relativity, is a sequential process,
-most of the gravitational wave models used in PE are approximants, meaning they are fits to numerical relativity waveforms.
-These fitted form can be evaluated at any given time or frequency without the need to simulate the signals from an initial condition.
-This means generating a waveform from an approximant can in fact be benefited from parallelization.
-Together with heterodyned likelihood, we can evaluate the likelihood at $\mathcal{O}(10^7)$ different locations on an Nvidia A100 GPU.
-The high throughput of likelihood evaluations unlocks the potential of the \texttt{flowMC} sampling algorithms.
+Another benefit accelerator brings is parallel evaluation of waveforms. The most
+expensive part of evaluating the likelihood is generating the waveform. This is
+especially significant when analysis long signals such as BNS merger, since the
+cost of evaluating the waveform scales linearly with the number of time samples.
+While the most accurate waveform model, numerical relativity, is a sequential
+process, most of the gravitational wave models used in PE are approximants,
+meaning they are fits to numerical relativity waveforms. These fitted form can
+be evaluated at any given time or frequency without the need to simulate the
+signals from an initial condition. This means generating a waveform from an
+approximant can in fact be benefited from parallelization. Together with
+heterodyned likelihood, we can evaluate the likelihood at $\mathcal{O}(10^7)$
+different locations on an Nvidia A100 GPU. The high throughput of likelihood
+evaluations unlocks the potential of the \texttt{flowMC} sampling algorithms.
 
 \section{Checks}
 

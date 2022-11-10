@@ -37,11 +37,18 @@ manuscript and running the analysis is publically available on github.
 % Brief description of PE and old generation of code
 Parameter estimation (PE) is one of the most commonly perform data analysis
 tasks in gravitational wave (GW) data analysis. The central question of PE is to
-infer the parameters of the GW source given the strain data. There are a number
-of standard tools developed by the community \kw{cite} tha
+infer the parameters of the GW source given the strain data. The PE results in
+the most recent catalog of GW events are powered by a number of community
+developed PE codes, including \texttt{lalinference}, \texttt{pycbc}, and
+\texttt{bilby} \kw{cite}. These packages have been tested by a number of groups
+and well regarded as the standard tools.
 
 % Emerging tools from different group
-While the
+While the standard tools can deliver trusted PE results, they are known to be computationally intensive.
+The exact amount of time needed to analyze one event depends on the length of the event.
+These community tools take about a week to analyze shorter events such as binary black hole (BBH) mergers,
+where they can take up to a month on a computer cluster to analyze longer events such as binary neutron star (BNS) mergers.
+There are effort
 
 %Basic idea and unique advantage of our tool
 

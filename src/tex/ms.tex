@@ -34,14 +34,37 @@ manuscript and running the analysis is publically available on github.
 \section{Introduction}
 \label{sec:intro}
 
+% Brief description of PE and old generation of code
+Parameter estimation (PE) is one of the most commonly perform data analysis
+tasks in gravitational wave (GW) data analysis. The central question of PE is to
+infer the parameters of the GW source given the strain data. There are a number
+of standard tools developed by the community \kw{cite} tha
+
+% Emerging tools from different group
+While the
+
+%Basic idea and unique advantage of our tool
+
+%Structure of paper
+
+The rest of the paper is structured as follows: We review the basic of PE in
+section \ref{sec: PE}. We provide a quick summary of the sampling framework
+built on top of \texttt{flowMC} in section \ref{sec: flowMC}. We present
+benchmarking result in section \ref{sec: Result}. Finally, we discuss the
+implications of this work and directions for future development in section
+\ref{sec: Discussion}.
+
 \section{Gravitational wave parameter estimation}
+\label{sec: PE}
 
-In this section we give a self-contained summary the gravitational-wave parameter estimation process.
+In this section we give a self-contained summary the gravitational-wave
+parameter estimation process.
 
-\subsection{MCMC}
+\subsection{Likelihood function}
+\label{sec:likelihood}
 
 \begin{align}
-    p(\theta| d) = \frac{\mathcal{L}(d|\theta)p(\theta)}{p(d)}
+    p(\theta| d) = \frac{\mathcal{L}(d|\theta)\pi(\theta)}{p(d)}
 \end{align}
 
 \begin{align}
@@ -49,10 +72,29 @@ In this section we give a self-contained summary the gravitational-wave paramete
 \end{align}
 
 \begin{align}
-    \left<a|b\right> = 4 Re\int \frac{a(f)^*b(f)}{\mathcal{S}_n(f)} df
+    \left<a|b\right> = 4 Re\int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df
 \end{align}
 
-\subsection{Waveform}
+% I think we should put a short description of MALA here
+Since our likelihood function is coded in 
+\subsection{MCMC with Gradient-based sampler}
+\label{sec:gradient}
+
+\texttt{Jax} allows us to compute the gradient of the likelihood function with
+respect to the parameters through automatic differentiation. This enables us to
+use gradient-based samplers such as Metropolis-adjusted Langevin algorithm
+(MALA) \kw{cite} and Hamiltonian Monte Carlo (HMC)\kw{cite}. The main advantage
+of gradient-based sampling methods over gradient-free sampling methods is the
+gradient information help decorrelates different parameters. This means
+gradient-based sampling methods allow longer jump in a high dimensional space.
+This is crucial for high dimensional problems \footnote{Gradient-free methods
+often have troubles dealing with problems with $>20$ dimensions.}, since
+gradient-free methods would need small step size to have reasonable acceptance
+rate in a high dimensional space, which in turn leads to a more correlated
+samples hence slower convergence.
+
+
+
 
 \subsection{Heterodyned likelihood}
 
@@ -68,28 +110,21 @@ refer the reader the reference \kw{}.
 
 \kw{Specify the idea of heterodyned likelihood here}.
 
-\section{FlowMC}
+\begin{align}
+r(f) = \frac{h(f)}{h_0(f)} = r_0(h,b) + r_1(h,b)(f- f_m(b)) + \cdots
+\end{align}
 
-In this section, we provide a high level summary of how each component in \texttt{flowMC} benefits the sampling process and their interplay.
+\begin{align}
+    \langle d|h \rangle &\approx \sum_b A_0(b) r^*_0(h,b) + A_1(b) r^*_1(h,b) \nonumber \\
+    \langle h|h \rangle &\approx \sum_b B_0(b) |r_0(h,b)|^2 + 2 B_1(b) \Re[r_0(h,b)r_1(h,b)]
+\end{align}
 
-Since our likelihood function is coded in 
-\subsection{Gradient-based sampler}
-\label{sec:gradient}
+\section{\texttt{flowMC}}
+\label{sec: flowMC}
 
-\texttt{Jax} allows us to compute the gradient of the likelihood function with
-respect to the parameters through automatic differentiation. This enables us to
-use gradient-based samplers such as Metropolis-adjusted Langevin algorithm
-(MALA) \kw{cite} and Hamiltonian Monte Carlo (HMC)\cite{kw}. The main advantage
-of gradient-based sampling methods over gradient-free sampling methods is the
-gradient information help decorrelates different parameters. This means
-gradient-based sampling methods allow longer jump in a high dimensional space.
-This is crucial for high dimensional problems \footnote{Gradient-free methods
-often have troubles dealing with problems with $>20$ dimensions.}, since
-gradient-free methods would need small step size to have reasonable acceptance
-rate in a high dimensional space, which in turn leads to a more correlated
-samples hence slower convergence.
+In this section, we provide a high level summary of how each component in
+\texttt{flowMC} benefits the sampling process and their interplay.
 
-\kw{Show some examples of successful application of HMC}
 
 \subsection{Normalizing Flow}
 \label{sec:flow}
@@ -112,7 +147,7 @@ be trapped in one mode and take extremely long time to transverse between the
 modes. This means the relative weights between modes will much longer to sample
 compared to the shape of each mode.
 
-% Long burn in too
+% Long burn-in too
 Moreover, before we can use the sampling chain to estimate the quantity we care,
 the sampler often needs to first find the most probable region in the target
 space, which is a common process that is referred to "burn-in" in the
@@ -130,10 +165,10 @@ distribution. Once the network is trained, one can evaluate the probability
 density of the complex distribution and samples from it very efficiently.
 The core of normalizing flow is given by
 \begin{align}
-    p_x(X) = p_z(Z) \prod_i \left| \frac{\partial f}{\partial x_i}\right|,
+    p_x(X) = p_z(Z) \left| \frac{\partial f}{\partial z}\right|,
 \end{align}
 where $p_x(X)$ is the complex target distribution $p_z(Z)$ is the simple latent
-distribution, and $f$ is a series of invertible parameterized transform that
+distribution, and $f$ is an invertible parameterized transform that
 connect the two distributions. For a detail discussion of the algorithm, we
 refer the readers to \kw{cite}.
 
@@ -148,6 +183,14 @@ distribution, hence we can use it as a \textit{proposal} distribution. This
 means independent chains can now jump between modes, or within a single mode
 that exhibits complex geometry that cannot be handled easily only through the
 local sampler, which greatly reduce both the burn-in time and sampling time.
+
+% Write down how you use it as proposal
+
+\begin{align}
+    acc(x,x_0) = \rm{min} \left[ 1, \frac{\hat{\rho}(x_0)\rho_*(x)}{\hat{\rho}(x)\rho_*(x_0)}\right],
+\end{align}
+where $x = f(z), z \sim p_z(Z)$ is the proposed jump location and $x_0$ is the current position.
+We can see the flow distribution is the target distribution when the accepting probability is 1.
 
 \kw{Mention how this helps gravitational wave, gives examples.}
 
@@ -179,7 +222,7 @@ from each chain, so we have to run more sequential steps to get the same amount
 of independent data as compared to running more chains, where former option does
 not benefit from parallelization but the latter does. In another word, being
 able to use many independent chains help the normalizing flow learn the global
-landscape faster in WALL time.
+landscape faster in Wall time.
 
 
 % GPU helps pack a shit ton of waveform evaluation
@@ -197,17 +240,25 @@ heterodyned likelihood, we can evaluate the likelihood at $\mathcal{O}(10^7)$
 different locations on an Nvidia A100 GPU. The high throughput of likelihood
 evaluations unlocks the potential of the \texttt{flowMC} sampling algorithms.
 
-\section{Checks}
+\section{Result}
+\label{sec: Result}
+
+In this section, we provide a number of sanity checks as well as a few real life applications
 
 \begin{enumerate}
     \item ppplot
     \item real-event result
 \end{enumerate}
 
+\subsection{Injection-recovery test}
+
+\subsection{Real event parameter estimation}
+
 \kw{GW159014}
 \kw{GW170817}
 
 \section{Discussion}
+\label{sec: Discussion}
 
 \kw{Talks about implication}
 \begin{enumerate}

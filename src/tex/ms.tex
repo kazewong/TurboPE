@@ -5,6 +5,10 @@
 
 \definecolor{rb4}{HTML}{27408B}
 \newcommand{\kw}[1]{{\color{rb4}[KW: #1 ]}}
+\newcommand{\flatiron}{\affiliation{Center for Computational Astrophysics,
+Flatiron Institute, New York, NY 10010, USA}}
+\newcommand{\jhu}{\affiliation{Department of Physics and Astronomy, Johns Hopkins University,
+3400 N. Charles Street, Baltimore, Maryland 21218, USA}}
 
 % Begin!
 \begin{document}
@@ -13,13 +17,21 @@
 \title{Turbo fast no compromise gravitational wave parameter estimation}
 
 % Author list
-\author{@kazewong}
+\author{Kaze W. K. Wong}
+\email{kwong@flatironinstitute.org}
+\flatiron
+
+\author{Thomas Edward}
+\jhu
+
+\author{Maximiliano Isi}
+\flatiron
 
 % Abstract with filler text
 \begin{abstract}
 We present a light-weighted, flexible and high performance framework to estimate
 gravitational wave event parameters. By combining heterodyned likelihood,
-automatically differentiable and accelerators compatible waveforms, normali zing
+automatically differentiable and accelerators compatible waveforms, normalizing
 flow enhanced gradient-based MCMC, we achieve parameter estimation for real
 event like GW150914 and GW170817 within a minute of sampling time with little to
 no compromise. Our framework does not require pre-training or explicit
@@ -40,17 +52,20 @@ tasks in gravitational wave (GW) data analysis. The central question of PE is to
 infer the parameters of the GW source given the strain data. The PE results in
 the most recent catalog of GW events are powered by a number of community
 developed PE codes, including \texttt{lalinference}, \texttt{pycbc}, and
-\texttt{bilby} \kw{cite}. These packages have been tested by a number of groups
+\texttt{bilby} \cite{Romero-Shaw:2020owr} \kw{cite}. These packages have been tested by a number of groups
 and well regarded as the standard tools.
 
 % Emerging tools from different group
-While the standard tools can deliver trusted PE results, they are known to be computationally intensive.
-The exact amount of time needed to analyze one event depends on the length of the event.
-These community tools take about a week to analyze shorter events such as binary black hole (BBH) mergers,
-where they can take up to a month on a computer cluster to analyze longer events such as binary neutron star (BNS) mergers.
-There are effort
+While the standard tools can deliver trusted PE results, they are known to be
+computationally intensive. The exact amount of time needed to analyze one event
+depends on the length of the event. These community tools take about a week to
+analyze shorter events such as binary black hole (BBH) mergers, where they can
+take up to a month on a computer cluster to analyze longer events such as binary
+neutron star (BNS) mergers. There are effort
 
 %Basic idea and unique advantage of our tool
+
+\kw{Dingo can't do BNS yet}
 
 %Structure of paper
 
@@ -65,22 +80,39 @@ implications of this work and directions for future development in section
 \label{sec: PE}
 
 In this section we give a self-contained summary the gravitational-wave
-parameter estimation process.
+parameter estimation (PE) process.
 
 \subsection{Likelihood function}
 \label{sec:likelihood}
 
+The main objective in PE can be summarized as: given data in the form of a time
+series of strain $\mathbf{d}$, find the distribution of the source parameters
+$\mathbf{\theta}$ that is compatible with the data, i.e.
+$p(\mathbf{\theta}|\mathbf{d})$. In order to compute this object, we can rewrite
+it using Bayes' theorem,
 \begin{align}
-    p(\theta| d) = \frac{\mathcal{L}(d|\theta)\pi(\theta)}{p(d)}
+    p(\theta| d) = \frac{\mathcal{L}(d|\theta)\pi(\theta)}{p(d)},
 \end{align}
 
-\begin{align}
-    \log{\mathcal{L}(d|\theta)} = -\left<d-h|d-h\right>/2
-\end{align}
+where $\mathcal{L}(d|\theta)$ is the likelihood function, $\pi(\theta)$ is the
+prior distribution, and $p(d)$ is the evidence. Since the evidence is a
+normalization constant that does not depend on the source parameters, it is
+often omitted if we are only interested in the posterior distribution. The prior
+distribution is often chosen to be some simple distributions, such as uniformly
+distributed in the component masses or a Gaussian distribution in the spins.
+The most computationally intensive part of the PE is the evaluating the likelihood function.
+Assuming the noise follows from a stationary Gaussian process, the log likelihood in the case of GW is given by
 
 \begin{align}
-    \left<a|b\right> = 4 Re\int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df
+    \log{\mathcal{L}(d|\theta)} = -\left<d-h(\mathbf{\theta})|d-h(\mathbf{\theta})\right>/2,
 \end{align}
+
+where $d$ is the data, $h(\mathbf{\theta})$ is the strain predicted by a waveform model with a specific set of source parameters.
+It is computationally cheaper to compute the likelihood in the frequency domain, which can be defined as 
+\begin{align}
+    \left<a|b\right> = 4 Re\int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df,
+\end{align}
+where $\mathcal{S}_n(f)$ is the noise power spectral density (PSD).
 
 % I think we should put a short description of MALA here
 Since our likelihood function is coded in 

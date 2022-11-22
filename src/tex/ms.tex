@@ -142,20 +142,71 @@ a threshold or simply after a certain number of iterations.
 
 Compared to direct sampling, MCMC algorithms only explore regions that are
 highly probable, thus reducing the computational cost by not wasting resource in
-region where it is unlikely to generate the data. 
+region where it is unlikely to generate the data. However, MCMC algorithms come
+with their own set of issue. To illustrate what difficulties a MCMC algorithms
+may face, we can examine one of the most vanilla MCMC algorithm, the
+Metropolis-Hastings algorithm with a Gaussian kernel. Starting at some initial
+point, one can draw a proposed point from a Gaussian transition kernel, defined
+as
+\begin{align}
+    q(\mathbf{x},\mathbf{x_0})= \mathcal{N}(\mathbf{x}|\mathbf{x_0},\mathbf{C}),
+\end{align}
+where $\mathbf{x_0}$ is the current location of the chain,
+$\mathbf{x}$ is the proposed location, and $\mathbf{C}$ is the
+covariance matrix of the Gaussian. In the simplest case, we can pick
+$\mathbf{C}$ to be a diagonal matrix with a constant value, which corresponds to
+an isotropic Gaussian centers around the current location with a constant variance.
+And the acceptance criteria is defined as
+\begin{align}
+\alpha(\mathbf{x},\mathbf{x_0}) = \min\left(1,\frac{p(\mathbf{x})q(\mathbf{x_0},\mathbf{x})}{p(\mathbf{x_0})q(\mathbf{x},\mathbf{x_0})}\right).
+\label{eq:Gaussian_acceptance}
+\end{align}
 
-\texttt{Jax} allows us to compute the gradient of the likelihood function with
-respect to the parameters through automatic differentiation. This enables us to
-use gradient-based samplers such as Metropolis-adjusted Langevin algorithm
-(MALA) \kw{cite} and Hamiltonian Monte Carlo (HMC)\kw{cite}. The main advantage
-of gradient-based sampling methods over gradient-free sampling methods is the
-gradient information help decorrelates different parameters. This means
-gradient-based sampling methods allow longer jump in a high dimensional space.
-This is crucial for high dimensional problems \footnote{Gradient-free methods
-often have troubles dealing with problems with $>20$ dimensions.}, since
-gradient-free methods would need small step size to have reasonable acceptance
-rate in a high dimensional space, which in turn leads to a more correlated
-samples hence slower convergence.
+We can see from eq. \ref{eq:Gaussian_acceptance} the acceptance rate is
+proportion to fraction of volume where the posterior density at the proposed
+location is higher than the current location within the Gaussian transition
+kernel. If we choose the variance of the transition kernel to be too large, this
+fraction will be small hence the acceptance rate will be poor. On the other
+hand, if one choose the variance to be too small, nearby samples will be
+correlated. In both cases, the efficiency in constructing the chain with a
+target number of independent samples is suboptimal. There is often a tuning
+process before we run the MCMC algorithm to find the optimal tuning parameters,
+in this example the variance of the Gaussian, to ensure close to optimal
+performance.
+
+However, as we are dealing with higher dimensional problems, even the optimally
+tuned Gaussian transition kernel does not guarantee good performance. In order
+to have a reasonable acceptance rate, the variance of the Gaussian has to be
+smaller in a higher dimensional space, which means the transition kernel is in
+general making smaller and smaller step as we increase the dimensionality.
+
+Transition kernels which leverage gradient information of the target
+distribution can help to address this issue of shortening steps in a high
+dimensional space. Instead of proposing a new point by drawing from a Gaussian,
+one can use the gradient evaluate at the current location to propose a new
+point. For example, Metropolis-adjusted Langevin algorithm (MALA) \kw{cite}
+place a unit Gaussian at the tip of the gradient vector at the current position,
+\begin{align}
+    \mathbf{x} = \mathbf{x_0} + \tau \nabla\log{p(\mathbf{x_0})} + \sqrt{2\tau}N(0,\mathbf{I}),
+\end{align}
+where $\tau$ is the step size, which is a tuning parameter. Compared to a
+Gaussian centers at the current location, the MALA transition kernel is more
+likely to propose a point into the higher posterior density region because of
+the gradient term, which helps to boost the acceptance rate.
+
+While transition kernels that use gradient information can help to improve the
+acceptance rate, computing the gradient of the posterior density function
+introduce additional computational cost, which is not necessary beneficial in
+terms of sampling time. If one wants to compute the gradient information through
+finite differencing, the additional computation cost goes as at least $\sim
+\mathcal{O}(2n)$, where $n$ is the dimension of the problem. \texttt{Jax} allows
+us to compute the gradient of the likelihood function with respect to the
+parameters through automatic differentiation, which gives the gradient
+information down to machine precision at around the same order of time compared
+to evaluating the posterior itself. Having access to gradient information
+through automatic differentiation is crucial to make the trade-off between using
+gradient-based transition kernels and additional computation cost favorable.
+
 
 \subsection{Heterodyned likelihood}
 

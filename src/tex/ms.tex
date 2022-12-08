@@ -410,7 +410,16 @@ We sample 1000 events from the following distribution of parameters:
 
 
 % Show injection pp plot
-To quantify the accuracy of our pipeline, we show th
+The result of the injection studies is shown in \ref{fig: ppplot}.
+
+\begin{figure}
+    \includegraphics[width=0.99\linewidth]{static/ppplot.png}
+    \caption{ \kw{I am pretty sure I am doing something wrong about the ppplot.
+        Given injected q=1, there is no way the quantile is not 1, which is what
+        bias the result seemingly.} }
+    \label{fig:ppplot}
+    \end{figure}
+
 \subsection{Real event parameter estimation}
 
 To demonstrate the performance of our parameter estimation pipeline, we apply
@@ -436,13 +445,6 @@ our pipeline to analysis GW150914 and GW170817.
 \label{fig:GW170817}
 \end{figure}
 
-\begin{figure}
-\includegraphics[width=0.99\linewidth]{static/ppplot.png}
-\caption{ \kw{I am pretty sure I am doing something wrong about the ppplot.
-    Given injected q=1, there is no way the quantile is not 1, which is what
-    bias the result seemingly.} }
-\label{fig:ppplot}
-\end{figure}
 
 \section{Discussion}
 \label{sec: Discussion}
@@ -534,8 +536,8 @@ extra dimension. Other marginalization mode should be considered in the future.
 % JIT overhead
 Jax's JIT compilation drastically reduce the computational time to evaluate the
 likelihood. However, it comes with a compilation overhead when the likelihood is
-evaluated for the first time. We observed the compilation time could depends on
-the device where the code will be run. This is expected since Jax leverage
+evaluated for the first time. We observe that the compilation time could depends
+on the device where the code will be run. This is expected since Jax leverage
 Accelerated Linear Algebra (XLA) to take advantage of accelerators, which means
 Jax needs to compile the code for the specific device according to its
 architecture. On an Nvidia A100 GPU, the compilation overhead could go up to 5
@@ -545,6 +547,35 @@ the compilation overhead is dominating the wall-clock time of the specific PE
 run we considered. To utilize our implementation to its full potential, we are
 looking into ways to reduce the compilation overhead, or to cache the
 compilation results to avoid paying the compilation overhead for every events.
+
+% Faster maximum likelihood finder
+
+Another overhead we are looking into reducing is the time needed to find the
+reference waveform for heterodyning the likelihood. Currently we are using
+\texttt{differential evolution} available in \texttt{scipy} to find the waveform
+parameters which maximize the likelihood. Since \texttt{differnetial evolution}
+has not been implemented in Jax, and the Jax waveform we use is not compatible
+with parallelization scheme in the \texttt{scipy} library, it takes around 5
+minutes \kw{Benchmark it in the code and make this number precise.} to find the
+reference waveform parameters for GW170817. There are two ways to improve the
+performance in finding the parameters of the reference waveform. First, we can
+explore different optimization strategy that is more compatible with the
+strength of our pipeline, in particular differentiability of our likelihood and
+the possibility to evaluate many waveforms in parallel with a GPU. Particle
+swarm or stochastic gradient descent methods are promising candidate which we
+intend to investigate in the future. 
+
+Another way to reduce the time of finding maximum likelihood waveform is to
+incoporate marginalization of extrinsic parameters to reduce the dimensionality
+of the optimization problem. Currently we simutaneously maximize all 11 GW
+parameters, which is unnecessarily complicated and expensive. There are
+long-existing marginalization schemes over extrinsic parameters such as merger
+time and phase, which can find the corresponding maximum likelihood waveform
+much more efficiently when compared to differential evolution. We expect
+implementing these marginalization schemes will reduce the time needed to find
+the reference waveform parameters by obtaining the extrinsic parameters and by
+reducing the dimensionality of the optimization problem for the intrinsic
+parameters.
 
 % Higher dimensional problems
 While standard GW analysis goes up to 17 dimensions. non-standard GW PE problems

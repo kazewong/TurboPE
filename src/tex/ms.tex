@@ -392,12 +392,25 @@ In this section, we provide a number of sanity checks as well as a number of rea
 
 \subsection{Injection-recovery test}
 
-In order to verify the fidelity of the sampler, we can inject a signal
-into the parameter estimation pipeline and compared the recovery parameters to
-the true parameters. 
+To demonstrate the robustness of our pipeline, we use it to recover the
+parameters of a set of simulated signals. We create a set of simulated signals
+and inject them into simulated noise, generated under the Gaussian noise
+assumption using the designed PSD for every detector. Then we run our pipeline
+given the simulated data and determine the credible interval at the true
+parameters of the injected signals. Given the set of credible value, we can
+check whether the true value lies within a certain credible interval at a
+reasonable frequency. If our pipeline is perfect, we should find the true
+parameters lie within $x\%$ credible interval $x\%$ of the time, e.g. the true
+value should lie within the $50\%$ credible interval $50\%$ of the time.
+Deviation from this behavior suggests the pipeline is either over-confident or
+too conservative.
+
+% State the distribution of injected population
+We sample 1000 events from the following distribution of parameters:
+
 
 % Show injection pp plot
-
+To quantify the accuracy of our pipeline, we show th
 \subsection{Real event parameter estimation}
 
 To demonstrate the performance of our parameter estimation pipeline, we apply
@@ -448,7 +461,7 @@ this work, and potential interplay between our work and other's work.
 Compared to \kw{Stephan's paper}, we do not rely on pre-training the
 neural network on a large collection of waveforms and noise realization. This
 means as soon as new waveforms models and noise models are available, our
-algorithm can already be deployed. Furthermore, our method is essentially an
+algorithm can already be deployed. Furthermore, our met hod is essentially an
 MCMC algorithm, which inherits the merit of convergence measures in MCMC. As we
 are only using the normalizing flow as a proposal distribution, and the
 normalizing flow is trained jointly with a local sampler, we do not suffer from

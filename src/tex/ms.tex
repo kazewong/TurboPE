@@ -111,7 +111,8 @@ normalization constant that does not depend on the source parameters, it is
 often omitted if we are only interested in the posterior distribution. The prior
 distribution is often chosen to be some simple distributions, such as uniformly
 distributed in the component masses or a Gaussian distribution in the spins.
-Assuming the noise follows from a stationary Gaussian process, the log likelihood in the case of GW is given by
+Assuming the noise follows from a stationary Gaussian process, the log
+likelihood in the case of GW is given by
 
 \begin{align}
     \log{\mathcal{L}(d|\theta)} = -\left<d-h(\mathbf{\theta})|d-h(\mathbf{\theta})\right>/2,
@@ -138,7 +139,11 @@ expensive for PE. To circumvent this problem, there are a number of waveform
 and NR surrogate family\kw{cite}. For shorter event such as a $30-30\ M_{\odot}$
 BBH, one waveform call could take $10\text{ms}$ to $\sim 1s$ \kw{verify number
 in lalsuite}. For longer event such as a $1.4-1.4\ M_{\odot}$ BNS event, the
-evaluation time could go up to \kw{Fill}.
+evaluation time could go up to \kw{Fill}. Since one needs to evaluate the
+likelihood many times during sampling\footnote{A typical PE run with
+\texttt{Bilby} takes $>10^6$ likelihood evalutation to converge.}, the
+computational cost in evaluating the waveform accumulate and is the main reason
+of the long runtime of GW PE.
 
 \subsection{Heterodyned likelihood}
 
@@ -498,14 +503,12 @@ On the other hand, if there are part of the target posterior that are not
 included in the reparameterization scheme, the normalizing flow should still be
 able to learn to produce accurate samples efficiently.
 
-\kw{Talks about implication}
-\begin{enumerate}
-    \item Multi-modality in testing GR PE
-    \item No pre-training, i.e. more adaptive to glitch and new noise model
-    \item As gauruntee to converge as other MCMC method
-    \item Access to higher dimensional problem
-    \item Much lower computational cost, allow poor institute to just run PE on colab if they want.
-\end{enumerate}
+% Multi-modality in testing GR PE
+
+% Access to higher dimensional problem
+While standard GW analysis goes up to 17 dimensions. non-standard GW PE problems
+can have more parameters, which could potentially lead to more complicate
+geometry in the target posterior. For example, 
 
 \kw{Talk about future development}
 
@@ -577,22 +580,11 @@ the reference waveform parameters by obtaining the extrinsic parameters and by
 reducing the dimensionality of the optimization problem for the intrinsic
 parameters.
 
-% Higher dimensional problems
-While standard GW analysis goes up to 17 dimensions. non-standard GW PE problems
-can have more parameters, which could potentially lead to more complicate
-geometry in the target posterior. For example, 
+% Multi-device scaling
 
+% Other detectors configuration
 
-
-
-\begin{enumerate}
-    \item Multi-device scaling?
-    \item Other detectors configuration
-    \item Combining with noise inference
-    \item Higher dimensional problems need HMC still
-\end{enumerate}
-
-
+% Higher dimensional problems need HMC still
 
 \section{Acknowledgements}
 

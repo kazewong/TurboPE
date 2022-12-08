@@ -27,8 +27,6 @@ Flatiron Institute, New York, NY 10010, USA}}
 \author{Thomas Edward}
 \jhu
 
-
-
 % Abstract with filler text
 \begin{abstract}
 We present a light-weighted, flexible and high performance framework to estimate
@@ -58,15 +56,26 @@ developed PE codes, including \texttt{lalinference}, \texttt{pycbc}, and
 and well regarded as the standard tools.
 
 % Emerging tools from different group
-While the standard tools can deliver trusted PE results, they are known to be
+While the standard tools have passed many robustness tests, they are known to be
 computationally intensive. The exact amount of time needed to analyze one event
 depends on the length of the event. These community tools take about a week to
 analyze shorter events such as binary black hole (BBH) mergers, where they can
 take up to a month on a computer cluster to analyze longer events such as binary
-neutron star (BNS) mergers. There are effort
+neutron star (BNS) mergers. There are efforts from multiple groups developing
+tools to speed up the PE process \kw{Cite}.
 
 %Basic idea and unique advantage of our tool
 
+In this work, we present a light-weighted, flexible and high performance
+framework to estimate GW event parameters. Our framework implemneted the
+following major features to achieve its performance:
+\begin{enumerate}
+\item Differential waveform models
+\item Normalizing flow enhanced MCMC sampler
+\item Heterodyned likelihood
+\item Native support for accelerator
+\item JIT compilation
+\end{enumerate}
 \kw{Dingo can't do BNS yet}
 
 %Structure of paper
@@ -102,34 +111,50 @@ normalization constant that does not depend on the source parameters, it is
 often omitted if we are only interested in the posterior distribution. The prior
 distribution is often chosen to be some simple distributions, such as uniformly
 distributed in the component masses or a Gaussian distribution in the spins.
-The most computationally intensive part of the PE is the evaluating the likelihood function.
 Assuming the noise follows from a stationary Gaussian process, the log likelihood in the case of GW is given by
 
 \begin{align}
     \log{\mathcal{L}(d|\theta)} = -\left<d-h(\mathbf{\theta})|d-h(\mathbf{\theta})\right>/2,
 \label{eq: loglikelihood}
 \end{align}
-where $d$ is the data, $h(\mathbf{\theta})$ is the strain predicted by a waveform model with a specific set of source parameters.
-It is computationally cheaper to compute the likelihood in the frequency domain, which can be defined as 
+where $d$ is the strain data, $h(\mathbf{\theta})$ is the strain predicted by a
+waveform model with a specific set of source parameters. The right handside of
+eq. \ref{eq: loglikelihood} can be evaluated in either time or frequency domain.
+Since it is computationally cheaper to compute the likelihood in the frequency
+domain, we choose to compute the likleihood throughout this work, which can be defined as 
 \begin{align}
     \left<a|b\right> = 4 Re\int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df,
 \label{eq: innerproduct}
 \end{align}
-where $\mathcal{S}_n(f)$ is the noise power spectral density (PSD).
+where $\mathcal{S}_n(f)$ is the noise power spectral density (PSD). To compute
+the integral shown in eq. \ref{eq: innerproduct}, we need to evaluate a chosen
+waveform model $h(\mathbf{\theta})$ at a number of frequnecy sample points.
+Evaluting the likelihood function is often the most computationally intensive
+part of the PE. The most accurate waveform model is numerical relativity (NR).
+However, depending on the source parameters, generating one time series of
+strain using can takes a day to half a year, which makes NR prohibitably
+expensive for PE. To circumvent this problem, there are a number of waveform
+"approximant" families, including the IMRPhenom family \kw{}, SEOB family \kw{},
+and NR surrogate family\kw{cite}. For shorter event such as a $30-30\ M_{\odot}$
+BBH, one waveform call could take $10\text{ms}$ to $\sim 1s$ \kw{verify number
+in lalsuite}. For longer event such as a $1.4-1.4\ M_{\odot}$ BNS event, the
+evaluation time could go up to \kw{Fill}.
 
 \subsection{Heterodyned likelihood}
 
-The computational cost of evaluating a waveform model scales linearly with the
-number of sample points either in time or frequency domain. This introduces
-greater computational burden for longer-duration signals. To reduce the
-computational cost, there are a number of methods to reduce the number of basis
-points one would need to compute the likelihood faithfully \kw{cite}. We use
-heterodyned likelihood \kw{cite} (also named relative binning in \kw{cite}) in
-this work. We give a concise description of what we implement in our code here.
-For more extensive discussion of the derivation of heterodyned likelihood, we
-refer the reader the reference \kw{}.
+Since the computational cost of evaluating a waveform model scales linearly with
+the number of sample points either in time or frequency domain, the
+computational burden for longer-duration signals are often quite large. To
+reduce the computational cost, there are a number of methods to reduce the
+number of basis points one would need to compute the likelihood faithfully
+\kw{cite}. We use heterodyned likelihood \kw{cite} (also named relative binning
+in \kw{cite}) in this work. We give a concise description of what we implement
+in our code here. For more extensive discussion of the derivation of heterodyned
+likelihood, we refer the reader the reference \kw{}.
 
 \kw{Specify the idea of heterodyned likelihood here}.
+The idea behind heterodyned likelihood is the following:
+
 
 \begin{align}
 r(f) = \frac{h(f)}{h_0(f)} = r_0(h,b) + r_1(h,b)(f- f_m(b)) + \cdots
@@ -380,22 +405,38 @@ our pipeline to analysis GW150914 and GW170817.
 
 \kw{GW159014}
 
+\begin{figure}
+\includegraphics[width=0.99\linewidth]{static/GW150914.png}
+\caption{
+    hi
+}
+\label{fig:GW150914}
+\end{figure}
+
 \kw{GW170817}
 
+\begin{figure}
+\includegraphics[width=0.99\linewidth]{static/GW170817.png}
+\caption{
+    hi
+}
+\label{fig:GW170817}
+\end{figure}
 
+\begin{figure}
+\includegraphics[width=0.99\linewidth]{static/ppplot.png}
+\caption{ \kw{I am pretty sure I am doing something wrong about the ppplot.
+    Given injected q=1, there is no way the quantile is not 1, which is what
+    bias the result seemingly.} }
+\label{fig:ppplot}
+\end{figure}
 
 \section{Discussion}
 \label{sec: Discussion}
 
+% Brief summary
 In this work, we present a PE pipeline for GW events that is efficient and flexible.
-Our implemneted the following major features to achieve its performance:
-\begin{enumerate}
-\item Differential waveform models
-\item Normalizing flow enhanced MCMC sampler
-\item Heterodyned likelihood
-\item Native support for accelerator
-\item JIT compilation
-\end{enumerate}
+
 
 % Compared to other works
 There are recent works from different groups on speeding up parameter estimation
@@ -441,8 +482,6 @@ reduce the complexity of the problem, hence speeding up the training phase.
 On the other hand, if there are part of the target posterior that are not
 included in the reparameterization scheme, the normalizing flow should still be
 able to learn to produce accurate samples efficiently.
-
-As there are multiple group
 
 \kw{Talks about implication}
 \begin{enumerate}
@@ -495,7 +534,9 @@ looking into ways to reduce the compilation overhead, or to cache the
 compilation results to avoid paying the compilation overhead for every events.
 
 % Higher dimensional problems
-While standard GW analysis goes up to 17 dimensions, 
+While standard GW analysis goes up to 17 dimensions. non-standard GW PE problems
+can have more parameters, which could potentially lead to more complicate
+geometry in the target posterior. For example, 
 
 
 
@@ -503,7 +544,7 @@ While standard GW analysis goes up to 17 dimensions,
 \begin{enumerate}
     \item Multi-device scaling?
     \item Other detectors configuration
-    \item  Combining with noise inference
+    \item Combining with noise inference
     \item Higher dimensional problems need HMC still
 \end{enumerate}
 

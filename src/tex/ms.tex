@@ -1,6 +1,7 @@
 % Define document class
 \documentclass[twocolumn]{aastex631}
 \usepackage{showyourwork}
+\usepackage[ruled,vlined]{algorithm2e}
 \usepackage{color}
 
 \definecolor{rb4}{HTML}{27408B}
@@ -271,7 +272,7 @@ gradient-based transition kernels and additional computation cost favorable.
 
 
 
-\subsection{Normalizing Flow}
+\subsection{Normalizing Flow enhanced sampling}
 \label{sec:flow}
 
 % Problem with just HMC or MALA
@@ -317,28 +318,65 @@ distribution, and $f$ is an invertible parameterized transform that
 connect the two distributions. For a detail discussion of the algorithm, we
 refer the readers to \kw{cite}.
 
-% How does it help our sampling
+% The flowMC algorithm
 As mentioned in the previous subsection, one of the main issue gradient-based
-sampler is it does not explore local correlation and multi-modality well. This
-is exactly where the normalizing flow model can help. While the method would
-still work when there is only one independent local sampler chain, this method
-works much better when we employ a lot of independent chains. By looking across
-multiple chains, the normalizing flow learns the global landscape of the target
-distribution, hence we can use it as a \textit{proposal} distribution. This
-means independent chains can now jump between modes, or within a single mode
-that exhibits complex geometry that cannot be handled easily only through the
+sampler is it does not explore local correlated features and multi-modality well. This
+is exactly where the normalizing flow model can help. Once multiple independent
+chains have generated samples, we can combine the samples and feed it to the
+normalizing flow, which it learns the global landscape of the target
+distribution. Note that since the independent chains are generated with the same
+number of samples, the normalization between posterior density represented by
+different chains are in general different from the true target distribution. To
+adjust for this inaccuracy, we use the normalizing flow model as a
+\textit{proposal} distribution. Given a trained normalizing flow model, we can
+generate proposed jump in the target space by sampling from the latent
+distribution $z \sim p_z(Z)$, then push it through the learned map given by the
+normalizing flow model $x=f(z)$. the acceptance criteria is given by
+\begin{align}
+    \alpha(\mathbf{x},\mathbf{x_0}) = \min \left[ 1, \frac{\hat{\rho}(\mathbf{x_0})\rho_*(\mathbf{x})}{\hat{\rho}(\mathbf{x})\rho_*(\mathbf{x_0})}\right],
+\end{align}
+where $\hat{\rho}$ is probability density estimated by the normalizing flow
+model, $\rho_*$ is the probability density evaluated using the target function,
+and $x_0$ is the current position. We can see the flow distribution is the
+target distribution when the accepting probability is 1. When the normalizing
+flow model has not converged to the target distribution, only a portion of the
+proposed jumps will be accepted. This means MCMC process using the normalizing
+flow model as the proposal distribution can adjust the normalization across
+different regions of the target parameter space by rejecting jumps into less
+likely regions. The training and sampling is then repeated until a certain
+criteria is met. Note that everytime we retrain the network, we are breaking the
+Markov properties since we are changing the proposal distribution. To produce
+final samples that can be used to estimate target quantities, one has to freeze
+the normalizing flow model and does not retrain during the final sampling phase.
+To summarize the sampling process, the pseudocode is given by
+
+\begin{algorithm}
+\caption{An algorithm with caption}\label{alg:cap}
+\KwData{Initial position}
+\KwResult{Chains, $\log{\mathcal{L}}$}
+\emph{Training}\;
+% \While{not converged}{
+%     \For{n_loc}{
+
+%     }
+%     Local Sampling
+% }
+\emph{Production}\;
+\end{algorithm}
+
+
+% Move these to discussion
+
+This means independent chains can now jump between modes, or within a single
+mode that exhibits complex geometry that cannot be handled only through the
 local sampler, which greatly reduce both the burn-in time and sampling time.
 
-% Write down how you use it as proposal
-
-\begin{align}
-    acc(x,x_0) = \rm{min} \left[ 1, \frac{\hat{\rho}(x_0)\rho_*(x)}{\hat{\rho}(x)\rho_*(x_0)}\right],
-\end{align}
-where $x = f(z), z \sim p_z(Z)$ is the proposed jump location and $x_0$ is the current position.
-We can see the flow distribution is the target distribution when the accepting probability is 1.
-
+While the method would still work when there is only one independent local
+sampler chain, this method works much better when we employ a lot of independent
+chains because of the increased number of samples available for training. 
 \kw{Mention how this helps gravitational wave, gives examples.}
 
+In practice, we find the normalizing flow not only helps jumping betw
 
 \subsection{Accelerators}
 \label{sec:accelerators}

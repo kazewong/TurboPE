@@ -158,8 +158,25 @@ in \kw{cite}) in this work. We give a concise description of what we implement
 in our code here. For more extensive discussion of the derivation of heterodyned
 likelihood, we refer the reader the reference \kw{}.
 
-\kw{Specify the idea of heterodyned likelihood here}.
-The idea behind heterodyned likelihood is the following:
+\kw{Specify the idea of heterodyned likelihood here}. The idea behind
+heterodyned likelihood can be summarized as the following: the integrand in eq.
+\ref{eq: innerproduct} is highly oscillatory function, so one has to sample the
+integrand with sufficiently dense sampling to compute the integral faithfully.
+The number of sample points needed would be much smaller if the integrand was
+smooth. Given a pair of waveform parameters $\mathbf{\theta}$ and
+$\mathbf{\theta_0}$ that are close to each other, the waveforms generated using
+the pair of parameters are similar to each other, this means the ratio between
+the waveforms is a smoothly varying function. Given a reference waveform
+$h(\mathbf{\theta_0})$, we can exploit this similarity between waveforms to
+reduce the number of sample points needed to compute the likelihood for the set
+of $\mathbf{\theta}$ that are similar to $\mathbf{\theta_0}$. We decompose
+the integrand into two parts: a highly oscillatory part that is depends only on
+the reference waveform and the data, hence it only needs to be evaluated once;
+and a smoothly varying part that depends on the target waveform parameters
+$\theta$, that needs to be evaluated for every new likelihood evaluation.
+Because the part that depends on the target waveform parameters is smooth, we
+can use far fewer sample points to compute the integral with sufficient
+accuracy.
 
 
 \begin{align}
@@ -170,6 +187,19 @@ r(f) = \frac{h(f)}{h_0(f)} = r_0(h,b) + r_1(h,b)(f- f_m(b)) + \cdots
     \langle d|h \rangle &\approx \sum_b A_0(b) r^*_0(h,b) + A_1(b) r^*_1(h,b) \nonumber \\
     \langle h|h \rangle &\approx \sum_b B_0(b) |r_0(h,b)|^2 + 2 B_1(b) \Re[r_0(h,b)r_1(h,b)]
 \end{align}
+
+One may be concerned by the accuracy of this approximation over the target
+parameter space, especially in the region where the generated waveform is
+significantly different from the reference waveform. However, given we are
+interested in the most probable set of parameters, if we choose the reference
+waveform to be close to the data, the waveforms that are different from the
+reference waveform should also differ significantly from the data. This means
+the likelihood value for these waveforms should be significantly smaller than
+the likelihood for the waveforms that are similar to the reference waveform,
+hence will not be relevant for the PE result. In practice, one will first
+optimize the likelihood function with full frequnecy resolution to obtain the
+reference waveform parameters, which can be run at a much lower cost compared to
+PE.
 
 
 \section{\texttt{flowMC}}
@@ -269,8 +299,6 @@ information down to machine precision at around the same order of time compared
 to evaluating the posterior itself. Having access to gradient information
 through automatic differentiation is crucial to make the trade-off between using
 gradient-based transition kernels and additional computation cost favorable.
-
-
 
 \subsection{Normalizing Flow enhanced sampling}
 \label{sec:flow}
@@ -409,19 +437,14 @@ landscape faster in Wall time.
 
 
 % GPU helps pack a shit ton of waveform evaluation
-Another benefit accelerator brings is parallel evaluation of waveforms. The most
-expensive part of evaluating the likelihood is generating the waveform. This is
-especially significant when analysis long signals such as BNS merger, since the
-cost of evaluating the waveform scales linearly with the number of time samples.
-While the most accurate waveform model, numerical relativity, is a sequential
-process, most of the gravitational wave models used in PE are approximants,
-meaning they are fits to numerical relativity waveforms. These fitted form can
-be evaluated at any given time or frequency without the need to simulate the
-signals from an initial condition. This means generating a waveform from an
-approximant can in fact be benefited from parallelization. Together with
-heterodyned likelihood, we can evaluate the likelihood at $\mathcal{O}(10^7)$
-different locations on an Nvidia A100 GPU. The high throughput of likelihood
-evaluations unlocks the potential of the \texttt{flowMC} sampling algorithms.
+Another benefit accelerator brings is parallel evaluation of waveforms. Since
+the waveform models being used in PE are approximants, they can be evaluated at
+any given time or frequency independent to what have been generated before the
+time or frequency. This means predicting the waveform can be trivially
+parallelized over frequency. Together with heterodyned likelihood, we can
+evaluate the likelihood at $\mathcal{O}(10^7)$ different locations on an Nvidia
+A100 GPU. The high throughput of likelihood evaluations unlocks the potential of
+the \texttt{flowMC} sampling algorithms.
 
 \section{Result}
 \label{sec: Result}
@@ -493,8 +516,11 @@ our pipeline to analysis GW150914 and GW170817.
 \label{sec: Discussion}
 
 % Brief summary
-In this work, we present a PE pipeline for GW events that is efficient and flexible.
-
+In this work, we present a PE pipeline for GW events that is efficient and
+flexible. With a differentiable waveform model, heterodyned likelihood and
+normalizing flow enhanced sampler \texttt{flowMC}, we are able to estimate the
+parameters of GW150914 and GW170817 in \kw{Quote speed}. Our method is general
+and extensable, \kw{continue}.
 
 % Compared to other works
 There are recent works from different groups on speeding up parameter estimation
@@ -550,7 +576,6 @@ geometry in the target posterior. For example,
 
 \kw{Talk about future development}
 
-
 % Additional traits for having differentiable waveforms
 There are a number of future developments we are working on. While IMRPhenomD is
 a reasonable start, it lacks some qualitative features that other
@@ -566,10 +591,16 @@ as calibrating waveforms to numerical relativity result, as detailed in
 
 % Precessing waveforms and higher mode.
 
+% Other detectors configuration
+
+In order to perform realistic PE with our pipeline, the detector pattern o
+The current code can perform parameter estimation for any combination of the
+Hanford, Livingston and Virgo detectors, under the assumption of 
+
 % More features such as marginalization
 The features we have implemented are the barebone version of parameter
 estimation. We do not include marginalization schemes such as time, phase and
-calibration lines marginalization. Because of the performance of the sampler on
+calibration lines marginalization. Because of the reaonsable performance of the sampler on
 accelerators, time and phase marginalization is not necessary, as the
 performance of our implementation is not significantly impacted by having two
 extra dimension. Other marginalization mode should be considered in the future.
@@ -618,11 +649,11 @@ the reference waveform parameters by obtaining the extrinsic parameters and by
 reducing the dimensionality of the optimization problem for the intrinsic
 parameters.
 
+% Interplay with importance sampling
+
+
 % Multi-device scaling
-
-% Other detectors configuration
-
-% Higher dimensional problems need HMC still
+The current implementation take 
 
 \section{Acknowledgements}
 

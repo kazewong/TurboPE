@@ -188,7 +188,7 @@ reference waveform parameters, which can be run at a much lower cost compared to
 PE.
 
 We give a concise description of what we implement
-in our code here. For more extensive discussion of the derivation of heterodyned
+in our code here. For more extensive  derivation of heterodyned
 likelihood, we refer the reader the reference \cite{Zackay:2018qdy}.
 
 In the heterodyned likelihood framework, the two terms in eq \ref{eq:
@@ -201,13 +201,13 @@ loglikelihood} are given by
 
 where $b$ denotes the index of a \textit{sparse} set of bins where the integrand
 will be computed on, $A_0(b)$, $A_1(b)$, $B_0(b)$, and $B_1(b)$ are the
-coefficients of computed using the data and the reference waveform, and
-$r_0(h,b)$ and $r_1(h,b)$ are the ratio between the target waveform and the
+heterodyning coefficients computed using the data and the reference waveform,
+and $r_0(h,b)$ and $r_1(h,b)$ are the ratio between the target waveform and the
 reference waveform at the center of the bin. To evaluate eq. \ref{eq:
 heterodynedlikelihood}, we need to be able to first choose a binning scheme,
-evaluate the coefficients given the data and the reference waveform, and finally
-evaluate the ratio between the target waveform and the reference waveform at the
-center of the bin.
+then evaluate the coefficients given the data and the reference waveform and the
+ratio between the target waveform and the reference waveform at the center of
+the bin.
 
 Considering the phasing of a waveform is denoted by a power series $\Psi(f) =
 \sum_i \alpha_i f^{\gamma_i}$, where $\alpha_i$ are some coefficients depending
@@ -238,15 +238,17 @@ $f_m(b)$ is the center frequency of the bin. Since we have access to both $h(f)$
 and $h_0(f)$, we can compute $r_0$ and $r_1$ by evaluating the value of $r(f)$
 at the edge of the bin and invert eq. \ref{eq:definer}.
 
-
+The final ingredient we need is the heterodyning coefficients given the data and
+the reference waveform on the sparse bins, which are given by
 \begin{align}
     A_0(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)}{S_n(f)} df, \\
     A_1(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)(f-f_m(b))}{S_n(f)} df, \\
     B_0(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2}{S_n(f)} df, \\
-    B_1(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2(f-f_m(b))}{S_n(f)} df,
+    B_1(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2(f-f_m(b))}{S_n(f)} df.
 \end{align}
-
-
+Note that the sum within each bins should be done with the same sampling rate as
+the data, i.e. the same one would do in the case without using heterodyned
+likelihood.
 
 \section{\texttt{flowMC}}
 \label{sec: flowMC}

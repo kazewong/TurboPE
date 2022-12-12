@@ -125,7 +125,8 @@ eq. \ref{eq: loglikelihood} can be evaluated in either time or frequency domain.
 Since it is computationally cheaper to compute the likelihood in the frequency
 domain, we choose to compute the likleihood throughout this work, which can be defined as 
 \begin{align}
-    \left<a|b\right> = 4 Re\int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df,
+    % \left<a|b\right> = 4 Re\int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df,
+    \left<a|b\right> = 4 \int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df,
 \label{eq: innerproduct}
 \end{align}
 where $\mathcal{S}_n(f)$ is the noise power spectral density (PSD). To compute
@@ -154,39 +155,24 @@ computational burden for longer-duration signals are often quite large. To
 reduce the computational cost, there are a number of methods to reduce the
 number of basis points one would need to compute the likelihood faithfully
 \kw{cite}. We use heterodyned likelihood \kw{cite} (also named relative binning
-in \kw{cite}) in this work. We give a concise description of what we implement
-in our code here. For more extensive discussion of the derivation of heterodyned
-likelihood, we refer the reader the reference \kw{}.
-
-\kw{Specify the idea of heterodyned likelihood here}. The idea behind
-heterodyned likelihood can be summarized as the following: the integrand in eq.
-\ref{eq: innerproduct} is highly oscillatory function, so one has to sample the
-integrand with sufficiently dense sampling to compute the integral faithfully.
-The number of sample points needed would be much smaller if the integrand was
-smooth. Given a pair of waveform parameters $\mathbf{\theta}$ and
-$\mathbf{\theta_0}$ that are close to each other, the waveforms generated using
-the pair of parameters are similar to each other, this means the ratio between
-the waveforms is a smoothly varying function. Given a reference waveform
-$h(\mathbf{\theta_0})$, we can exploit this similarity between waveforms to
-reduce the number of sample points needed to compute the likelihood for the set
-of $\mathbf{\theta}$ that are similar to $\mathbf{\theta_0}$. We decompose
-the integrand into two parts: a highly oscillatory part that is depends only on
-the reference waveform and the data, hence it only needs to be evaluated once;
-and a smoothly varying part that depends on the target waveform parameters
-$\theta$, that needs to be evaluated for every new likelihood evaluation.
-Because the part that depends on the target waveform parameters is smooth, we
-can use far fewer sample points to compute the integral with sufficient
-accuracy.
-
-
-\begin{align}
-r(f) = \frac{h(f)}{h_0(f)} = r_0(h,b) + r_1(h,b)(f- f_m(b)) + \cdots
-\end{align}
-
-\begin{align}
-    \langle d|h \rangle &\approx \sum_b A_0(b) r^*_0(h,b) + A_1(b) r^*_1(h,b) \nonumber \\
-    \langle h|h \rangle &\approx \sum_b B_0(b) |r_0(h,b)|^2 + 2 B_1(b) \Re[r_0(h,b)r_1(h,b)]
-\end{align}
+in \kw{cite}) in this work. The idea behind heterodyned likelihood can be
+summarized as the following: the integrand in eq. \ref{eq: innerproduct} is
+highly oscillatory function, so one has to sample the integrand with
+sufficiently dense sampling to compute the integral faithfully. The number of
+sample points needed would be much smaller if the integrand was smooth. Given a
+pair of waveform parameters $\mathbf{\theta}$ and $\mathbf{\theta_0}$ that are
+close to each other, the waveforms generated using the pair of parameters are
+similar to each other, this means the ratio between the waveforms is a smoothly
+varying function. Given a reference waveform $h(\mathbf{\theta_0})$, we can
+exploit this similarity between waveforms to reduce the number of sample points
+needed to compute the likelihood for the set of $\mathbf{\theta}$ that are
+similar to $\mathbf{\theta_0}$. We decompose the integrand into two parts: a
+highly oscillatory part that is depends only on the reference waveform and the
+data, hence it only needs to be evaluated once; and a smoothly varying part that
+depends on the target waveform parameters $\theta$, that needs to be evaluated
+for every new likelihood evaluation. Because the part that depends on the target
+waveform parameters is smooth, we can use far fewer sample points to compute the
+integral with sufficient accuracy.
 
 One may be concerned by the accuracy of this approximation over the target
 parameter space, especially in the region where the generated waveform is
@@ -200,6 +186,66 @@ hence will not be relevant for the PE result. In practice, one will first
 optimize the likelihood function with full frequnecy resolution to obtain the
 reference waveform parameters, which can be run at a much lower cost compared to
 PE.
+
+We give a concise description of what we implement
+in our code here. For more extensive discussion of the derivation of heterodyned
+likelihood, we refer the reader the reference \cite{Zackay:2018qdy}.
+
+In the heterodyned likelihood framework, the two terms in eq \ref{eq:
+loglikelihood} are given by
+\begin{align}
+    \langle d|h \rangle &\approx \sum_b A_0(b) r^*_0(h,b) + A_1(b) r^*_1(h,b), \nonumber \\
+    \langle h|h \rangle &\approx \sum_b B_0(b) |r_0(h,b)|^2 + 2 B_1(b) \Re[r_0(h,b)r_1(h,b)],
+\label{eq: heterodynedlikelihood}
+\end{align}
+
+where $b$ denotes the index of a \textit{sparse} set of bins where the integrand
+will be computed on, $A_0(b)$, $A_1(b)$, $B_0(b)$, and $B_1(b)$ are the
+coefficients of computed using the data and the reference waveform, and
+$r_0(h,b)$ and $r_1(h,b)$ are the ratio between the target waveform and the
+reference waveform at the center of the bin. To evaluate eq. \ref{eq:
+heterodynedlikelihood}, we need to be able to first choose a binning scheme,
+evaluate the coefficients given the data and the reference waveform, and finally
+evaluate the ratio between the target waveform and the reference waveform at the
+center of the bin.
+
+Considering the phasing of a waveform is denoted by a power series $\Psi(f) =
+\sum_i \alpha_i f^{\gamma_i}$, where $\alpha_i$ are some coefficients depending
+on the waveform parameters and $\gamma_i$ are powers motivated by post-Newtonian
+thoery. For example, for the term $\gamma_i = -5/3$, $\alpha_i$ is related to
+the chirp mass. The maximum dephasing one can have within a frequency interval $[f_{\textrm{min}},f_{\textrm{max}}]$ is given by
+\begin{align}
+    \delta \Psi_{\textrm{max}}(f) = 2\pi \sum_{i} (f/f_{*,i})^{\gamma_i} \textrm{sgn}(\gamma_i),
+\label{eq: maxdephasing}
+\end{align}
+where $f_{*,i} = f_{\textrm{max}}$ for $\gamma_i>=0$ and $f_{*,i} =
+f_{\textrm{min}}$ for $\gamma_i<0$. Given the relation shown in eq. \ref{eq:
+maxdephasing}, we can choose the binning scheme which devide the entire
+frequency domain of interests into a set of bins such that the maximum dephasing
+within each bin is smaller than a certain threshold $\epsilon$, i.e.
+$|\delta\Psi_{\textrm{max}}(f_{\textrm{max}}) -
+\delta\Psi_{\textrm{max}}(f_{\textrm{min}})| < \epsilon$. 
+
+Given a sufficiently dense binning scheme, the ratio between the target waveform
+and the reference within a bin can be approximated as by linear interpolation
+\begin{align}
+r(f) = \frac{h(f)}{h_0(f)} = r_0(h,b) + r_1(h,b)(f- f_m(b)) + \cdots,
+\label{eq:definer}
+\end{align}
+where $b$ is the index of a particular bin, $r_0(h,b)$ and $r_1(h,b)$ are the
+value and slope of the ratio at the center of the bin resepctively, and
+$f_m(b)$ is the center frequency of the bin. Since we have access to both $h(f)$
+and $h_0(f)$, we can compute $r_0$ and $r_1$ by evaluating the value of $r(f)$
+at the edge of the bin and invert eq. \ref{eq:definer}.
+
+
+\begin{align}
+    A_0(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)}{S_n(f)} df, \\
+    A_1(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)(f-f_m(b))}{S_n(f)} df, \\
+    B_0(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2}{S_n(f)} df, \\
+    B_1(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2(f-f_m(b))}{S_n(f)} df,
+\end{align}
+
 
 
 \section{\texttt{flowMC}}

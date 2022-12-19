@@ -81,18 +81,14 @@ following major features to achieve its performance:
 
 %Structure of paper
 
-The rest of the paper is structured as follows: We review the basic of PE in
-section \ref{sec: PE}. We provide a quick summary of the sampling framework
-built on top of \texttt{flowMC} in section \ref{sec: flowMC}. We present
-benchmarking result in section \ref{sec: Result}. Finally, we discuss the
-implications of this work and directions for future development in section
-\ref{sec: Discussion}.
+The rest of the paper is structured as follows: We review the basic of PE and
+introduce our framework in section \ref{sec: PE}. We present benchmarking
+results on both simulated and real data in section \ref{sec: Result}. Finally,
+we discuss the implications of this work and directions for future development
+in section \ref{sec: Discussion}.
 
 \section{Gravitational wave parameter estimation}
 \label{sec: PE}
-
-In this section we give a self-contained summary the gravitational-wave
-parameter estimation (PE) process.
 
 \subsection{Likelihood function}
 \label{sec:likelihood}
@@ -248,12 +244,6 @@ the reference waveform on the sparse bins, which are given by
 Note that the sum within each bins should be done with the same sampling rate as
 the data, i.e. the same one would do in the case without using heterodyned
 likelihood.
-
-\section{\texttt{flowMC}}
-\label{sec: flowMC}
-
-In this section, we provide a high level summary of how each component in
-\texttt{flowMC} benefits the sampling process and their interplay.
 
 \subsection{MCMC with Gradient-based sampler}
 \label{sec:gradient}
@@ -469,8 +459,7 @@ not benefit from parallelization but the latter does. In another word, being
 able to use many independent chains help the normalizing flow learn the global
 landscape faster in Wall time.
 
-
-% GPU helps pack a shit ton of waveform evaluation
+% GPU helps packing a shit ton of waveform evaluation
 Another benefit accelerator brings is parallel evaluation of waveforms. Since
 the waveform models being used in PE are approximants, they can be evaluated at
 any given time or frequency independent to what have been generated before the
@@ -574,6 +563,7 @@ of gravitational wave, including efficient reparameterization and deep learning
 \kw{cite}. While all of these methods are able to get down to minutes-scale parameter
 estimation with high fidelity, we would like to highlight the unique strength of
 this work, and potential interplay between our work and other's work.
+
 % Stephen's work
 Compared to \kw{Stephan's paper}, we do not rely on pre-training the neural
 network on a large collection of waveforms and noise realization. This means as
@@ -705,7 +695,20 @@ reducing the dimensionality of the optimization problem for the intrinsic
 parameters.
 
 % Multi-device scaling
-The current implementation takes one GPU
+One important aspect of modern computing is scalability, meaning it is generally
+favorable if one can simply put more computing units in the same problem and
+reduce the Wall time. In our case, this means we would like to use more than one
+GPU for the same PE process. More GPUs can help in the following ways: first,
+more GPUs means we can run more independent chains at the same time, which can
+generate more samples faster. But more importantly, as shown in this work and
+\kw{cite flowMC?}, more independent chains also helps with reducing the burn-in
+time. Parallelizing over the number of chain dimension is trivial and does not
+require much change to the current infrastructure. Another way more GPUs can
+helps is allowing faster training of larger flow model. While the training time
+is not the biggest bottleneck given the flow model used in this study, more GPUs
+means we can increase the bandwidth of the flow model by increasing its size
+while keeping the training time the same. This helps in capture more complex
+geometry in the target space, which can lead to more accurate result in general.
 
 
 \section{Acknowledgements}

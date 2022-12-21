@@ -30,17 +30,17 @@ Flatiron Institute, New York, NY 10010, USA}}
 
 % Abstract with filler text
 \begin{abstract}
-We present a light-weighted, flexible and high performance framework to estimate
+We present a light-weighted, flexible, and high-performance framework to estimate
 gravitational wave event parameters. By combining heterodyned likelihood,
 automatically differentiable and accelerators compatible waveforms, normalizing
 flow enhanced gradient-based MCMC, we achieve parameter estimation for real
-event like GW150914 and GW170817 within a minute of sampling time with little to
+events like GW150914 and GW170817 within a minute of sampling time with little to
 no compromise. Our framework does not require pre-training or explicit
-reparameterization, and can be generalized to handle higher dimensional
-problems. We also discuss as near-real time parameter estimation have been shown
+reparameterization and can be generalized to handle higher dimensional
+problems. We also discuss as near real-time parameter estimation has been shown
 to be possible by multiple groups, what are the trade-offs and future
 developments the community should be aware of. Our code for generating the
-manuscript and running the analysis is publically available on github.
+manuscript and running the analysis is publically available on GitHub.
 \end{abstract}
 
 % Main body with filler text
@@ -48,27 +48,27 @@ manuscript and running the analysis is publically available on github.
 \label{sec:intro}
 
 % Brief description of PE and old generation of code
-Parameter estimation (PE) is one of the most commonly perform data analysis
+Parameter estimation (PE) is one of the most commonly performed data analysis
 tasks in gravitational wave (GW) data analysis. The central question of PE is to
 infer the parameters of the GW source given the strain data. The PE results in
-the most recent catalog of GW events are powered by a number of community
-developed PE codes, including \texttt{lalinference}, \texttt{pycbc}, and
-\texttt{bilby} \cite{Romero-Shaw:2020owr} \kw{cite}. These packages have been tested by a number of groups
-and well regarded as the standard tools.
+the most recent catalog of GW events are powered by several community-developed
+PE codes, including \texttt{lalinference}, \texttt{pycbc}, and \texttt{bilby}
+\cite{Romero-Shaw:2020owr} \kw{cite}. These packages have been tested by a
+number of groups and are well regarded as the standard tools.
 
 % Emerging tools from different group
 While the standard tools have passed many robustness tests, they are known to be
 computationally intensive. The exact amount of time needed to analyze one event
 depends on the length of the event. These community tools take about a week to
-analyze shorter events such as binary black hole (BBH) mergers, where they can
+analyze shorter events such as binary black hole (BBH) mergers, whereas they can
 take up to a month on a computer cluster to analyze longer events such as binary
 neutron star (BNS) mergers. There are efforts from multiple groups developing
 tools to speed up the PE process \kw{Cite}.
 
 %Basic idea and unique advantage of our tool
 
-In this work, we present a light-weighted, flexible and high performance
-framework to estimate GW event parameters. Our framework implemneted the
+In this work, we present a light-weighted, flexible, and high performance
+framework to estimate GW event parameters. Our framework implements the
 following major features to achieve its performance:
 \begin{enumerate}
 \item Differential waveform models
@@ -81,7 +81,7 @@ following major features to achieve its performance:
 
 %Structure of paper
 
-The rest of the paper is structured as follows: We review the basic of PE and
+The rest of the paper is structured as follows: We review the basics of PE and
 introduce our framework in section \ref{sec: PE}. We present benchmarking
 results on both simulated and real data in section \ref{sec: Result}. Finally,
 we discuss the implications of this work and directions for future development
@@ -93,10 +93,10 @@ in section \ref{sec: Discussion}.
 \subsection{Likelihood function}
 \label{sec:likelihood}
 
-The main objective in PE can be summarized as: given data in the form of a time
+The main objective in PE can be summarized as given data in the form of a time
 series of strain $\mathbf{d}$, find the distribution of the source parameters
 $\mathbf{\theta}$ that is compatible with the data, i.e.
-$p(\mathbf{\theta}|\mathbf{d})$. In order to compute this object, we can rewrite
+$p(\mathbf{\theta}|\mathbf{d})$. To compute this object, we can rewrite
 it using Bayes' theorem,
 \begin{align}
     p(\theta| d) = \frac{\mathcal{L}(d|\theta)\pi(\theta)}{p(d)},
@@ -106,20 +106,20 @@ where $\mathcal{L}(d|\theta)$ is the likelihood function, $\pi(\theta)$ is the
 prior distribution, and $p(d)$ is the evidence. Since the evidence is a
 normalization constant that does not depend on the source parameters, it is
 often omitted if we are only interested in the posterior distribution. The prior
-distribution is often chosen to be some simple distributions, such as uniformly
+distribution is often chosen to be some simple distribution, such as uniformly
 distributed in the component masses or a Gaussian distribution in the spins.
-Assuming the noise follows from a stationary Gaussian process, the log
-likelihood in the case of GW is given by
+Assuming the noise follows from a stationary Gaussian process, the
+log-likelihood in the case of GW is given by
 
 \begin{align}
     \log{\mathcal{L}(d|\theta)} = -\left<d-h(\mathbf{\theta})|d-h(\mathbf{\theta})\right>/2,
 \label{eq: loglikelihood}
 \end{align}
 where $d$ is the strain data, $h(\mathbf{\theta})$ is the strain predicted by a
-waveform model with a specific set of source parameters. The right handside of
+waveform model with a specific set of source parameters. The right hand side of
 eq. \ref{eq: loglikelihood} can be evaluated in either time or frequency domain.
 Since it is computationally cheaper to compute the likelihood in the frequency
-domain, we choose to compute the likleihood throughout this work, which can be defined as 
+domain, we choose to compute the likelihood throughout this work, which can be defined as 
 \begin{align}
     % \left<a|b\right> = 4 Re\int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df,
     \left<a|b\right> = 4 \int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df,
@@ -128,32 +128,32 @@ domain, we choose to compute the likleihood throughout this work, which can be d
 where $\mathcal{S}_n(f)$ is the noise power spectral density (PSD). To compute
 the integral shown in eq. \ref{eq: innerproduct}, we need to evaluate a chosen
 waveform model $h(\mathbf{\theta})$ at a number of frequnecy sample points.
-Evaluting the likelihood function is often the most computationally intensive
+Evaluating the likelihood function is often the most computationally intensive
 part of the PE. The most accurate waveform model is numerical relativity (NR).
 However, depending on the source parameters, generating one time series of
-strain using can takes a day to half a year, which makes NR prohibitably
-expensive for PE. To circumvent this problem, there are a number of waveform
+strain can take a day to half a year, which makes NR prohibitively
+expensive for PE. To circumvent this problem, there are several waveform
 "approximant" families, including the IMRPhenom family \kw{}, SEOB family \kw{},
-and NR surrogate family\kw{cite}. For shorter event such as a $30-30\ M_{\odot}$
+and NR surrogate family\kw{cite}. For shorter events such as a $30-30\ M_{\odot}$
 BBH, one waveform call could take $10\text{ms}$ to $\sim 1s$ \kw{verify number
-in lalsuite}. For longer event such as a $1.4-1.4\ M_{\odot}$ BNS event, the
+in lalsuite}. For longer events such as a $1.4-1.4\ M_{\odot}$ BNS event, the
 evaluation time could go up to \kw{Fill}. Since one needs to evaluate the
 likelihood many times during sampling\footnote{A typical PE run with
-\texttt{Bilby} takes $>10^6$ likelihood evalutation to converge.}, the
+\texttt{Bilby} takes $>10^6$ likelihood evaluation to converge.}, the
 computational cost in evaluating the waveform accumulate and is the main reason
 of the long runtime of GW PE.
 
 \subsection{Heterodyned likelihood}
 
 Since the computational cost of evaluating a waveform model scales linearly with
-the number of sample points either in time or frequency domain, the
-computational burden for longer-duration signals are often quite large. To
+the number of sample points either in the time or frequency domain, the
+computational burden for longer-duration signals is often quite large. To
 reduce the computational cost, there are a number of methods to reduce the
 number of basis points one would need to compute the likelihood faithfully
 \kw{cite}. We use heterodyned likelihood \kw{cite} (also named relative binning
 in \kw{cite}) in this work. The idea behind heterodyned likelihood can be
 summarized as the following: the integrand in eq. \ref{eq: innerproduct} is
-highly oscillatory function, so one has to sample the integrand with
+a highly oscillatory function, so one has to sample the integrand with
 sufficiently dense sampling to compute the integral faithfully. The number of
 sample points needed would be much smaller if the integrand was smooth. Given a
 pair of waveform parameters $\mathbf{\theta}$ and $\mathbf{\theta_0}$ that are
@@ -161,9 +161,9 @@ close to each other, the waveforms generated using the pair of parameters are
 similar to each other, this means the ratio between the waveforms is a smoothly
 varying function. Given a reference waveform $h(\mathbf{\theta_0})$, we can
 exploit this similarity between waveforms to reduce the number of sample points
-needed to compute the likelihood for the set of $\mathbf{\theta}$ that are
+needed to compute the likelihood for the set of $\mathbf{\theta}$ that is
 similar to $\mathbf{\theta_0}$. We decompose the integrand into two parts: a
-highly oscillatory part that is depends only on the reference waveform and the
+highly oscillatory part that depends only on the reference waveform and the
 data, hence it only needs to be evaluated once; and a smoothly varying part that
 depends on the target waveform parameters $\theta$, that needs to be evaluated
 for every new likelihood evaluation. Because the part that depends on the target
@@ -177,15 +177,15 @@ interested in the most probable set of parameters, if we choose the reference
 waveform to be close to the data, the waveforms that are different from the
 reference waveform should also differ significantly from the data. This means
 the likelihood value for these waveforms should be significantly smaller than
-the likelihood for the waveforms that are similar to the reference waveform,
+the likelihood of the waveforms that are similar to the reference waveform,
 hence will not be relevant for the PE result. In practice, one will first
-optimize the likelihood function with full frequnecy resolution to obtain the
+optimize the likelihood function with full frequency resolution to obtain the
 reference waveform parameters, which can be run at a much lower cost compared to
 PE.
 
 We give a concise description of what we implement
-in our code here. For more extensive  derivation of heterodyned
-likelihood, we refer the reader the reference \cite{Zackay:2018qdy}.
+in our code here. For a more extensive derivation of heterodyned
+likelihood, we refer the reader to the reference \cite{Zackay:2018qdy}.
 In the heterodyned likelihood framework, the two terms in eq \ref{eq:
 loglikelihood} are given by
 \begin{align}
@@ -207,7 +207,7 @@ the bin.
 Considering the phasing of a waveform is denoted by a power series $\Psi(f) =
 \sum_i \alpha_i f^{\gamma_i}$, where $\alpha_i$ are some coefficients depending
 on the waveform parameters and $\gamma_i$ are powers motivated by post-Newtonian
-thoery. For example, for the term $\gamma_i = -5/3$, $\alpha_i$ is related to
+theory. For example, for the term $\gamma_i = -5/3$, $\alpha_i$ is related to
 the chirp mass. The maximum dephasing one can have within a frequency interval $[f_{\textrm{min}},f_{\textrm{max}}]$ is given by
 \begin{align}
     \delta \Psi_{\textrm{max}}(f) = 2\pi \sum_{i} (f/f_{*,i})^{\gamma_i} \textrm{sgn}(\gamma_i),
@@ -215,20 +215,20 @@ the chirp mass. The maximum dephasing one can have within a frequency interval $
 \end{align}
 where $f_{*,i} = f_{\textrm{max}}$ for $\gamma_i>=0$ and $f_{*,i} =
 f_{\textrm{min}}$ for $\gamma_i<0$. Given the relation shown in eq. \ref{eq:
-maxdephasing}, we can choose the binning scheme which devide the entire
+maxdephasing}, we can choose the binning scheme which divide the entire
 frequency domain of interests into a set of bins such that the maximum dephasing
 within each bin is smaller than a certain threshold $\epsilon$, i.e.
 $|\delta\Psi_{\textrm{max}}(f_{\textrm{max}}) -
 \delta\Psi_{\textrm{max}}(f_{\textrm{min}})| < \epsilon$. 
 
 Given a sufficiently dense binning scheme, the ratio between the target waveform
-and the reference within a bin can be approximated as by linear interpolation
+and the reference within a bin can be approximated by linear interpolation
 \begin{align}
 r(f) = \frac{h(f)}{h_0(f)} = r_0(h,b) + r_1(h,b)(f- f_m(b)) + \cdots,
 \label{eq:definer}
 \end{align}
 where $b$ is the index of a particular bin, $r_0(h,b)$ and $r_1(h,b)$ are the
-value and slope of the ratio at the center of the bin resepctively, and
+value and slope of the ratio at the center of the bin respectively, and
 $f_m(b)$ is the center frequency of the bin. Since we have access to both $h(f)$
 and $h_0(f)$, we can compute $r_0$ and $r_1$ by evaluating the value of $r(f)$
 at the edge of the bin and invert eq. \ref{eq:definer}.
@@ -241,7 +241,7 @@ the reference waveform on the sparse bins, which are given by
     B_0(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2}{S_n(f)} df, \\
     B_1(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2(f-f_m(b))}{S_n(f)} df.
 \end{align}
-Note that the sum within each bins should be done with the same sampling rate as
+Note that the sum within each bin should be done with the same sampling rate as
 the data, i.e. the same one would do in the case without using heterodyned
 likelihood.
 
@@ -261,7 +261,7 @@ iteratively proposing a new point in the parameter space based on the current
 location of the chain. The proposed point is accepted with a probability that is
 usually set to be proportional to the ratio of the posterior density evaluated
 at the proposed point and the current point. The chain can either accept the
-proposal and move to the new location, or reject the proposal and stay at the
+proposal and move to the new location or reject the proposal and stay at the
 current location. This process is repeated until the chain converges to the
 target distribution. The samples generated by the chain are then used to
 estimate the quantities of interest, such as the mean and credible intervals of
@@ -271,9 +271,9 @@ met, such as a Gelman-Rubin convergence statistic \cite{Gelman-rhat} lower than
 a threshold or simply after a certain number of iterations.
 
 Compared to direct sampling, MCMC algorithms only explore regions that are
-highly probable, thus reducing the computational cost by not wasting resource in
-region where it is unlikely to generate the data. However, MCMC algorithms come
-with their own set of issue. To illustrate what difficulties a MCMC algorithms
+highly probable, thus reducing the computational cost by not wasting resources in
+regions where it is unlikely to generate the data. However, MCMC algorithms come
+with their own set of issues. To illustrate what difficulties an MCMC algorithm
 may face, we can examine one of the most vanilla MCMC algorithm, the
 Metropolis-Hastings algorithm with a Gaussian kernel. Starting at some initial
 point, one can draw a proposed point from a Gaussian transition kernel, defined
@@ -281,23 +281,23 @@ as
 \begin{align}
     q(\mathbf{x},\mathbf{x_0})= \mathcal{N}(\mathbf{x}|\mathbf{x_0},\mathbf{C}),
 \end{align}
-where $\mathbf{x_0}$ is the current location of the chain,
-$\mathbf{x}$ is the proposed location, and $\mathbf{C}$ is the
-covariance matrix of the Gaussian. In the simplest case, we can pick
-$\mathbf{C}$ to be a diagonal matrix with a constant value, which corresponds to
-an isotropic Gaussian centers around the current location with a constant variance.
-And the acceptance criteria is defined as
+where $\mathbf{x_0}$ is the current location of the chain, $\mathbf{x}$ is the
+proposed location, and $\mathbf{C}$ is the covariance matrix of the Gaussian. In
+the simplest case, we can pick $\mathbf{C}$ to be a diagonal matrix with a
+constant value, which corresponds to an isotropic Gaussian center around the
+current location with a constant variance. And the acceptance criteria is
+defined as
 \begin{align}
 \alpha(\mathbf{x},\mathbf{x_0}) = \min\left(1,\frac{p(\mathbf{x})q(\mathbf{x_0},\mathbf{x})}{p(\mathbf{x_0})q(\mathbf{x},\mathbf{x_0})}\right).
 \label{eq:Gaussian_acceptance}
 \end{align}
 
 We can see from eq. \ref{eq:Gaussian_acceptance} the acceptance rate is
-proportion to fraction of volume where the posterior density at the proposed
+proportion to the fraction of volume where the posterior density at the proposed
 location is higher than the current location within the Gaussian transition
 kernel. If we choose the variance of the transition kernel to be too large, this
 fraction will be small hence the acceptance rate will be poor. On the other
-hand, if one choose the variance to be too small, nearby samples will be
+hand, if one chooses the variance to be too small, nearby samples will be
 correlated. In both cases, the efficiency in constructing the chain with a
 target number of independent samples is suboptimal. There is often a tuning
 process before we run the MCMC algorithm to find the optimal tuning parameters,
@@ -308,12 +308,12 @@ However, as we are dealing with higher dimensional problems, even the optimally
 tuned Gaussian transition kernel does not guarantee good performance. In order
 to have a reasonable acceptance rate, the variance of the Gaussian has to be
 smaller in a higher dimensional space, which means the transition kernel is in
-general making smaller and smaller step as we increase the dimensionality.
+general making smaller and smaller steps as we increase the dimensionality.
 
-Transition kernels which leverage gradient information of the target
+Transition kernels that leverage gradient information of the target
 distribution can help to address this issue of shortening steps in a high
 dimensional space. Instead of proposing a new point by drawing from a Gaussian,
-one can use the gradient evaluate at the current location to propose a new
+one can use the gradient evaluation at the current location to propose a new
 point. For example, Metropolis-adjusted Langevin algorithm (MALA) \kw{cite}
 place a unit Gaussian at the tip of the gradient vector at the current position,
 \begin{align}
@@ -326,7 +326,7 @@ the gradient term, which helps to boost the acceptance rate.
 
 While transition kernels that use gradient information can help to improve the
 acceptance rate, computing the gradient of the posterior density function
-introduce additional computational cost, which is not necessary beneficial in
+introduce additional computational cost, which is not necessarily beneficial in
 terms of sampling time. If one wants to compute the gradient information through
 finite differencing, the additional computation cost goes as at least $\sim
 \mathcal{O}(2n)$, where $n$ is the dimension of the problem. \texttt{Jax} allows
@@ -345,27 +345,27 @@ While gradient-based samplers have been shown to be superior in terms of
 performance when compared to other gradient-free algorithms in many practical
 examples\kw{cite}, there are still a number of classes of problems
 gradient-based samplers do not solve well. \footnote{To be specific, we are
-referring to sampling algorithms that use first order derivative here. Sampling
-algorithms that use information of higher order derivative such as manifold-MALA
+referring to sampling algorithms that use first-order derivatives here. Sampling
+algorithms that use the information of higher order derivatives such as manifold-MALA
 and Riemannian-HMC can in principle decorrelate local correlation in the target
-distribution, however they often have instability issue when they are used on
-real-life application, so they are not used often in practice.} For examples,
-target distribution that exhibits local correlation are hard to dealt with,
+distribution, however, they often have instability issues when they are used on
+real-life applications, so they are not used often in practice.} For example,
+target distribution that exhibits local correlation is hard to deal with,
 since by construction first order gradient-based algorithms can only handle
 global correlation structure. Another example is multi-modality. If there are
-multiple modes in the target distribution, an independent chain will likely to
-be trapped in one mode and take extremely long time to transverse between the
+multiple modes in the target distribution, an independent chain will likely 
+be trapped in one mode and take an extremely long time to transverse between the
 modes. This means the relative weights between modes will much longer to sample
 compared to the shape of each mode.
 
 % Long burn-in too
-Moreover, before we can use the sampling chain to estimate the quantity we care,
+Moreover, before we can use the sampling chain to estimate the quantity we care about,
 the sampler often needs to first find the most probable region in the target
-space, which is a common process that is referred to "burn-in" in the
+space, which is a common process that is referred to as "burn-in" in the
 literature. This means one would discard a certain amount of data generated from
 the beginning and only use the later part to estimate the quantities of
 interest. The burn-in phase of a gradient-based sampler is often as long as the
-sampling phase, which means a good portion of computation is not necessary
+sampling phase, which means a good portion of computation is not necessarily
 helpful in estimating the target quantities.
 
 % Crux of normalizing flow
@@ -379,40 +379,40 @@ The core of normalizing flow is given by
     p_x(X) = p_z(Z) \left| \frac{\partial f}{\partial z}\right|,
 \end{align}
 where $p_x(X)$ is the complex target distribution $p_z(Z)$ is the simple latent
-distribution, and $f$ is an invertible parameterized transform that
-connect the two distributions. For a detail discussion of the algorithm, we
+distribution and $f$ is an invertible parameterized transform that
+connect the two distributions. For a detailed discussion of the algorithm, we
 refer the readers to \kw{cite}.
 
 % The flowMC algorithm
 As mentioned in the previous subsection, one of the main issue gradient-based
-sampler is it does not explore local correlated features and multi-modality well. This
+sampler is it does not explore locally correlated features and multi-modality well. This
 is exactly where the normalizing flow model can help. Once multiple independent
-chains have generated samples, we can combine the samples and feed it to the
-normalizing flow, which it learns the global landscape of the target
+chains have generated samples, we can combine the samples and feed them to the
+normalizing flow, which learns the global landscape of the target
 distribution. Note that since the independent chains are generated with the same
 number of samples, the normalization between posterior density represented by
-different chains are in general different from the true target distribution. To
+different chains is in general different from the true target distribution. To
 adjust for this inaccuracy, we use the normalizing flow model as a
 \textit{proposal} distribution. Given a trained normalizing flow model, we can
-generate proposed jump in the target space by sampling from the latent
+generate the proposed jump in the target space by sampling from the latent
 distribution $z \sim p_z(Z)$, then push it through the learned map given by the
 normalizing flow model $x=f(z)$. the acceptance criteria is given by
 \begin{align}
     \alpha(\mathbf{x},\mathbf{x_0}) = \min \left[ 1, \frac{\hat{\rho}(\mathbf{x_0})\rho_*(\mathbf{x})}{\hat{\rho}(\mathbf{x})\rho_*(\mathbf{x_0})}\right],
 \end{align}
-where $\hat{\rho}$ is probability density estimated by the normalizing flow
+where $\hat{\rho}$ is the probability density estimated by the normalizing flow
 model, $\rho_*$ is the probability density evaluated using the target function,
 and $x_0$ is the current position. We can see the flow distribution is the
 target distribution when the accepting probability is 1. When the normalizing
 flow model has not converged to the target distribution, only a portion of the
-proposed jumps will be accepted. This means MCMC process using the normalizing
+proposed jumps will be accepted. This means an MCMC process using the normalizing
 flow model as the proposal distribution can adjust the normalization across
 different regions of the target parameter space by rejecting jumps into less
-likely regions. The training and sampling is then repeated until a certain
-criteria is met. Note that everytime we retrain the network, we are breaking the
+likely regions. The training and sampling are then repeated until certain
+criteria are met. Note that every time we retrain the network, we are breaking the
 Markov properties since we are changing the proposal distribution. To produce
 final samples that can be used to estimate target quantities, one has to freeze
-the normalizing flow model and does not retrain during the final sampling phase.
+the normalizing flow model and not retrain during the final sampling phase.
 To summarize the sampling process, the pseudocode is given by
 
 \begin{algorithm}
@@ -433,36 +433,36 @@ To summarize the sampling process, the pseudocode is given by
 \subsection{Accelerators}
 \label{sec:accelerators}
 
-Modern accelerators such as GPUs and TPUs are designed to execute large scale
+Modern accelerators such as GPUs and TPUs are designed to execute large-scale
 dense computation. They are often much more cost-efficient than using many CPUs
 when it comes to solving problems that can be benefited from parallelization.
 The downside of these accelerators compared to CPUs is they can only perform a
-more restricted set of operation, and are often less performant when they are
-dealing with problem that are serial. Parameter estimation with MCMC is a serial
-problem, since each new sample generated from a chain depends on the last sample
+more restricted set of operations and are often less performant when they are
+dealing with serial problems. Parameter estimation with MCMC is a serial
+problem since each new sample generated from a chain depends on the last sample
 in the chain. This means naively putting the problem on an accelerator is more
 likely to harm the performance instead of improving it.
 
 
 % More sample helps training normalizing flow
 In this work, the use of accelerators provides two independent perks that
-tremendously benefits the parameter estimation process. First, using
+tremendously benefit the parameter estimation process. First, using
 accelerators allow us to run many independent chains at the same time, which
 benefits the training of the normalizing flow. Since we generate the data we use
-to train the normalizing flow on-the-fly, the more independent data we can feed
+to train the normalizing flow on the fly, the more independent data we can feed
 to the training process, the higher chance the normalizing flow can learn a
 reasonable representation of the global landscape of the target distribution. If
-we only use a small amount of chains, we are limited to the correlated samples
+we only use a small number of chains, we are limited to the correlated samples
 from each chain, so we have to run more sequential steps to get the same amount
-of independent data as compared to running more chains, where former option does
+of independent data as compared to running more chains, where the former option does
 not benefit from parallelization but the latter does. In another word, being
 able to use many independent chains help the normalizing flow learn the global
 landscape faster in Wall time.
 
 % GPU helps packing a shit ton of waveform evaluation
-Another benefit accelerator brings is parallel evaluation of waveforms. Since
+Another benefit accelerator brings is the parallel evaluation of waveforms. Since
 the waveform models being used in PE are approximants, they can be evaluated at
-any given time or frequency independent to what have been generated before the
+any given time or frequency independent of what has been generated before the
 time or frequency. This means predicting the waveform can be trivially
 parallelized over frequency. Together with heterodyned likelihood, we can
 evaluate the likelihood at $\mathcal{O}(10^7)$ different locations on an Nvidia
@@ -471,8 +471,6 @@ the \texttt{flowMC} sampling algorithms.
 
 \section{Result}
 \label{sec: Result}
-
-In this section, we provide a number of sanity checks as well as a number of real life usecases
 
 \begin{enumerate}
     \item ppplot
@@ -486,7 +484,7 @@ parameters of a set of simulated signals. We create a set of simulated signals
 and inject them into simulated noise, generated under the Gaussian noise
 assumption using the designed PSD for every detector. Then we run our pipeline
 given the simulated data and determine the credible interval at the true
-parameters of the injected signals. Given the set of credible value, we can
+parameters of the injected signals. Given the set of credible values, we can
 check whether the true value lies within a certain credible interval at a
 reasonable frequency. If our pipeline is perfect, we should find the true
 parameters lie within $x\%$ credible interval $x\%$ of the time, e.g. the true
@@ -512,7 +510,7 @@ The result of the injection studies is shown in \ref{fig: ppplot}.
 \subsection{Real event parameter estimation}
 
 To demonstrate the performance of our parameter estimation pipeline, we apply
-our pipeline to analysis GW150914 and GW170817. 
+our pipeline to analyze GW150914 and GW170817. 
 
 \kw{GW159014}
 
@@ -537,7 +535,7 @@ our pipeline to analysis GW150914 and GW170817.
 % Observation of traits of flowMC
 This means independent chains can now jump between modes, or within a single
 mode that exhibits complex geometry that cannot be handled only through the
-local sampler, which greatly reduce both the burn-in time and sampling time.
+local sampler, which greatly reduces both the burn-in time and sampling time.
 
 While the method would still work when there is only one independent local
 sampler chain, this method works much better when we employ a lot of independent
@@ -553,30 +551,30 @@ In practice, we find the normalizing flow not only helps jumping betw
 % Brief summary
 In this work, we present a PE pipeline for GW events that is efficient and
 flexible. With differentiable waveform models, heterodyned likelihood and
-normalizing flow enhanced sampler \texttt{flowMC}, we are able to estimate the
+normalizing flow enhanced sampler \texttt{flowMC}, we can estimate the
 parameters of GW150914 and GW170817 in \kw{Quote speed}. Our method is general
 and extensible, \kw{continue}.
 
 % Compared to other works
 There are recent works from different groups on speeding up parameter estimation
 of gravitational wave, including efficient reparameterization and deep learning
-\kw{cite}. While all of these methods are able to get down to minutes-scale parameter
+\kw{cite}. While all of these methods can get down to minutes-scale parameter
 estimation with high fidelity, we would like to highlight the unique strength of
-this work, and potential interplay between our work and other's work.
+this work, and the potential interplay between our work and others' work.
 
 % Stephen's work
 Compared to \kw{Stephan's paper}, we do not rely on pre-training the neural
 network on a large collection of waveforms and noise realization. This means as
-soon as new waveforms models and noise models are available, our algorithm can
+soon as new waveform models and noise models are available, our algorithm can
 already be deployed. Furthermore, our method is essentially an MCMC algorithm,
 which inherits the merit of convergence measures in MCMC. As we are only using
 the normalizing flow as a proposal distribution, and the normalizing flow is
 trained jointly with a local sampler, we do not suffer from overfitting since
-our training data is being generated on-the-fly and is always approaching the
+our training data is being generated on the fly and is always approaching the
 target distribution. In this sense, we do not introduce potential extra
-systematic error to inference result.
+systematic error to inference results.
 
-While our pipeline use the sample generated by the local sampler for training,
+While our pipeline uses the sample generated by the local sampler for training,
 one can also supply a pre-trained normalizing flow model to our pipeline to
 bypass the training stage. This can further reduce the total runtime of our
 inference pipeline. However, this may introduce potential systematic bias in the
@@ -591,102 +589,102 @@ handcrafted reparameterization depends on the assumptions used in deriving the
 reparameterization scheme, which would inevitably run into limitations of use
 cases. Our work can be viewed as an automatic reparameterization powered by
 normalizing flow, while not being exact hence as efficient as an explicit
-reparameterization, the method proposed in this work is applicable to a much
-boarder class of problems, such as parameter estimation with precessing
+reparameterization, the method proposed in this work applies to a much
+border class of problems, such as parameter estimation with precessing
 waveforms, testing GR, and multi-event joint inference.
 
 It is always beneficial to reparameterize if the reparameterization is known
-ahead-of-time. For the class of problems where \kw{Tousif's paper} is applicable
-to, we can incorporate the reparameterization scheme into our MCMC pipeline to
-reduce the complexity of the problem, hence speeding up the training phase.
-On the other hand, if there are part of the target posterior that are not
-included in the reparameterization scheme, the normalizing flow should still be
-able to learn to produce accurate samples efficiently.
+ahead of time. For the class of problems where \kw{Tousif's paper} applies, we
+can incorporate the reparameterization scheme into our MCMC pipeline to reduce
+the complexity of the problem, hence speeding up the training phase. On the
+other hand, if there is part of the target posterior that is not included in the
+reparameterization scheme, the normalizing flow should still be able to learn to
+produce accurate samples efficiently.
 
 \kw{Talk about future development}
 
 % Additional traits for having differentiable waveforms
-There are a number of future developments we are working on. While IMRPhenomD is
+There are some future developments we are working on. While IMRPhenomD is
 a reasonable start, it lacks some qualitative features that other
 state-of-the-art models have, such as precession, higher mode, and eccentricity \kw{cite}. It
-also has higher mismatch with reference numerical relativity waveforms compared
+also has a higher mismatch with reference numerical relativity waveforms compared
 to more recent waveform models. Currently, we are working on building differentiable
 IMRPhenomPv2 and NRSurrogate waveforms. Going forward, we encourage the waveform
-development community to leverage autodiff environment such as Jax when
+development community to leverage autodiff environments such as Jax when
 constructing new waveform models. Having a differentiable waveform model is not
 only beneficial for parameter estimation, but also for other applications such
-as calibrating waveforms to numerical relativity result, as detailed in
+as calibrating waveforms to numerical relativity results, as detailed in
 \kw{cite}.
 
 % Access to higher dimensional problem
 While standard GW analysis goes up to 17 dimensions. non-standard GW PE problems
-can have more parameters, which could potentially lead to more complicate
-geometry in the target posterior that are hard to reparameterize. For example,
+can have more parameters, which could potentially lead to more complicated
+geometry in the target posterior that is hard to reparameterize. For example,
 there are \kw{Be specific with the number} parameterized modifications to the
-waveform one can introduce whn testing GR, which means there are \kw{the number}
+waveform one can introduce when testing GR, which means there are \kw{the number}
 extra parameters one would need to consider in the PE process. Worse, these
 parameters often introduce non-trivial degeneracies such as local correlation
 and multi-modality. Currently testing GR is limited to varying these
-modifications one at a time, partially due to the bottle neck in sampler. Given
-the gradient-based and normalizing flow enhanced sampler, our code shows
-potential in solving this problem in full at once.
+modifications one at a time, partially due to the bottleneck in the sampler. Given
+the gradient-based and normalizing flow-enhanced sampler, our code shows
+the potential in solving this problem in full at once.
 
 
 % Other detectors configuration
 
-In order to perform realistic PE with our pipeline, the antenna pattern of the
+To perform realistic PE with our pipeline, the antenna pattern of the
 detector network needed to be taken into account. Our current code can perform
-parameter estimation for any combination of the Hanford, Livingston and Virgo
+parameter estimation for any combination of the Hanford, Livingston, and Virgo
 detectors, under the assumption of short signals such that the effect of Earth's
-rotation can be ignored. For next generation detector network such as the
+rotation can be ignored. For next-generation detector networks such as the
 Einstein Telescope and the Cosmic Explorer \kw{cite}, a differentiable version
-of their antennat pattern is needed.
+of their antenna pattern is needed.
 
 % More features such as marginalization
 The features we have implemented are the barebone version of parameter
-estimation. We do not include marginalization schemes such as time, phase and
-calibration lines marginalization. Because of the reaonsable performance of the sampler on
+estimation. We do not include marginalization schemes such as time, phase, and
+calibration lines marginalization. Because of the reasonable performance of the sampler on
 accelerators, time and phase marginalization is not necessary, as the
 performance of our implementation is not significantly impacted by having two
-extra dimension. Other marginalization mode should be considered in the future.
+extra dimensions. Other marginalization modes should be considered in the future.
 
 % JIT overhead
-Jax's JIT compilation drastically reduce the computational time to evaluate the
+Jax's JIT compilation drastically reduces the computational time to evaluate the
 likelihood. However, it comes with a compilation overhead when the likelihood is
-evaluated for the first time. We observe that the compilation time could depends
+evaluated for the first time. We observe that the compilation time could depend
 on the device where the code will be run. This is expected since Jax leverage
-Accelerated Linear Algebra (XLA) to take advantage of accelerators, which means
+Accelerated Linear Algebra (XLA) takes advantage of accelerators, which means
 Jax needs to compile the code for the specific device according to its
 architecture. On an Nvidia A100 GPU, the compilation overhead could go up to 5
 minutes for the waveform we are using. For the cases we have studied, the time
-needed to obtain converging results on a A100 is about 2-3 minutes. This means
+needed to obtain converging results on an A100 is about 2-3 minutes. This means
 the compilation overhead is dominating the wall-clock time of the specific PE
 run we considered. To utilize our implementation to its full potential, we are
-looking into ways to reduce the compilation overhead, or to cache the
-compilation results to avoid paying the compilation overhead for every events.
+looking into ways to reduce the compilation overhead or to cache the
+compilation results to avoid paying the compilation overhead for every event.
 
 % Faster maximum likelihood finder
 
 Another overhead we are looking into reducing is the time needed to find the
-reference waveform for heterodyning the likelihood. Currently we are using
+reference waveform for heterodyning the likelihood. Currently, we are using
 \texttt{differential evolution} available in \texttt{scipy} to find the waveform
 parameters which maximize the likelihood. Since \texttt{differnetial evolution}
 has not been implemented in Jax, and the Jax waveform we use is not compatible
-with parallelization scheme in the \texttt{scipy} library, it takes around 5
+with the parallelization scheme in the \texttt{scipy} library, it takes around 5
 minutes \kw{Benchmark it in the code and make this number precise.} to find the
 reference waveform parameters for GW170817. There are two ways to improve the
 performance in finding the parameters of the reference waveform. First, we can
 explore different optimization strategy that is more compatible with the
 strength of our pipeline, in particular differentiability of our likelihood and
 the possibility to evaluate many waveforms in parallel with a GPU. Particle
-swarm or stochastic gradient descent methods are promising candidate which we
+swarm or stochastic gradient descent methods are promising candidates which we
 intend to investigate in the future. 
 
-Another way to reduce the time of finding maximum likelihood waveform is to
-incoporate marginalization of extrinsic parameters to reduce the dimensionality
-of the optimization problem. Currently we simutaneously maximize all 11 GW
+Another way to reduce the time of finding the maximum likelihood waveform is to
+incorporate marginalization of extrinsic parameters to reduce the dimensionality
+of the optimization problem. Currently, we simultaneously maximize all 11 GW
 parameters, which is unnecessarily complicated and expensive. There are
-long-existing marginalization schemes over extrinsic parameters such as merger
+long-existing marginalization schemes over extrinsic parameters such as the merger
 time and phase, which can find the corresponding maximum likelihood waveform
 much more efficiently when compared to differential evolution. We expect
 implementing these marginalization schemes will reduce the time needed to find
@@ -701,14 +699,14 @@ reduce the Wall time. In our case, this means we would like to use more than one
 GPU for the same PE process. More GPUs can help in the following ways: first,
 more GPUs means we can run more independent chains at the same time, which can
 generate more samples faster. But more importantly, as shown in this work and
-\kw{cite flowMC?}, more independent chains also helps with reducing the burn-in
+\kw{cite flowMC?}, more independent chains also help with reducing the burn-in
 time. Parallelizing over the number of chain dimension is trivial and does not
 require much change to the current infrastructure. Another way more GPUs can
-helps is allowing faster training of larger flow model. While the training time
+helps is by allowing faster training of larger flow models. While the training time
 is not the biggest bottleneck given the flow model used in this study, more GPUs
 means we can increase the bandwidth of the flow model by increasing its size
-while keeping the training time the same. This helps in capture more complex
-geometry in the target space, which can lead to more accurate result in general.
+while keeping the training time the same. This helps capture more complex
+geometry in the target space, which can lead to more accurate results in general.
 
 
 \section{Acknowledgements}

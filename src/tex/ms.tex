@@ -1,7 +1,8 @@
 % Define document class
 \documentclass[twocolumn]{aastex631}
 \usepackage{showyourwork}
-\usepackage[ruled,vlined]{algorithm2e}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{algorithmic}
 \usepackage{color}
 
 \definecolor{rb4}{HTML}{27408B}
@@ -10,6 +11,7 @@
 Flatiron Institute, New York, NY 10010, USA}}
 \newcommand{\jhu}{\affiliation{Department of Physics and Astronomy, Johns Hopkins University,
 3400 N. Charles Street, Baltimore, Maryland 21218, USA}}
+
 
 % Begin!
 \begin{document}
@@ -416,17 +418,29 @@ the normalizing flow model and not retrain during the final sampling phase.
 To summarize the sampling process, the pseudocode is given by
 
 \begin{algorithm}
-\caption{An algorithm with caption}\label{alg:cap}
-\KwData{Initial position}
-\KwResult{Chains, $\log{\mathcal{L}}$}
-\emph{Training}\;
-% \While{not converged}{
-%     \For{n_loc}{
+\caption{FlowMC pseudocode}\label{alg:cap}
+\KwIn{Initial position $ip$}
+\SetKwData{Parameters}{Parameters}
+\Parameters{n training loop $nt$, n production loop $np$}
+\SetKwData{Variables}{Variables}
+\Variables{current chain $cc$, current position $cp$, current NF parameters $\Theta$}
+\KwResult{Chains}
+$cp \leftarrow ip$\\
+\tcc{Training loop}
+    \For{$i<nt$}{
+        $cc, cp \leftarrow LocalSampling(cp)$
+        $\Theta \leftarrow TuneNF(cc)$
+        $chains, cp \leftarrow GlobalSampling(cp, \Theta)$ 
+        $cc \leftarrow Append(cc, chains)$
+    }
+\tcc{Production loop}
+    \For{$i<np$}{
+        $Chains, cp \leftarrow LocalSampling(cp)$
+        $subchains, cp \leftarrow GlobalSampling(cp, \Theta)$ 
+        $Chains \leftarrow Append(cc, chains)$
+    }
 
-%     }
-%     Local Sampling
-% }
-\emph{Production}\;
+\Return{$Chains$}
 \end{algorithm}
 
 

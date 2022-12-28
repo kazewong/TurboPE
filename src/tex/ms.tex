@@ -34,40 +34,66 @@ Flatiron Institute, New York, NY 10010, USA}}
 
 % Abstract with filler text
 \begin{abstract}
-We present a light-weighted, flexible, and high-performance framework to estimate
-gravitational wave event parameters. By combining heterodyned likelihood,
-automatically differentiable and accelerators compatible waveforms, normalizing
-flow enhanced gradient-based MCMC, we achieve parameter estimation for real
-events like GW150914 and GW170817 within a minute of sampling time with little to
-no compromise. Our framework does not require pre-training or explicit
-reparameterization and can be generalized to handle higher dimensional
-problems. We also discuss as near real-time parameter estimation has been shown
-to be possible by multiple groups, what are the trade-offs and future
-developments the community should be aware of. Our code for generating the
-manuscript and running the analysis is publically available on GitHub.
+We present a light-weighted, flexible, and high-performance framework to
+estimate gravitational wave event parameters. By combining heterodyned
+likelihood, automatically differentiable and accelerators compatible waveforms,
+normalizing flow enhanced gradient-based Markov Chain Monte Carlo (MCMC), we
+achieve parameter estimation for real events like GW150914 and GW170817 within a
+minute of sampling time. Our framework does not require pre-training or explicit
+reparameterization and can be generalized to handle higher dimensional problems.
+We also discuss as near real-time parameter estimation has been shown to be
+possible by multiple groups, what are the trade-offs and future developments the
+community should be aware of. Our code for generating the manuscript and running
+the analysis is publically available on GitHub.
 \end{abstract}
 
 % Main body with filler text
 \section{Introduction}
 \label{sec:intro}
 
-% Brief description of PE and old generation of code
+% Brief description of PE
 Parameter estimation (PE) is one of the most commonly performed data analysis
 tasks in gravitational wave (GW) data analysis. The central question of PE is to
-infer the parameters of the GW source given the strain data. The PE results in
-the most recent catalog of GW events are powered by several community-developed
-PE codes, including \texttt{lalinference}, \texttt{pycbc}, and \texttt{bilby}
-\cite{Romero-Shaw:2020owr} \kw{cite}. These packages have been tested by a
-number of groups and are well regarded as the standard tools.
+infer the parameters of a particular GW model given the strain data. In the
+standard compact binary coalescence scenario, this could mean inferring
+intrinsic parameters such the masses and spins of the event, as well as
+extrinsic parameters such as sky localization and distance from Earth to the
+event. PE is also used in testing general relativity (GR), which the main
+question is then to check for deviations in parameters that are related to
+non-GR modifications \kw{cite}. PE is a crucial step in GW science, since it translate
+characteristics of the strain data into astrophysically relevant quantities that
+can be used to constrain astrophysical phenomenon such as theories of binary
+evolution \kw{cite}.
 
-% Emerging tools from different group
+% Old codes have trouble handling next gen data
+The PE results in the most recent catalog of GW events are powered by several
+community-developed PE codes, including \texttt{lalinference}, \texttt{pycbc},
+and \texttt{bilby} \cite{Romero-Shaw:2020owr} \kw{cite}. These packages have
+been tested by a number of groups and are well regarded as the standard tools.
 While the standard tools have passed many robustness tests, they are known to be
 computationally intensive. The exact amount of time needed to analyze one event
 depends on the length of the event. These community tools take about a week to
 analyze shorter events such as binary black hole (BBH) mergers, whereas they can
 take up to a month on a computer cluster to analyze longer events such as binary
-neutron star (BNS) mergers. There are efforts from multiple groups developing
-tools to speed up the PE process \kw{Cite}.
+neutron star (BNS) mergers. In the coming decade, there are planned upgrade for
+existing facilities and next-generation detector such as the Einstein Telescope
+(ET) \kw{cite} and the Cosmic Explorer (CE) \kw{cite}. These upgrades will
+increase the sensitivity of the detectors and allow for the detection of more
+events with better signal-to-noise ratio (SNR). The number of events that will
+be detected in the coming decade is expected to grow from around a thousand per
+year to over a million per year. This will put a significant strain on the
+current PE tools, which are not designed to handle this many events.
+
+% Effort going to new tools development.
+In order to handle the future catalog, there are efforts from multiple groups
+developing tools to speed up the PE process. This includes methods that employ
+modern tools such as deep learning-based method pre-trained on a large
+collection of waveforms \kw{cite}, as well as methods that simplify the
+computational challenge by leveraging our knowledge about GW signals \kw{cite}.
+While these methods are promising avenues to tackle standard GW analysis tasks
+in the coming decade, particularly about events involving compact binary coalescence
+(CBC) in GR, they capitalize assumptions that may not be valid for analysis involving
+outliers and beyond-GR analysis.
 
 %Basic idea and unique advantage of our tool
 
@@ -75,13 +101,15 @@ In this work, we present a light-weighted, flexible, and high performance
 framework to estimate GW event parameters. Our framework implements the
 following major features to achieve its performance:
 \begin{enumerate}
+\setlength{\itemsep}{0pt}
 \item Differential waveform models
 \item Normalizing flow enhanced MCMC sampler
 \item Heterodyned likelihood
 \item Native support for accelerator
-\item JIT compilation
 \end{enumerate}
-\kw{Dingo can't do BNS yet}
+The main advantage of our framework is it does not rely on specific models or
+assumptions about the problem to achieve its performance. This makes our method
+extensible to problems beyond the standard CBC analysis. 
 
 %Structure of paper
 
@@ -428,7 +456,7 @@ To summarize the sampling process, the pseudocode is given by
 $cp \leftarrow ip$\\
 \tcc{Training loop}
     \For{$i<nt$}{
-        $cc, cp \leftarrow LocalSampling(cp)$
+        $cc, cp \leftarrow LocalSampling(cp)$\\
         $\Theta \leftarrow TuneNF(cc)$
         $chains, cp \leftarrow GlobalSampling(cp, \Theta)$ 
         $cc \leftarrow Append(cc, chains)$
@@ -614,6 +642,24 @@ the complexity of the problem, hence speeding up the training phase. On the
 other hand, if there is part of the target posterior that is not included in the
 reparameterization scheme, the normalizing flow should still be able to learn to
 produce accurate samples efficiently.
+
+The two relevant works represent two orthogonal directions one can take in
+building next generation tools in general. On one hand, there are modern tools
+such as deep learning that are very flexible and powerful, but may need to rely
+on having highly robust training data. On the other hand, there are traditional
+tools that make use of our understanding of the underlying physics to simplify
+the problem, which relies on having good intuition of the problem. Both
+approaches rely on having a somewhat reasonable prior on how to approach the
+problem. The main difference between methods used in industrial products and
+scientific problems is scientific problems often try to address questions one
+may have not been answered before, hence it is supposed to be far away from our
+prior knowledge, meaning one need to take capability to generalize beyond the
+current problem into account while building the tool. Our work utilizes both
+reparameterization and deep learning, yet our method can be trivially extended
+to problems beyond standard GW analysis that reparameterization or deep learning
+alone may have trouble dealing with. We believe such flexibility is crucial for
+building scientific tools.
+
 
 \kw{Talk about future development}
 

@@ -12,6 +12,8 @@ Flatiron Institute, New York, NY 10010, USA}}
 \newcommand{\jhu}{\affiliation{Department of Physics and Astronomy, Johns Hopkins University,
 3400 N. Charles Street, Baltimore, Maryland 21218, USA}}
 
+\SetKwInput{Parameters}{Parameters}
+\SetKwInput{Variables}{Variables}
 
 % Begin!
 \begin{document}
@@ -418,11 +420,9 @@ the normalizing flow model and not retrain during the final sampling phase.
 To summarize the sampling process, the pseudocode is given by
 
 \begin{algorithm}
-\caption{FlowMC pseudocode}\label{alg:cap}
+\caption{flowMC pseudocode}\label{alg:cap}
 \KwIn{Initial position $ip$}
-\SetKwData{Parameters}{Parameters}
 \Parameters{n training loop $nt$, n production loop $np$}
-\SetKwData{Variables}{Variables}
 \Variables{current chain $cc$, current position $cp$, current NF parameters $\Theta$}
 \KwResult{Chains}
 $cp \leftarrow ip$\\

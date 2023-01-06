@@ -462,15 +462,15 @@ $cp \leftarrow ip$\\
 \tcc{Training loop}
     \For{$i<nt$}{
         $cc, cp \leftarrow LocalSampling(cp)$\\
-        $\Theta \leftarrow TuneNF(cc)$
-        $chains, cp \leftarrow GlobalSampling(cp, \Theta)$ 
+        $\Theta \leftarrow TuneNF(cc)$\\
+        $chains, cp \leftarrow GlobalSampling(cp, \Theta)$ \\
         $cc \leftarrow Append(cc, chains)$
     }
 \tcc{Production loop}
     \For{$i<np$}{
-        $Chains, cp \leftarrow LocalSampling(cp)$
-        $subchains, cp \leftarrow GlobalSampling(cp, \Theta)$ 
-        $Chains \leftarrow Append(cc, chains)$
+        $c_local, cp \leftarrow LocalSampling(cp)$\\
+        $c_global, cp \leftarrow GlobalSampling(cp, \Theta)$ \\
+        $Chains \leftarrow Append(Chains, c_local, c_global)$
     }
 
 \Return{$Chains$}

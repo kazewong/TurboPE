@@ -216,7 +216,7 @@ the likelihood of the waveforms that are similar to the reference waveform,
 hence will not be relevant for the PE result. In practice, one will first
 optimize the likelihood function with full frequency resolution to obtain the
 reference waveform parameters, which can be run at a much lower cost compared to
-PE. \te{I find this point a little unclear. I don't think there is any guarentee that the likelihood values far from the reference waveform will not be overestimated using the method right? Do you therefore have to explicitly ensure you're sampler doesn't wander too far from the reference waveform?}
+PE. 
 
 We give a concise description of what we implement
 in our code here. For a more extensive derivation of heterodyned
@@ -278,7 +278,7 @@ the reference waveform on the sparse bins, which are given by
 \end{align}
 Note that the sum within each bin should be done with the same sampling rate as
 the data, i.e. the same one would do in the case without using heterodyned
-likelihood. \te{If we want this to be maximally instructive, it might be useful to include a plot here. Something like the Fig 1 from the Zackay paper but maybe explicitly showing the two parts of the integral i.e. the highly oscillating part and the smooth part?}
+likelihood.
 
 \te{Do we also already here want to make the point that it really helps with memory issues of GPUs if the frequency array isn't too large?}
 
@@ -449,7 +449,7 @@ likely regions. The training and sampling are then repeated until certain
 criteria are met. Note that every time we retrain the network, we are breaking the
 Markov properties since we are changing the proposal distribution. To produce
 final samples that can be used to estimate target quantities, one has to freeze
-the normalizing flow model and not retrain during the final sampling phase.
+the normalizing flow model and not retrain during the final sampling phase in order to satisfy the detailed balance condition.
 To summarize the sampling process, the pseudocode is given by
 
 \begin{algorithm}
@@ -476,7 +476,6 @@ $cp \leftarrow ip$\\
 \Return{$Chains$}
 \end{algorithm}
 
-\te{Discussion of detailed balance here? I know that some people really care about this stuff}
 \subsection{Accelerators}
 \label{sec:accelerators}
 
@@ -775,6 +774,7 @@ geometry in the target space, which can lead to more accurate results in general
 
 
 \section{Acknowledgements}
+Thanks Will.
 
 \bibliography{bib}
 

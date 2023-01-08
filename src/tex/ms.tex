@@ -517,12 +517,6 @@ the \texttt{flowMC} sampling algorithms.
 
 \section{Result}
 \label{sec: Result}
-
-\begin{enumerate}
-    \item ppplot
-    \item real-event result
-\end{enumerate}
-
 \subsection{Injection-recovery test}
 
 To demonstrate the robustness of our pipeline, we use it to recover the
@@ -548,24 +542,24 @@ and we project the signal on the LIGO Hanford, Livingston and Virgo detector.
 We used the designed sensitivity curve for each detector to generate the noise \kw{cite}.
 We use a minimum frequency cutoff of 30 Hz with a sampling rate of 2048 Hz.
 
-\begin{table*}[hbt!]
+\begin{table}[hbt!]
     \begin{center}
     \begin{tabular}{ l l l }
     \hline
     \hline
     Parameters &  Description & Prior range\\
 
-    $M_c$ & chirp mass & $[10, 50] M_\odot$\\
-    $q$ & mass ratio & $[0.5, 1]$\\
-    $\chi_1$ & dimensionless spin of the primary mass & $[-0.5, 0.5]$\\
-    $\chi_2$ & dimensionless spin of the secondary mass & $[-0.5, 0.5]$\\
-    $d_L$ & luminosity distance & $[300, 2000] Mpc$\\
-    $t_c$ & coalescence time & $[-0.5, 0.5] s$\\
-    $\phi_c$ & coalescence phase & $[0, 2\pi]$\\
-    $\cos{\iota}$ & cosine of inclination angle & $[-1, 1]$\\
-    $\psi$ & polarization angle & $[0, \pi]$\\
-    $\alpha$ & right ascension & $[0, 2\pi]$\\
-    $\sin{\delta}$ & sine of declination & $[-1, 1]$\\
+    $M_c$ & Chirp mass & $[10, 50] M_\odot$\\
+    $q$ & Mass ratio & $[0.5, 1]$\\
+    $\chi_1$ & Primary dimensionless spin& $[-0.5, 0.5]$\\
+    $\chi_2$ & Secondary dimensionless spin & $[-0.5, 0.5]$\\
+    $d_L$ & Luminosity distance & $[300, 2000] \textrm{Mpc}$\\
+    $t_c$ & Coalescence time & $[-0.5, 0.5] \textrm{s}$\\
+    $\phi_c$ & Coalescence phase & $[0, 2\pi]$\\
+    $\cos{\iota}$ & Cosine of inclination angle & $[-1, 1]$\\
+    $\psi$ & Polarization angle & $[0, \pi]$\\
+    $\alpha$ & Right ascension & $[0, 2\pi]$\\
+    $\sin{\delta}$ & Sine of declination & $[-1, 1]$\\
 
     \hline
     \hline
@@ -573,10 +567,10 @@ We use a minimum frequency cutoff of 30 Hz with a sampling rate of 2048 Hz.
     \caption{Parameters used in the injection-recovery test.}
     \label{tab:parameters}
     \end{center}
-\end{table*}
+\end{table}
 
 % Show injection pp plot
-The result of this injection-recovery campaign is shown in fig. \ref{fig: ppplot}. We
+The result of this injection-recovery campaign is shown in fig. \ref{fig:ppplot}. We
 computed the quantile of which the true value lies for each marginalized
 distribution, then plotted the cumulative distribution of these quantiles. The
 shadow band denotes the 95\% credible interval drawn from a uniform distribution
@@ -592,7 +586,7 @@ compute the Kolmogorov-Smirnov test p-values for each marginalized distribution.
 If the p-value is too low, often chosen to be $0.05$, then it means our result
 does not agree with a uniform distribution, hence it could be biased. The
 p-values for each marginalized distribution are shown in the legend of fig.
-\ref{fig: ppplot}. We can see most of them are well above the $0.05$ threshold,
+\ref{fig:ppplot}. We can see most of them are well above the $0.05$ threshold,
 except for $\chi_2$, which is mildly below the threshold. Once again, assuming
 these p-values are drawn from a uniform distribution, given $11$ draws (the
 number of parameters in our inference), it is not abnormal to have one of the
@@ -723,9 +717,6 @@ reparameterization and deep learning, yet our method can be trivially extended
 to problems beyond standard GW analysis that reparameterization or deep learning
 alone may have trouble dealing with. We believe such flexibility is crucial for
 building scientific tools.
-
-
-\kw{Talk about future development}
 
 % Additional traits for having differentiable waveforms
 There are some future developments we are working on. While IMRPhenomD is

@@ -534,23 +534,78 @@ parameters of the injected signals. Given the set of credible values, we can
 check whether the true value lies within a certain credible interval at a
 reasonable frequency. If our pipeline is perfect, we should find the true
 parameters lie within $x\%$ credible interval $x\%$ of the time, e.g. the true
-value should lie within the $50\%$ credible interval $50\%$ of the time.
-Deviation from this behavior suggests the pipeline is either over-confident or
-too conservative.
+value should lie within the $50\%$ credible interval $50\%$ of the time. In
+other word, the percentiles of the true parameters should be uniformly
+distributed. Deviation from this behavior suggests the pipeline is either
+over-confident or too conservative. 
 
 % State the distribution of injected population
-We sample 1000 events from the following distribution of parameters:
+We sample 1000 events from the following distribution of parameters detailed in
+table \ref{tab:parameters}.
+The same distribution of parameters are used as the prior in the PE process.
+The simulated signals have a 16 seconds segment length,
+and we project the signal on the LIGO Hanford, Livingston and Virgo detector.
+We used the designed sensitivity curve for each detector to generate the noise \kw{cite}.
+We use a minimum frequency cutoff of 30 Hz with a sampling rate of 2048 Hz.
 
+\begin{table*}[hbt!]
+    \begin{center}
+    \begin{tabular}{ l l l }
+    \hline
+    \hline
+    Parameters &  Description & Prior range\\
+
+    $M_c$ & chirp mass & $[10, 50] M_\odot$\\
+    $q$ & mass ratio & $[0.5, 1]$\\
+    $\chi_1$ & dimensionless spin of the primary mass & $[-0.5, 0.5]$\\
+    $\chi_2$ & dimensionless spin of the secondary mass & $[-0.5, 0.5]$\\
+    $d_L$ & luminosity distance & $[300, 2000] Mpc$\\
+    $t_c$ & coalescence time & $[-0.5, 0.5] s$\\
+    $\phi_c$ & coalescence phase & $[0, 2\pi]$\\
+    $\cos{\iota}$ & cosine of inclination angle & $[-1, 1]$\\
+    $\psi$ & polarization angle & $[0, \pi]$\\
+    $\alpha$ & right ascension & $[0, 2\pi]$\\
+    $\sin{\delta}$ & sine of declination & $[-1, 1]$\\
+
+    \hline
+    \hline
+    \end{tabular}
+    \caption{Parameters used in the injection-recovery test.}
+    \label{tab:parameters}
+    \end{center}
+\end{table*}
 
 % Show injection pp plot
-The result of the injection studies is shown in \ref{fig: ppplot}.
+The result of this injection-recovery campaign is shown in fig. \ref{fig: ppplot}. We
+computed the quantile of which the true value lies for each marginalized
+distribution, then plotted the cumulative distribution of these quantiles. The
+shadow band denotes the 95\% credible interval drawn from a uniform distribution
+with the same number of events. We can see most the injection-recovery result
+lies within the band drawn from a uniform distribution, showing our inference
+results agree well with a uniform distribution. There is a small deviation from
+a uniform distribution for the secondary spin $\chi_2$, which is not too
+alarming since we are computing the quantile for 11 parameters. Having one of
+them lying briefly outside the 95\% band does not mean the inference is bias.
+
+To quantify how well our result agrees with a uniform distribution, we can
+compute the Kolmogorov-Smirnov test p-values for each marginalized distribution.
+If the p-value is too low, often chosen to be $0.05$, then it means our result
+does not agree with a uniform distribution, hence it could be biased. The
+p-values for each marginalized distribution are shown in the legend of fig.
+\ref{fig: ppplot}. We can see most of them are well above the $0.05$ threshold,
+except for $\chi_2$, which is mildly below the threshold. Once again, assuming
+these p-values are drawn from a uniform distribution, given $11$ draws (the
+number of parameters in our inference), it is not abnormal to have one of the
+parameters lies slightly outside the threshold. To assess whether this is
+expected, we can compute the combined p-value for these 11 parameters, which is $0.47$.
+This shows our inference pipeline performs properly on simulated data.
+Indeed, the accuracy of our inference pipeline is consistent with other works\kw{cite}.
+
 
 \begin{figure}
     \script{ppplots.py}
     \includegraphics[width=0.99\linewidth]{figures/ppplot.pdf}
-    \caption{ \kw{I am pretty sure I am doing something wrong about the ppplot.
-        Given injected q=1, there is no way the quantile is not 1, which is what
-        bias the result seemingly.} }
+    \caption{Result of 1000 injections drawn from the 16 seconds prior.}
     \label{fig:ppplot}
     \end{figure}
 

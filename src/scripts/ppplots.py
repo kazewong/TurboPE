@@ -49,8 +49,10 @@ def makeCumulativeHist(data):
     h = np.histogram(data,bins=100,range=(0,1),density=True)
     return np.cumsum(h[0])/100.
 
+counts = 1200
+
 N = 10000
-uniform_data = np.random.uniform(size=(N,960))
+uniform_data = np.random.uniform(size=(N,counts))
 cum_hist = []
 for i in range(N):
     cum_hist.append(makeCumulativeHist(uniform_data[i]))
@@ -70,8 +72,8 @@ bins = (bins[1:]+bins[:-1])/2
 plt.fill_between(bins,lower_quantile_array,upper_quantile_array,alpha=0.5)
 pvalues = []
 for i in range(11):
-    pvalues.append(kstest(result[:,i],cdf=uniform(0,1).cdf).pvalue)
-    plt.plot(np.append(0,bins),np.append(0,makeCumulativeHist(result[:,i])), label=axis_labels[i]+" "+str(round(pvalues[-1],2)))
+    pvalues.append(kstest(result[:counts,i],cdf=uniform(0,1).cdf).pvalue)
+    plt.plot(np.append(0,bins),np.append(0,makeCumulativeHist(result[:counts,i])), label=axis_labels[i]+" "+str(round(pvalues[-1],2)))
 plt.legend(loc='upper left',fontsize=14)
 plt.xlabel(r'Confidence Level')
 plt.ylabel(r'Fraction of Samples with Confidence Level $\leq$ x')

@@ -632,6 +632,15 @@ our pipeline to analyze GW150914 and GW170817.
 \label{fig:GW170817}
 \end{figure}
 
+% Describe the distance between flowMC result and Bilby result using Jensen-Shannon divergence, scipy has a function to compute that in scipy.spatial.distance
+
+For a quantitative comparison between results obtained through our code and other existing tools,
+we compute the Jensen-Shannon divergence of the marginalized distribution between our code and \texttt{Bilby}.
+The Jensen-Shannon divergence is a symmetric measure of the distance between two probability distributions,
+with a value of 0 indicating identical distributions and a value of $\ln{2} \textrm{nat}$ representing
+the maximum possible divergence between two distributions.
+\kw{Report JSO} 
+
 % Observation of traits of flowMC
 This means independent chains can now jump between modes, or within a single
 mode that exhibits complex geometry that cannot be handled only through the

@@ -187,13 +187,14 @@ of the long runtime of GW PE.
 
 Since the computational cost of evaluating a waveform model scales linearly with
 the number of sample points either in the time or frequency domain, the
-computational burden for longer-duration signals is often quite large. To
-reduce the computational cost, there are a number of methods to reduce the
-number of basis points one would need to compute the likelihood faithfully
-\kw{cite}. We use heterodyned likelihood \kw{cite} (also named relative binning
-in \kw{cite}) in this work. The idea behind heterodyned likelihood can be
-summarized as the following: the integrand in eq. \ref{eq: innerproduct} is
-a highly oscillatory function, so one has to sample the integrand with
+computational burden for longer-duration signals is often quite large. To reduce
+the computational cost, there are a number of methods to reduce the number of
+basis points one would need to compute the likelihood faithfully
+\cite{Field:2011mf, Field:2013cfa, Smith:2016qas, Vinciguerra:2017ngf}. We use
+heterodyned likelihood \cite{Cornish:2021lje} (also named relative binning in
+\cite{Zackay:2018qdy}) in this work. The idea behind heterodyned likelihood can
+be summarized as the following: the integrand in eq. \ref{eq: innerproduct} is a
+highly oscillatory function, so one has to sample the integrand with
 sufficiently dense sampling to compute the integral faithfully. The number of
 sample points needed would be much smaller if the integrand was smooth. Given a
 pair of waveform parameters $\mathbf{\theta}$ and $\mathbf{\theta_0}$ that are
@@ -223,11 +224,10 @@ optimize the likelihood function with full frequency resolution to obtain the
 reference waveform parameters, which can be run at a much lower cost compared to
 PE. 
 
-We give a concise description of what we implement
-in our code here. For a more extensive derivation of heterodyned
-likelihood, we refer the reader to the reference \cite{Zackay:2018qdy}.
-In the heterodyned likelihood framework, the two terms in eq \ref{eq:
-loglikelihood} are given by
+We give a concise description of what we implement in our code here. For a more
+extensive derivation of heterodyned likelihood, we refer the reader to the
+reference \cite{Zackay:2018qdy}. In the heterodyned likelihood framework, the
+two terms in eq \ref{eq: loglikelihood} are given by
 \begin{align}
     \langle d|h \rangle &\approx \sum_b A_0(b) r^*_0(h,b) + A_1(b) r^*_1(h,b), \nonumber \\
     \langle h|h \rangle &\approx \sum_b B_0(b) |r_0(h,b)|^2 + 2 B_1(b) \Re[r_0(h,b)r_1(h,b)],

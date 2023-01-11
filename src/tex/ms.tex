@@ -58,46 +58,51 @@ the analysis is publically available on GitHub.
 % Brief description of PE
 Parameter estimation (PE) is one of the most commonly performed data analysis
 tasks in gravitational wave (GW) data analysis. The central question of PE is to
-infer the parameters of a particular GW model given the strain data. In the
-standard compact binary coalescence scenario, this could mean inferring
-intrinsic parameters such the masses and spins of the event, as well as
-extrinsic parameters such as sky localization and distance from Earth to the
-event. PE is also used in testing general relativity (GR), which the main
-question is then to check for deviations in parameters that are related to
-non-GR modifications \kw{cite}. PE is a crucial step in GW science, since it translate
-characteristics of the strain data into astrophysically relevant quantities that
-can be used to constrain astrophysical phenomenon such as theories of binary
-evolution \kw{cite}.
+infer the parameters of a particular GW model given the strain data
+\cite{Christensen:2022bxb, 2019PASA...36...10T}. In the standard compact binary
+coalescence scenario, this could mean inferring intrinsic parameters such the
+masses and spins of the event, as well as extrinsic parameters such as sky
+localization and distance from Earth to the event. PE is also used in testing
+general relativity (GR), which the main question is then to check for deviations
+in parameters that are related to non-GR modifications
+\cite{LIGOScientific:2016lio,LIGOScientific:2018dkp,LIGOScientific:2021sio}. PE
+is a crucial step in GW science, since it translate characteristics of the
+strain data into astrophysically relevant quantities that can be used to
+constrain astrophysical phenomenon such as theories of binary evolution
+\cite{LIGOScientific:2021psn}.
 
 % Old codes have trouble handling next gen data
 The PE results in the most recent catalog of GW events are powered by several
-community-developed PE codes, including \texttt{lalinference}, \texttt{pycbc},
-and \texttt{bilby} \cite{Romero-Shaw:2020owr} \kw{cite}. These packages have
-been tested by a number of groups and are well regarded as the standard tools.
-While the standard tools have passed many robustness tests, they are known to be
-computationally intensive. The exact amount of time needed to analyze one event
-depends on the length of the event. These community tools take about a week to
-analyze shorter events such as binary black hole (BBH) mergers, whereas they can
-take up to a month on a computer cluster to analyze longer events such as binary
-neutron star (BNS) mergers. In the coming decade, there are planned upgrade for
-existing facilities and next-generation detector such as the Einstein Telescope
-(ET) \kw{cite} and the Cosmic Explorer (CE) \kw{cite}. These upgrades will
-increase the sensitivity of the detectors and allow for the detection of more
-events with better signal-to-noise ratio (SNR). The number of events that will
-be detected in the coming decade is expected to grow from around a thousand per
-year to over a million per year. This will put a significant strain on the
-current PE tools, which are not designed to handle this many events.
+community-developed PE codes, including \texttt{lalinference}
+\cite{Veitch:2014wba}, \texttt{pycbc} \cite{Biwer:2018osg}, and \texttt{bilby}
+\cite{Ashton:2018jfp}. These packages have been tested by a number of groups and
+are well regarded as the standard tools. While the standard tools have passed
+many robustness tests, they are known to be computationally intensive. The exact
+amount of time needed to analyze one event depends on the length of the event.
+These community tools take about a week to analyze shorter events such as binary
+black hole (BBH) mergers, whereas they can take up to a month on a computer
+cluster to analyze longer events such as binary neutron star (BNS) mergers. In
+the coming decade, there are planned upgrade for existing facilities and
+next-generation detector such as the Einstein Telescope (ET)
+\cite{Punturo:2010zz} and the Cosmic Explorer (CE)
+\cite{LIGOScientific:2016wof}. These upgrades will increase the sensitivity of
+the detectors and allow for the detection of more events with better
+signal-to-noise ratio (SNR). The number of events that will be detected in the
+coming decade is expected to grow from around a thousand per year to over a
+million per year \cite{Baibhav:2019gxm}. This will put a significant strain on
+the current PE tools, which are not designed to handle this many events.
 
 % Effort going to new tools development.
 In order to handle the future catalog, there are efforts from multiple groups
 developing tools to speed up the PE process. This includes methods that employ
 modern tools such as deep learning-based method pre-trained on a large
-collection of waveforms \kw{cite}, as well as methods that simplify the
-computational challenge by leveraging our knowledge about GW signals \kw{cite}.
-While these methods are promising avenues to tackle standard GW analysis tasks
-in the coming decade, particularly about events involving compact binary coalescence
-(CBC) in GR, they capitalize assumptions that may not be valid for analysis involving
-outliers and beyond-GR analysis.
+collection of waveforms \cite{Dax:2021tsq,Dax:2022pxd}, as well as methods that
+simplify the computational challenge by leveraging our knowledge about GW
+signals \cite{Islam:2022afg,Roulet:2022kot}. While these methods are promising
+avenues to tackle standard GW analysis tasks in the coming decade, particularly
+about events involving compact binary coalescence (CBC) in GR, they capitalize
+assumptions that may not be valid for analysis involving additional physical
+effects such as lensing and beyond-GR analysis.
 
 %Basic idea and unique advantage of our tool
 
@@ -682,6 +687,7 @@ Jensen-Shannon divergence is a symmetric measure of the distance between two
 probability distributions, with a value of 0 indicating identical distributions
 and a value of $\ln{2} \textrm{nat}$ representing the maximum possible
 divergence between two distributions.
+
 \kw{Report JSO} 
 
 \section{Discussion}

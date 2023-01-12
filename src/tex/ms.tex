@@ -428,7 +428,7 @@ The core equation of normalizing flow is given by
 where $p_x(X)$ is the complex target distribution $p_z(Z)$ is the simple latent
 distribution and $f$ is an invertible parameterized transform that
 connect the two distributions. For a detailed discussion of the algorithm, we
-refer the readers to \kw{cite}.
+refer the readers to \cite{2019arXiv190809257K, 2019arXiv191202762P}.
 
 % The flowMC algorithm
 As mentioned in the previous subsection, one of the main issue gradient-based
@@ -632,14 +632,14 @@ are shown in table \ref{tab:parameters}. We use a 4 seconds long segment for the
 GW150914 analysis, and a 128 seconds long segment for the GW170817 analysis.
 Both data segment are fetched from GWOSC \kw{cite}. Given the specific sampler
 setting we use, we produce around an average of 2500 and 3500 \textbf{effective
-samples} for GW150914 and GW170817 \footnote{Note that effective sample measures
-the number of independent samples, which takes correlation between step into
-account, and it is not the same as the number of generated samples. The
-effective sample size is computed using
+samples}\footnote{Note that effective sample measures the number of independent
+samples, which takes correlation between step into account, and it is not the
+same as the number of generated samples. The effective sample size is computed
+using
 \texttt{arviz},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.}
-in each analysis respectively, which is run on an Nvidia A100 GPU. The
-\texttt{wall} time for both event is around 10 minutes. The chain data and the
-analysis scripts which generate the chains can be found on
+for GW150914 and GW170817 in each analysis respectively, which is run on an
+Nvidia A100 GPU. The \texttt{wall} time for both event is around 10 minutes. The
+chain data and the analysis scripts which generate the chains can be found on
 %\kw{\variable{data/} and \variable{script}}
 . Most of the time is spent on jit compilation of the code, and the actual
 sampling time was about \~150s. Note that we have pre-computed the reference
@@ -689,10 +689,13 @@ divergence between two distributions.
 
 % Brief summary
 In this work, we present a PE pipeline for GW events that is efficient and
-flexible. With differentiable waveform models, heterodyned likelihood and
-normalizing flow enhanced sampler \texttt{flowMC}, we can estimate the
-parameters of GW150914 and GW170817 in \kw{Quote speed}. Our method is general
-and extensible, \kw{continue}.
+flexible. Our package put together a number of innovations, including
+differentiable waveform models from \texttt{ripple} \kw{cite}, heterodyned
+likelihood and normalizing flow enhanced sampler \texttt{flowMC}. We tested the
+robustness of our pipeline on a set of 1200 synthetic GW events, showing it is
+capable of handling catalog that will be available in the near future. We also
+demonstrate our pipeline can estimate the parameters of GW150914 and GW170817 in
+\kw{Quote speed}. 
 
 % Compared to other works
 There are recent works from different groups on speeding up parameter estimation

@@ -388,20 +388,21 @@ gradient-based transition kernels and additional computation cost favorable.
 % Problem with just HMC or MALA
 While gradient-based samplers have been shown to be superior in terms of
 performance when compared to other gradient-free algorithms in many practical
-examples , there are still a number of classes of problems
-gradient-based samplers do not solve well. \footnote{To be specific, we are
-referring to sampling algorithms that use first-order derivatives here. Sampling
-algorithms that use the information of higher order derivatives such as manifold-MALA
-and Riemannian-HMC \cite{RMHMC} can in principle decorrelate local correlation in the target
-distribution, however, they often have instability issues when they are used on
-real-life applications, so they are not used often in practice.} For example,
-target distribution that exhibits local correlation is hard to deal with,
-since by construction first order gradient-based algorithms can only handle
-global correlation structure. Another example is multi-modality. If there are
-multiple modes in the target distribution, an independent chain will likely 
-be trapped in one mode and take an extremely long time to transverse between the
-modes. This means the relative weights between modes will much longer to sample
-compared to the shape of each mode.
+examples, there are still a number of classes of problems gradient-based
+samplers do not solve well. \footnote{To be specific, we are referring to
+sampling algorithms that use first-order derivatives here. Sampling algorithms
+that use the information of higher order derivatives such as manifold-MALA and
+Riemannian-HMC \cite{RMHMC} can in principle decorrelate local correlation in
+the target distribution, however, they often have instability issues when they
+are used on real-life applications, so they are not used often in practice.} For
+example, target distribution that exhibits local correlation is hard to deal
+with, since by construction first order gradient-based algorithms can only
+handle global correlation structure \cite{2017arXiv170102434B}. Another example
+is multi-modality. If there are multiple modes in the target distribution, an
+independent chain will likely be trapped in one mode and take an extremely long
+time to transverse between the modes \cite{2018arXiv180803230M}. This means the
+relative weights between modes will much longer to sample compared to the shape
+of each mode.
 
 % Long burn-in too
 Moreover, before we can use the sampling chain to estimate the quantity we care about,
@@ -417,9 +418,9 @@ helpful in estimating the target quantities.
 Normalizing flow is a neural-network based technique that aims at learning a
 mapping between a simple distribution, such as a Gaussian distribution, to a
 complex distribution, often given in the form of data samples from a target
-distribution. Once the network is trained, one can evaluate the probability
+distribution \cite{2019arXiv190809257K, 2019arXiv191202762P}. Once the network is trained, one can evaluate the probability
 density of the complex distribution and samples from it very efficiently.
-The core of normalizing flow is given by
+The core equation of normalizing flow is given by
 \begin{align}
     p_x(X) = p_z(Z) \left| \frac{\partial f}{\partial z}\right|,
 \end{align}
@@ -441,7 +442,7 @@ adjust for this inaccuracy, we use the normalizing flow model as a
 \textit{proposal} distribution. Given a trained normalizing flow model, we can
 generate the proposed jump in the target space by sampling from the latent
 distribution $z \sim p_z(Z)$, then push it through the learned map given by the
-normalizing flow model $x=f(z)$. the acceptance criteria is given by
+normalizing flow model $x=f(z)$. The acceptance criterion is given by
 \begin{align}
     \alpha(\mathbf{x},\mathbf{x_0}) = \min \left[ 1, \frac{\hat{\rho}(\mathbf{x_0})\rho_*(\mathbf{x})}{\hat{\rho}(\mathbf{x})\rho_*(\mathbf{x_0})}\right],
 \end{align}
@@ -458,8 +459,9 @@ criteria are met. Note that every time we retrain the network, we are breaking
 the Markov properties since we are changing the proposal distribution. To
 produce final samples that can be used to estimate target quantities, one has to
 freeze the normalizing flow model and not retrain during the final sampling
-phase in order to satisfy the detailed balance condition. To summarize the
-sampling process, the pseudocode is given by
+phase in order to satisfy the detailed balance condition. We use the package
+\texttt{flowMC} \cite{2022arXiv221106397W}. The pseudocode of the algorithm is
+given in Algorithm \ref{alg:cap}.
 
 \begin{algorithm}
 \caption{flowMC pseudocode}\label{alg:cap}

@@ -28,20 +28,6 @@ archivePrefix = {arXiv},
     year = "2020"
 }
 
-@article{Gelman-rhat,
-author = {Andrew Gelman and Donald B. Rubin},
-title = {{Inference from Iterative Simulation Using Multiple Sequences}},
-volume = {7},
-journal = {Statistical Science},
-number = {4},
-publisher = {Institute of Mathematical Statistics},
-pages = {457 -- 472},
-keywords = {Bayesian inference, Convergence of stochastic processes, ECM, EM, Gibbs sampler, importance sampling, Metropolis algorithm, multiple imputation, random-effects model, SIR},
-year = {1992},
-doi = {10.1214/ss/1177011136},
-URL = {https://doi.org/10.1214/ss/1177011136}
-}
-
 @article{Zackay:2018qdy,
     author = "Zackay, Barak and Dai, Liang and Venumadhav, Tejaswi",
     title = "{Relative Binning and Fast Likelihood Evaluation for Gravitational Wave Parameter Estimation}",
@@ -358,4 +344,65 @@ archivePrefix = {arXiv},
     number = "11",
     pages = "115006",
     year = "2017"
+}
+
+@article{RMHMC,
+author = {Girolami, Mark and Calderhead, Ben},
+title = {Riemann manifold Langevin and Hamiltonian Monte Carlo methods},
+journal = {Journal of the Royal Statistical Society: Series B (Statistical Methodology)},
+volume = {73},
+number = {2},
+pages = {123-214},
+keywords = {Bayesian inference, Geometry in statistics, Hamiltonian Monte Carlo methods, Langevin diffusion, Markov chain Monte Carlo methods, Riemann manifolds},
+doi = {https://doi.org/10.1111/j.1467-9868.2010.00765.x},
+url = {https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.1467-9868.2010.00765.x},
+eprint = {https://rss.onlinelibrary.wiley.com/doi/pdf/10.1111/j.1467-9868.2010.00765.x},
+abstract = {Summary.  The paper proposes Metropolis adjusted Langevin and Hamiltonian Monte Carlo sampling methods defined on the Riemann manifold to resolve the shortcomings of existing Monte Carlo algorithms when sampling from target densities that may be high dimensional and exhibit strong correlations. The methods provide fully automated adaptation mechanisms that circumvent the costly pilot runs that are required to tune proposal densities for Metropolis–Hastings or indeed Hamiltonian Monte Carlo and Metropolis adjusted Langevin algorithms. This allows for highly efficient sampling even in very high dimensions where different scalings may be required for the transient and stationary phases of the Markov chain. The methodology proposed exploits the Riemann geometry of the parameter space of statistical models and thus automatically adapts to the local structure when simulating paths across this manifold, providing highly efficient convergence and exploration of the target density. The performance of these Riemann manifold Monte Carlo methods is rigorously assessed by performing inference on logistic regression models, log-Gaussian Cox point processes, stochastic volatility models and Bayesian estimation of dynamic systems described by non-linear differential equations. Substantial improvements in the time-normalized effective sample size are reported when compared with alternative sampling approaches. MATLAB code that is available from http://www.ucl.ac.uk/statistics/research/rmhmc allows replication of all the results reported.},
+year = {2011}
+}
+
+@ARTICLE{2017arXiv170102434B,
+       author = {{Betancourt}, Michael},
+        title = "{A Conceptual Introduction to Hamiltonian Monte Carlo}",
+      journal = {arXiv e-prints},
+     keywords = {Statistics - Methodology},
+         year = 2017,
+        month = jan,
+          eid = {arXiv:1701.02434},
+        pages = {arXiv:1701.02434},
+archivePrefix = {arXiv},
+       eprint = {1701.02434},
+ primaryClass = {stat.ME},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2017arXiv170102434B},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@article{10.2307/2346184,
+ ISSN = {00359246},
+ URL = {http://www.jstor.org/stable/2346184},
+ abstract = {Modern sensor technologies, especially in biomedicine, produce increasingly detailed and informative image ensembles, many extremely complex. It will be argued that pattern theory can supply mathematical representations of subject-matter knowledge that can be used as a basis for algorithmic `understanding' of such pictures. After a brief survey of the basic principles of pattern theory we shall illustrate them by an application to a concrete situation: high magnification (greater than 15 000 ×) electron micrographs of cardiac muscle cells. The aim is to build algorithms for automatic hypothesis formation concerning the number, location, orientation and shape of mitochondria and membranes. For this we construct a pattern theoretic model in the form of a prior probability measure on the space of configurations describing these hypotheses. This measure is synthesized by solving sequentially a jump-diffusion equation of generalized Langevin form. The jumps occur for the creation-annihilation of hypotheses, corresponding to a jump from one continuum to another in configuration (hypothesis) space. These continua (subhypotheses) are expressed in terms of products of low dimensional Lie groups acting on the generators of a template. We use a modified Bayes approach to obtain the hypothesis formation, also organized by solving a generalized Langevin equation. To justify this it is shown that the resulting jump-diffusion process is ergodic so that the solution converges to the desired probability measure. To speed up the convergence we reduce the computation of the drift term in the stochastic differential equation analytically to a curvilinear integral, with the random term computed almost instantaneously. The algorithms thus obtained are implemented, both for mitochondria and membranes, on a 4000 processor parallel machine. Photographs of the graphics illustrate how automatic hypothesis formation is achieved. This approach is applied to deformable neuroanatomical atlases and tracking recognition from narrow band and high resolution sensor arrays.},
+ author = {Ulf Grenander and Michael I. Miller},
+ journal = {Journal of the Royal Statistical Society. Series B (Methodological)},
+ number = {4},
+ pages = {549--603},
+ publisher = {[Royal Statistical Society, Wiley]},
+ title = {Representations of Knowledge in Complex Systems},
+ urldate = {2023-01-12},
+ volume = {56},
+ year = {1994}
+}
+
+@article{10.2307/2246093,
+ ISSN = {08834237},
+ URL = {http://www.jstor.org/stable/2246093},
+ abstract = {The Gibbs sampler, the algorithm of Metropolis and similar iterative simulation methods are potentially very helpful for summarizing multivariate distributions. Used naively, however, iterative simulation can give misleading answers. Our methods are simple and generally applicable to the output of any iterative simulation; they are designed for researchers primarily interested in the science underlying the data and models they are analyzing, rather than for researchers interested in the probability theory underlying the iterative simulations themselves. Our recommended strategy is to use several independent sequences, with starting points sampled from an overdispersed distribution. At each step of the iterative simulation, we obtain, for each univariate estimand of interest, a distributional estimate and an estimate of how much sharper the distributional estimate might become if the simulations were continued indefinitely. Because our focus is on applied inference for Bayesian posterior distributions in real problems, which often tend toward normality after transformations and marginalization, we derive our results as normal-theory approximations to exact Bayesian inference, conditional on the observed simulations. The methods are illustrated on a random-effects mixture model applied to experimental measurements of reaction times of normal and schizophrenic patients.},
+ author = {Andrew Gelman and Donald B. Rubin},
+ journal = {Statistical Science},
+ number = {4},
+ pages = {457--472},
+ publisher = {Institute of Mathematical Statistics},
+ title = {Inference from Iterative Simulation Using Multiple Sequences},
+ urldate = {2023-01-12},
+ volume = {7},
+ year = {1992}
 }

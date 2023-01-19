@@ -4,11 +4,13 @@
 \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 \usepackage{algorithmic}
 \usepackage{color}
+%\usepackage[dvipsnames]{xcolor}
 
 \definecolor{rb4}{HTML}{27408B}
 \newcommand{\kw}[1]{{\color{rb4}[KW: #1 ]}}
 \definecolor{pyRed}{RGB}{214, 39, 40}
 \newcommand{\te}[1]{\textbf{\color{pyRed}(TE: #1)}}
+\newcommand{\mi}[1]{\textsf{\color{teal}[\textbf{MI:} #1]}}
 
 \newcommand{\flatiron}{\affiliation{Center for Computational Astrophysics,
 Flatiron Institute, New York, NY 10010, USA}}
@@ -38,17 +40,18 @@ Flatiron Institute, New York, NY 10010, USA}}
 
 % Abstract with filler text
 \begin{abstract}
-We present a light-weighted, flexible, and high-performance framework to
-estimate gravitational wave event parameters. By combining heterodyned
-likelihood, automatically differentiable and accelerators compatible waveforms,
-normalizing flow enhanced gradient-based Markov Chain Monte Carlo (MCMC), we
-achieve parameter estimation for real events like GW150914 and GW170817 within a
-minute of sampling time. Our framework does not require pre-training or explicit
-reparameterization and can be generalized to handle higher dimensional problems.
-We also discuss as near real-time parameter estimation has been shown to be
-possible by multiple groups, what are the trade-offs and future developments the
-community should be aware of. Our code for generating the manuscript and running
-the analysis is publically available on GitHub.
+We present a light-weight, flexible, and high-performance framework for
+inferring the properties of gravitational-wave events. By combining likelihood
+heterodyning, automatically-differentiable and accelerator-compatible
+waveforms, and gradient-based Markov chain Monte Carlo (MCMC) sampling enhanced
+by normalizing flows, we achieve full Bayesian parameter estimation for real
+events like GW150914 and GW170817 within a minute of sampling time.  \mi{should
+we say a standard analysis takes hours?} Our framework does not require
+pre-training or explicit reparameterizations and can be generalized to handle
+higher dimensional problems. We present the details of our implementation and
+discuss trade-offs and future developments in the context of other proposed
+strategies for real-time parameter estimation. Our code for generating the
+manuscript and running the analysis is publicly available on GitHub.
 \end{abstract}
 
 % Main body with filler text
@@ -57,76 +60,90 @@ the analysis is publically available on GitHub.
 
 % Brief description of PE
 Parameter estimation (PE) is one of the most commonly performed data analysis
-tasks in gravitational wave (GW) data analysis. The central question of PE is to
-infer the parameters of a particular GW model given the strain data
-\cite{Christensen:2022bxb, 2019PASA...36...10T}. In the standard compact binary
-coalescence scenario, this could mean inferring intrinsic parameters such the
-masses and spins of the event, as well as extrinsic parameters such as sky
-localization and distance from Earth to the event. PE is also used in testing
-general relativity (GR), which the main question is then to check for deviations
-in parameters that are related to non-GR modifications
+tasks in gravitational-wave (GW) data analysis, and it underpins all of GW physics
+and astrophysics \cite{Christensen:2022bxb,
+2019PASA...36...10T}. The central goal of PE is to infer the parameters of a
+particular GW source given the strain data detected by instruments like LIGO \cite{LIGOScientific:2014pky}, Virgo \cite{VIRGO:2014yos}
+and KAGRA \cite{KAGRA:2020tym}.
+In the standard compact binary coalescence (CBC) scenario, this
+could mean inferring intrinsic parameters such the masses and spins of the
+compact objects, as well as extrinsic parameters such as their sky localization and distance
+from Earth. PE is also applied to test general relativity (GR) and constrain deviations away from its predictions in observed data
 \cite{LIGOScientific:2016lio,LIGOScientific:2018dkp,LIGOScientific:2021sio}. PE
-is a crucial step in GW science, since it translate characteristics of the
+is a crucial step in GW science, since it translates characteristics of the
 strain data into astrophysically relevant quantities that can be used to
-constrain astrophysical phenomenon such as theories of binary evolution
-\cite{LIGOScientific:2021psn}.
+constrain astrophysical phenomena, including informing theories of binary evolution
+\cite{LIGOScientific:2021psn} and measuring the properties of nuclear matter.
 
 % Old codes have trouble handling next gen data
-The PE results in the most recent catalog of GW events are powered by several
-community-developed PE codes, including \texttt{lalinference}
-\cite{Veitch:2014wba}, \texttt{pycbc} \cite{Biwer:2018osg}, and \texttt{bilby}
-\cite{Ashton:2018jfp}. These packages have been tested by a number of groups and
-are well regarded as the standard tools. While the standard tools have passed
+% The PE results in the most recent catalog of GW events are produced by several
+% community-developed PE codes
+% \mi{what catalog do you mean? The LVK doesn't use PyCBC Inference}
+There exist a number of prominent, community-developed PE codes, including \textsc{LALInference}
+\cite{Veitch:2014wba}, \textsc{PyCBC Inference} \cite{Biwer:2018osg}, and \textsc{Bilby}
+\cite{Ashton:2018jfp}.
+These packages have been tested by a number of groups and
+are well regarded as the standard tools. However, while these tools have passed
 many robustness tests, they are known to be computationally intensive. The exact
-amount of time needed to analyze one event depends on the length of the event.
-These community tools take about a week to analyze shorter events such as binary
-black hole (BBH) mergers, whereas they can take up to a month on a computer
-cluster to analyze longer events such as binary neutron star (BNS) mergers. In
-the coming decade, there are planned upgrade for existing facilities and
-next-generation detector such as the Einstein Telescope (ET)
+amount of time needed to analyze one event depends on factors like the duration and frequency of the signal, as well as features of the specific waveform model.
+Typical runtimes for production-level analyses of shorter events, such as binary
+black hole (BBH) mergers, can range from hours to weeks, whereas longer events such as binary neutron star (BNS) mergers can reach months on a standard computer cluster.
+\mi{do we have any reference for these numbers? this will be attacked otherwise, since the comparisons are not strictly fair---e.g., it takes me 2 days to run on GW170817 with IMRD, not months}
+This expense precludes iterating quickly on results, launching large scale measurement simulations, or obtaining results in low latency to inform astronomers for potential followup in real time.
+
+Additionally, in
+the coming decade, there are planned upgrades for existing facilities, as well as
+plans for next-generation detectors such as the Einstein Telescope (ET)
 \cite{Punturo:2010zz} and the Cosmic Explorer (CE)
 \cite{LIGOScientific:2016wof}. These upgrades will increase the sensitivity of
-the detectors and allow for the detection of more events with better
+the instruments and allow for the detection of more events with better
 signal-to-noise ratio (SNR). The number of events that will be detected in the
 coming decade is expected to grow from around a thousand per year to over a
 million per year \cite{Baibhav:2019gxm}. This will put a significant strain on
-the current PE tools, which are not designed to handle this many events.
+the current PE tools.
 
 % Effort going to new tools development.
-In order to handle the future catalog, there are efforts from multiple groups
-developing tools to speed up the PE process. This includes methods that employ
-modern tools such as deep learning-based method pre-trained on a large
-collection of waveforms \cite{Dax:2021tsq,Dax:2022pxd}, as well as methods that
-simplify the computational challenge by leveraging our knowledge about GW
-signals \cite{Islam:2022afg,Roulet:2022kot}. While these methods are promising
-avenues to tackle standard GW analysis tasks in the coming decade, particularly
-about events involving compact binary coalescence (CBC) in GR, they capitalize
-assumptions that may not be valid for analysis involving additional physical
-effects such as lensing and beyond-GR analysis.
+In order to address this, there are efforts from multiple groups developing
+tools to speed up the PE process. This includes methods that employ modern
+tools such as deep learning-based method pre-trained on a large collection of
+waveforms \cite{Dax:2021tsq,Dax:2022pxd}, as well as methods that simplify the
+computational challenge by leveraging our knowledge about GW signals
+\cite{Islam:2022afg,Roulet:2022kot}. While these methods are promising avenues
+to tackle standard GW analysis tasks in the coming decade, particularly about
+events involving CBCs in GR, they rely on assumptions that may not be valid for
+analysis involving additional physical effects such as lensing and beyond-GR
+analysis, or may use approximations that do not compute the Bayesian likelihood
+exactly.
 
 %Basic idea and unique advantage of our tool
 
-In this work, we present a light-weighted, flexible, and high performance
-framework to estimate GW event parameters. Our framework implements the
-following major features to achieve its performance:
+In this work, we present a light-weight, flexible, and high performance
+framework to infer GW event parameters in a fully-Bayesian analysis. Our
+framework implements the following major features to achieve its performance:
 \begin{enumerate}
 \setlength{\itemsep}{0pt}
-\item Differential waveform models
-\item Normalizing flow enhanced MCMC sampler
-\item Heterodyned likelihood
-\item Native support for accelerator
+\item differentiable waveform models,
+\item normalizing-flow enhanced Markov chain Monte-Carlo (MCMC) sampler,
+\item heterodyned likelihood,
+\item native support for hardware accelerators.
 \end{enumerate}
-The main advantage of our framework is it does not rely on specific models or
+The main advantage of our framework is it does not rely on specific models
+\mi{what do you mean by ``models'' here? we rely on specific waveforms} or
 assumptions about the problem to achieve its performance. This makes our method
-extensible to problems beyond the standard CBC analysis. 
+extensible to problems beyond the standard CBC analysis, without sacrificing
+accuracy for efficiency.
+\mi{should we also say something of the advantage of having better, modern
+sampling with diffable WFs? can we say we expect this to be more robust to
+strange posterior geometries, as you might get by introducing tidal and non-GR
+params?}
 
 %Structure of paper
 
-The rest of the paper is structured as follows: We review the basics of PE and
-introduce our framework in section \ref{sec: PE}. We present benchmarking
-results on both simulated and real data in section \ref{sec: Result}. Finally,
+The rest of the paper is structured as follows: we review the basics of PE and
+introduce our framework in Sec.~\ref{sec: PE}; we present benchmarking
+results on both simulated and real data in Sec.~\ref{sec: Result}; and, finally,
 we discuss the implications of this work and directions for future development
-in section \ref{sec: Discussion}.
+in Sec.~\ref{sec: Discussion}.
 
 \section{Gravitational wave parameter estimation}
 \label{sec: PE}
@@ -134,157 +151,176 @@ in section \ref{sec: Discussion}.
 \subsection{Likelihood function}
 \label{sec:likelihood}
 
-The main objective in PE can be summarized as given data in the form of a time
-series of strain $\mathbf{d}$, find the distribution of the source parameters
-$\mathbf{\theta}$ that is compatible with the data, i.e.
-$p(\mathbf{\theta}|\mathbf{d})$. To compute this object, we can rewrite
-it using Bayes' theorem,
+The main objective in PE is to obtain a multidimensional posterior distribution
+$p(\mathbf{\theta} \mid d)$ on parameters $\mathbf{\theta}$ given strain
+data $d$.  Such probability density represents our best inference of
+the source properties, an encodes all relevant information contained in the
+observed data.
+To compute this object, we use Bayes' theorem to write
 \begin{align}
-    p(\theta| d) = \frac{\mathcal{L}(d|\theta)\pi(\theta)}{p(d)},
+    p(\theta \mid d) = \frac{\mathcal{L}(d \mid \theta)\pi(\theta)}{p(d)}\, ,
 \end{align}
-where $\mathcal{L}(d|\theta)$ is the likelihood function, $\pi(\theta)$ is the
+where $\mathcal{L}(d \mid \theta)$ is the likelihood function, $\pi(\theta)$ is the
 prior distribution, and $p(d)$ is the evidence. Since the evidence is a
 normalization constant that does not depend on the source parameters, it is
 often omitted if we are only interested in the posterior distribution. The prior
 distribution is often chosen to be some simple distribution, such as uniformly
-distributed in the component masses or a Gaussian distribution in the spins.
-Assuming the noise follows from a stationary Gaussian process, the
-log-likelihood in the case of GW is given by
+distributed in the component masses or a Gaussian distribution in the spins, or it could encode astrophysical information.
+Assuming the noise is drawn from a Gaussian process, the
+log-likelihood for GW data is given by
 \begin{align}
-    \log{\mathcal{L}(d|\theta)} = -\left<d-h(\mathbf{\theta})|d-h(\mathbf{\theta})\right>/2,
+    \log{\mathcal{L}(d \mid \theta)} = -\frac{1}{2} \left\langle d-h(\mathbf{\theta}) \mid d-h(\mathbf{\theta})\right\rangle,
 \label{eq: loglikelihood}
 \end{align}
-where $d$ is the strain data, $h(\mathbf{\theta})$ is the strain predicted by a
-waveform model with a specific set of source parameters. The right hand side of
-eq. \ref{eq: loglikelihood} can be evaluated in either time or frequency domain.
-Since it is computationally cheaper to compute the likelihood in the frequency
-domain, we choose to compute the likelihood throughout this work, which can be defined as 
-\te{Need to take the real part?}
+where $d$ is the observed strain data, $h(\mathbf{\theta})$ is the signal predicted by a
+waveform model with a specific set of source parameters $\theta$. The right hand side of
+Eq.~\eqref{eq: loglikelihood} can be evaluated in either the time or frequency domains.
+For stationary noise, it is computationally cheaper to compute the likelihood in the frequency
+domain, and the noise-weighted inner product can be written 
 \begin{align}
     % \left<a|b\right> = 4 Re\int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df,
-    \left<a|b\right> = 4 \int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df,
+    \left\langle a \mid b\right\rangle = 4 \Re \int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)}\, \mathrm{d}f \, ,
 \label{eq: innerproduct}
 \end{align}
-where $\mathcal{S}_n(f)$ is the noise power spectral density (PSD). To compute
-the integral shown in eq. \ref{eq: innerproduct}, we need to evaluate a chosen
-waveform model $h(\mathbf{\theta})$ at a number of frequnecy sample points.
-Evaluating the likelihood function is often the most computationally intensive
-part of the PE. The most accurate waveform model is numerical relativity (NR).
+where $\mathcal{S}_n(f)$ is the noise power spectral density (PSD).
+In practice, the integral becomes a discrete sum over a finite number of
+samples determined by the sampling rate of the detector data and duration of
+the observation.
+
+To compute
+the integral shown in Eq.~\eqref{eq: innerproduct}, we need to evaluate a chosen
+waveform model $h(\mathbf{\theta})$ at a number of frequency sample points.
+This makes evaluating the likelihood function often the most computationally intensive
+part of PE. The most accurate waveform model is numerical relativity (NR),
+which obtains waveforms by directly solving the Einstein equations numerically
+for a given system.
 However, depending on the source parameters, generating one time series of
 strain can take a day to half a year, which makes NR prohibitively expensive for
-PE. To circumvent this problem, there are several waveform "approximant"
-families, including the IMRPhenom family \cite{Khan:2015jqa,
-Garcia-Quiros:2020qpx}, SEOB family \cite{PhysRevD.89.061502}, and NR surrogate
-family\cite{Varma:2019csw}. For shorter events such as a $30-30\ M_{\odot}$ BBH, one
-waveform call could take $10\text{ms}$ to $\sim 1s$ \kw{verify number in
-lalsuite}. For longer events such as a $1.4-1.4\ M_{\odot}$ BNS event, the
+PE. To circumvent this problem, there are several families of waveform ``approximants'', including the \textsc{IMRPhenom} family \cite{Khan:2015jqa,
+Garcia-Quiros:2020qpx}, the \textsc{SEOB} family \cite{PhysRevD.89.061502}, and the NR surrogate
+family\cite{Varma:2019csw}. For shorter events, such as a $30-30\ M_{\odot}$ BBH, one
+waveform call could take $10\text{ms}$ to ${\sim}1s$ \kw{verify number in
+lalsuite}. For longer events, such as a $1.4-1.4\ M_{\odot}$ BNS, the
 evaluation time could go up to \kw{Fill}. Since one needs to evaluate the
-likelihood many times during sampling\footnote{A typical PE run with
-\texttt{Bilby} takes $>10^6$ likelihood evaluation to converge.}, the
-computational cost in evaluating the waveform accumulate and is the main reason
+likelihood millions of times during sampling,\footnote{A typical PE run with
+\texttt{Bilby} takes ${>}10^6$ likelihood evaluations to converge.} the
+computational cost in evaluating the waveform accumulates and is the main reason
 of the long runtime of GW PE.
 
 \subsection{Heterodyned likelihood}
 
-Since the computational cost of evaluating a waveform model scales linearly with
-the number of sample points either in the time or frequency domain, the
-computational burden for longer-duration signals is often quite large. To reduce
-the computational cost, there are a number of methods to reduce the number of
-basis points one would need to compute the likelihood faithfully
-\cite{Field:2011mf, Field:2013cfa, Smith:2016qas, Vinciguerra:2017ngf}. We use
-heterodyned likelihood \cite{Cornish:2021lje} (also named relative binning in
-\cite{Zackay:2018qdy}) in this work. The idea behind heterodyned likelihood can
-be summarized as the following: the integrand in eq. \ref{eq: innerproduct} is a
-highly oscillatory function, so one has to sample the integrand with
-sufficiently dense sampling to compute the integral faithfully. The number of
-sample points needed would be much smaller if the integrand was smooth. Given a
-pair of waveform parameters $\mathbf{\theta}$ and $\mathbf{\theta_0}$ that are
-close to each other, the waveforms generated using the pair of parameters are
-similar to each other, this means the ratio between the waveforms is a smoothly
-varying function. Given a reference waveform $h(\mathbf{\theta_0})$, we can
-exploit this similarity between waveforms to reduce the number of sample points
-needed to compute the likelihood for the set of $\mathbf{\theta}$ that is
-similar to $\mathbf{\theta_0}$. We decompose the integrand into two parts: a
-highly oscillatory part that depends only on the reference waveform and the
-data, hence it only needs to be evaluated once; and a smoothly varying part that
-depends on the target waveform parameters $\theta$, that needs to be evaluated
-for every new likelihood evaluation. Because the part that depends on the target
-waveform parameters is smooth, we can use far fewer sample points to compute the
-integral with sufficient accuracy.
+Since the computational cost of evaluating a waveform model scales linearly
+with the number of sample points either in the time or frequency domain, the
+computational burden for longer-duration signals is often quite large. To
+reduce the computational cost, there are a number of methods to reduce the
+number of basis points one would need to compute the likelihood faithfully
+\cite{Field:2011mf, Field:2013cfa, Smith:2016qas, Vinciguerra:2017ngf}. In this
+work, we use likelihood heterodyning \cite{Cornish:2021lje} (also named
+relative binning in \cite{Zackay:2018qdy}).
+
+The idea behind the heterodyned likelihood can be summarized as follows: the
+integrand in Eq.~\eqref{eq: innerproduct} is a highly oscillatory function, so
+one has to sample the integrand with sufficiently dense sampling to compute the
+integral faithfully. The number of sample points needed would be much smaller
+if the integrand was smooth. Given a pair of waveform parameters
+$\mathbf{\theta}$ and $\mathbf{\theta_0}$ that are close to each other, the
+waveforms generated using the pair of parameters are similar to each other,
+this means the ratio between the waveforms is a smoothly varying function.
+Given a reference waveform $h(\mathbf{\theta_0})$, we can exploit this
+similarity between waveforms to reduce the number of sample points needed to
+compute the likelihood for the set of $\mathbf{\theta}$ that is similar to
+$\mathbf{\theta_0}$. We decompose the integrand into two parts: (1) a highly
+oscillatory part that depends only on the reference waveform given by
+$\mathbf{\theta}$ and the data, and hence only needs to be evaluated once; and,
+(2) a smoothly varying part that depends on the target waveform parameters
+$\theta$, that needs to be evaluated for every new likelihood evaluation.
+Because the part that depends on the target waveform parameters is smooth, we
+can use far fewer sample points to compute the integral with sufficient
+accuracy.
 
 One may be concerned by the accuracy of this approximation over the target
 parameter space, especially in the region where the generated waveform is
-significantly different from the reference waveform. However, given we are
+significantly different from the reference waveform. However, given that we are
 interested in the most probable set of parameters, if we choose the reference
 waveform to be close to the data, the waveforms that are different from the
-reference waveform should also differ significantly from the data. This means
-the likelihood value for these waveforms should be significantly smaller than
-the likelihood of the waveforms that are similar to the reference waveform,
-hence will not be relevant for the PE result. In practice, one will first
-optimize the likelihood function with full frequency resolution to obtain the
-reference waveform parameters, which can be run at a much lower cost compared to
-PE. 
+reference waveform should necessarily also differ significantly from the data.
+This means that the likelihood value for these waveforms should be
+significantly smaller than the likelihood of the waveforms that are similar to
+the reference waveform, and hence will not be relevant for the PE result. In
+practice, one will first optimize the likelihood function with full frequency
+resolution to obtain the reference waveform parameters, which can be run at a
+much lower cost compared to PE. 
 
-We give a concise description of what we implement in our code here. For a more
-extensive derivation of heterodyned likelihood, we refer the reader to the
-reference \cite{Zackay:2018qdy}. In the heterodyned likelihood framework, the
-two terms in eq \ref{eq: loglikelihood} are given by
+We now give a concise description of the implementation of this approach in our
+code; for a more extensive derivation of heterodyned likelihood, we refer the
+reader to the reference \cite{Zackay:2018qdy}. In the heterodyned likelihood
+framework, the two terms involving $h$ obtained by expanding Eq.~\eqref{eq: loglikelihood} can be approximated as
+\begin{subequations} \label{eq: heterodynedlikelihood}
+\begin{equation}
+    \langle d \mid h \rangle \approx \sum_b \left[ A_0(b)\, r^*_0(h,b) + A_1(b)\, r^*_1(h,b) \right] ,
+\end{equation}
 \begin{align}
-    \langle d|h \rangle &\approx \sum_b A_0(b) r^*_0(h,b) + A_1(b) r^*_1(h,b), \nonumber \\
-    \langle h|h \rangle &\approx \sum_b B_0(b) |r_0(h,b)|^2 + 2 B_1(b) \Re[r_0(h,b)r_1(h,b)],
-\label{eq: heterodynedlikelihood}
+    \langle h \mid h \rangle \approx \sum_b &\left[ B_0(b)\, |r_0(h,b)|^2 + \right. \nonumber \\
+    &\left. 2 B_1(b)\, \Re\{r_0(h,b)\, r_1(h,b)\} \right] 
 \end{align}
-
-where $b$ denotes the index of a \textit{sparse} set of bins where the integrand
-will be computed on, $A_0(b)$, $A_1(b)$, $B_0(b)$, and $B_1(b)$ are the
-heterodyning coefficients computed using the data and the reference waveform,
-and $r_0(h,b)$ and $r_1(h,b)$ are the ratio between the target waveform and the
-reference waveform at the center of the bin. To evaluate eq. \ref{eq:
-heterodynedlikelihood}, we need to be able to first choose a binning scheme,
-then evaluate the coefficients given the data and the reference waveform and the
+\end{subequations} 
+where $b$ denotes the index of a \textit{sparse} set of bins over which the integrand
+will be computed; $A_0(b)$, $A_1(b)$, $B_0(b)$, and $B_1(b)$ are the
+heterodyning coefficients computed using the data and the reference waveform;
+and, finally, $r_0(h,b)$ and $r_1(h,b)$ are the ratios between the target waveform and the
+reference waveform at the center of the bin \mi{mention difference between $r_{0/1}$?}.
+To evaluate Eq.~\eqref{eq:
+heterodynedlikelihood}, we need to first choose a binning scheme,
+then evaluate the coefficients given the data and the reference waveform, and last the
 ratio between the target waveform and the reference waveform at the center of
-the bin.
+each bin.
+\mi{this paragraph is kind of floating around, maybe it should go at the end of
+this subsection?}
 
-Considering the phasing of a waveform is denoted by a power series $\Psi(f) =
-\sum_i \alpha_i f^{\gamma_i}$, where $\alpha_i$ are some coefficients depending
-on the waveform parameters and $\gamma_i$ are powers motivated by post-Newtonian
-theory. For example, for the term $\gamma_i = -5/3$, $\alpha_i$ is related to
-the chirp mass. The maximum dephasing one can have within a frequency interval $[f_{\textrm{min}},f_{\textrm{max}}]$ is given by
+We can obtain further insight by noting that the Fourier phase of a GW inspiral
+can be expressed as a power series $\Psi(f) = \sum_i \alpha_i f^{\gamma_i}$,
+where $\alpha_i$ are some coefficients depending on the waveform parameters and
+$\gamma_i$ are powers motivated by post-Newtonian theory \cite{}. For example,
+for the term $\gamma_i = -5/3$, $\alpha_i$ is related to the chirp mass. The
+maximum dephasing one can accrue over a frequency interval
+$[f_{\textrm{min}},f_{\textrm{max}}]$ is thus given by
 \begin{align}
     \delta \Psi_{\textrm{max}}(f) = 2\pi \sum_{i} (f/f_{*,i})^{\gamma_i} \textrm{sgn}(\gamma_i),
 \label{eq: maxdephasing}
 \end{align}
-where $f_{*,i} = f_{\textrm{max}}$ for $\gamma_i>=0$ and $f_{*,i} =
-f_{\textrm{min}}$ for $\gamma_i<0$. Given the relation shown in eq. \ref{eq:
-maxdephasing}, we can choose the binning scheme which divide the entire
-frequency domain of interests into a set of bins such that the maximum dephasing
-within each bin is smaller than a certain threshold $\epsilon$, i.e.
+where $f_{*,i} = f_{\textrm{max}}$ for $\gamma_i \geq 0$ and $f_{*,i} =
+f_{\textrm{min}}$ for $\gamma_i<0$. Given the relation shown in Eq.~\eqref{eq:
+maxdephasing}, we can choose the binning scheme to divide the entire
+frequency band of interest into a set of bins such that the maximum dephasing
+within each bin is smaller than a certain threshold $\epsilon$, i.e.,
 $|\delta\Psi_{\textrm{max}}(f_{\textrm{max}}) -
 \delta\Psi_{\textrm{max}}(f_{\textrm{min}})| < \epsilon$. 
 
-Given a sufficiently dense binning scheme, the ratio between the target waveform
-and the reference within a bin can be approximated by linear interpolation
+For sufficiently fine bins, the ratio between the target waveform
+and the reference within a bin can be approximated by linear interpolation,
 \begin{align}
 r(f) = \frac{h(f)}{h_0(f)} = r_0(h,b) + r_1(h,b)(f- f_m(b)) + \cdots,
 \label{eq:definer}
 \end{align}
+\mi{I think this eqn should appear right after Eq.~\eqref{eq:
+heterodynedlikelihood}, because it's necessary to understand what the terms in
+that eqn are, and you don't need Eq.~\eqref{eq: maxdephasing} to understand this one}
 where $b$ is the index of a particular bin, $r_0(h,b)$ and $r_1(h,b)$ are the
 value and slope of the ratio at the center of the bin respectively, and
 $f_m(b)$ is the center frequency of the bin. Since we have access to both $h(f)$
 and $h_0(f)$, we can compute $r_0$ and $r_1$ by evaluating the value of $r(f)$
-at the edge of the bin and invert eq. \ref{eq:definer}.
+at the edge of the bin and inverting Eq.~\eqref{eq:definer}.
 
-The final ingredient we need is the heterodyning coefficients given the data and
-the reference waveform on the sparse bins, which are given by
+The final ingredient we need is the heterodyning coefficients for the data and
+the reference waveform on the sparse bins, which are explicitly given by
 \begin{align}
-    A_0(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)}{S_n(f)} df, \\
-    A_1(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)(f-f_m(b))}{S_n(f)} df, \\
-    B_0(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2}{S_n(f)} df, \\
-    B_1(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2(f-f_m(b))}{S_n(f)} df.
+    A_0(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)}{S_n(f)} \Delta f, \\
+    A_1(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)(f-f_m(b))}{S_n(f)} \Delta f, \\
+    B_0(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2}{S_n(f)} \Delta f, \\
+    B_1(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2(f-f_m(b))}{S_n(f)} \Delta f.
 \end{align}
 Note that the sum within each bin should be done with the same sampling rate as
-the data, i.e. the same one would do in the case without using heterodyned
-likelihood.
+the data, i.e., the same one would do without using the heterodyned likelihood.
 
 \te{Do we also already here want to make the point that it really helps with memory issues of GPUs if the frequency array isn't too large?}
 

@@ -480,9 +480,9 @@ $cp \leftarrow ip$\\
     }
 \tcc{Production loop}
     \For{$i<np$}{
-        $c_local, cp \leftarrow LocalSampling(cp)$\\
-        $c_global, cp \leftarrow GlobalSampling(cp, \Theta)$ \\
-        $Chains \leftarrow Append(Chains, c_local, c_global)$
+        $c_{local}, cp \leftarrow LocalSampling(cp)$\\
+        $c_{global}, cp \leftarrow GlobalSampling(cp, \Theta)$ \\
+        $Chains \leftarrow Append(Chains, c_{local}, c_{global})$
     }
 
 \Return{$Chains$}

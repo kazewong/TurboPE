@@ -40,7 +40,7 @@ Flatiron Institute, New York, NY 10010, USA}}
 
 % Abstract with filler text
 \begin{abstract}
-We present a light-weight, flexible, and high-performance framework for
+We present a lightweight, flexible, and high-performance framework for
 inferring the properties of gravitational-wave events. By combining likelihood
 heterodyning, automatically-differentiable and accelerator-compatible
 waveforms, and gradient-based Markov chain Monte Carlo (MCMC) sampling enhanced
@@ -117,7 +117,7 @@ exactly.
 
 %Basic idea and unique advantage of our tool
 
-In this work, we present a light-weight, flexible, and high performance
+In this work, we present a lightweight, flexible, and high performance
 framework to infer GW event parameters in a fully-Bayesian analysis. Our
 framework implements the following major features to achieve its performance:
 \begin{enumerate}
@@ -430,8 +430,8 @@ favorable in terms of computing cost.
 While gradient-based samplers have been shown to outperform gradient-free
 algorithms in many practical applications, there remain classes of problems that
 most gradient-based samplers do not solve well. For example, first-order
-gradient-based algorithms struggle with target distributions that exhibit local
-correlations, since they can only handle global structures by construction
+gradient-based algorithms struggle with target distributions that exhibit locally-varying
+correlations, since they assume a uniform global structure by construction
 \cite{2017arXiv170102434B}.\footnote{Sampling algorithms that use the
 information of higher order derivatives such as manifold-MALA and
 Riemannian-HMC \cite{RMHMC} can in principle handle local correlations in the
@@ -446,13 +446,13 @@ the shape of each mode.
 % Long burn-in too
 Moreover, before we can use the sampling chain to estimate the posterior
 quantities we care about, the sampler often needs to first find the most
-probable region in the target space; this is a common process often referred to
-as ``burn-in'' in the literature. As a consequence, one would discard a certain
-amount of data generated from the beginning of the sampling process, and only
-use the later part of the chain to estimate the quantities of interest. The
-burn-in phase of a gradient-based sampler is often as long as the sampling
-phase, which means that a good portion of the computation is not directly
-devoted to estimating the target quantities.
+probable region in the target space (known as the \emph{typical set}); this is
+a common process often referred to as ``burn-in'' in the literature. As a
+consequence, one would discard a certain amount of data generated from the
+beginning of the sampling process, and only use the later part of the chain to
+estimate the quantities of interest. The burn-in phase of a gradient-based
+sampler is often as long as the sampling phase, which means that a good portion
+of the computation is not directly devoted to estimating the target quantities.
 
 % Crux of normalizing flow
 All the above issues can be mitigated by normalizing flows.  Normalizing flows
@@ -465,9 +465,8 @@ simple distribution and then applying the learned mapping. The core equation
 of normalizing flows is the coordinate transformation of probability
 distributions via a Jacobian, as given by
 \begin{align}
-    p_x(X) = p_z(Z) \left| \frac{\partial f}{\partial z}\right|,
+    p_x(X) = p_z(Z) \left| \frac{\partial f}{\partial z}\right|^{-1},
 \end{align}
-\mi{is there an inverse missing on the Jacobian factor?}
 where $p_x(X)$ is the complex target distribution, $p_z(Z)$ is the simple
 latent distribution and $f$ is an invertible parameterized transform that
 connects the two distributions, $x = f(z)$, to be learned by the normalizing
@@ -475,9 +474,9 @@ flow. For a detailed discussion of the algorithm, we refer the readers to
 \cite{2019arXiv190809257K, 2019arXiv191202762P}.
 
 % The flowMC algorithm
-\mi{I think this following paragraph could be made clearer: what does it mean
-to learn the ``global landscape''? and how does this jive with the fact that
-norm flows are supposed to help with the \emph{local} correlations?}
+\mi{can we clarify what it means to learn the ``global landscape'', and how
+this jives with the fact that norm flows are supposed to help with the
+\emph{local} correlations?}
 Working in tandem, gradient-based MCMC and normalizing flows can efficiently
 explore posteriors with local and global correlations, as well as multiple
 separate modes.  The scheme relies on iteratively using draws from the
@@ -486,37 +485,36 @@ proposal for another stage of MCMC sampling.
 
 Concretely, we begin by producing initial training data for the normalizing
 flow by running multiple independent chains of the gradient-based algorithm for
-a fixed number of steps.
-From the resulting pool of
-samples, the normalizing
+a fixed number of steps.  From the resulting pool of samples, the normalizing
 flow can begin to learn the global landscape of the target distribution.
 %
 However, since the independent chains contain the same number of samples, the
-relative weight assigned to each chains will differ from the true target distribution (e.g., the relative
-importance of separate modes will not be correctly calibrated). This is
-mitigated by a second stage of gradient-based MCMC sampling that uses the
-distribution learned by the normalizing flow as a \textit{proposal}.
-
+relative weight assigned to each chains will not represent the true target
+distribution (e.g., the relative importance of separate modes will not be
+correctly calibrated). This is mitigated by a second stage of gradient-based
+MCMC sampling that uses the distribution learned by the normalizing flow as a
+\textit{proposal}.
 
 Given a trained normalizing flow model, we can generate the proposed jump in
 the target space by sampling from the latent distribution $z \sim p_z(Z)$,
 usually a Gaussian, and then pushing it through the learned map given by the
 normalizing flow model $x=f(z)$.  The acceptance criterion is then set to be
-\begin{align}
+\begin{align} \label{eq:flow-proposal}
     \alpha(\mathbf{x},\mathbf{x_0}) = \min \left[ 1, \frac{\hat{\rho}(\mathbf{x_0})\rho_*(\mathbf{x})}{\hat{\rho}(\mathbf{x})\rho_*(\mathbf{x_0})}\right],
 \end{align}
 where $\hat{\rho}$ is the probability density estimated by the normalizing flow
 model, $\rho_*$ is the probability density evaluated using the target function,
 and $x_0$ is the current position.
 
-We can see the flow distribution is the
+From Eq.~\eqref{eq:flow-proposal}, we can see that the flow distribution is the
 target distribution when the accepting probability is 1. When the normalizing
 flow model has not converged to the target distribution, only a portion of the
 proposed jumps will be accepted. This means an MCMC process using the
-normalizing flow model as the proposal distribution can adjust the normalization
-across different regions of the target parameter space by rejecting jumps into
-less likely regions. The training and sampling are then repeated until certain
-criteria are met.
+normalizing flow model as the proposal distribution can adjust the
+normalization across different regions of the target parameter space by
+rejecting jumps into less likely regions. The training and sampling are then
+repeated until certain criteria, at each step combining global and local MCMC
+sampling which respectively do and do not use the normalizing flow as proposal.
 
 Note that every time we retrain the network, we are breaking
 the Markov properties since we are changing the proposal distribution. To
@@ -527,11 +525,11 @@ phase in order to satisfy the detailed balance condition. We use the package
 given in Algorithm \ref{alg:cap}.
 
 \begin{algorithm}
-\caption{\textsc{flowMC} pseudocode \mi{can I edit this?}}\label{alg:cap}
+\caption{\textsc{flowMC} pseudocode}\label{alg:cap}
 \KwIn{initial position $ip$}
-\Parameters{n training loop $nt$, n production loop $np$}
+\Parameters{number of training loops $nt$, number of production loops $np$}
 \Variables{current chain $cc$, current position $cp$, current NF parameters $\Theta$}
-\KwResult{Chains}
+\KwResult{$chains$}
 $cp \leftarrow ip$\\
 \tcc{Training loop}
     \For{$i<nt$}{
@@ -544,10 +542,10 @@ $cp \leftarrow ip$\\
     \For{$i<np$}{
         $c_{local}, cp \leftarrow LocalSampling(cp)$\\
         $c_{global}, cp \leftarrow GlobalSampling(cp, \Theta)$ \\
-        $Chains \leftarrow Append(Chains, c_{local}, c_{global})$
+        $chains \leftarrow Append(chains, c_{local}, c_{global})$
     }
 
-\Return{$Chains$}
+\Return{$chains$}
 \end{algorithm}
 
 \subsection{Accelerators}
@@ -595,85 +593,83 @@ potential of the \texttt{flowMC} sampling algorithms.
 
 To demonstrate the robustness of our pipeline, we use it to recover the
 parameters of a set of simulated signals. We create a set of simulated signals
-and inject them into simulated noise, generated under the Gaussian noise
-assumption using the designed PSD for every detector. Then we run our pipeline
-given the simulated data and determine the credible interval at the true
-parameters of the injected signals. Given the set of credible values, we can
-check whether the true value lies within a certain credible interval at a
-reasonable frequency. If our pipeline is perfect, we should find the true
-parameters lie within $x\%$ credible interval $x\%$ of the time, e.g. the true
-value should lie within the $50\%$ credible interval $50\%$ of the time. In
-other word, the percentiles of the true parameters should be uniformly
-distributed. Deviation from this behavior suggests the pipeline is either
-over-confident or too conservative. 
+and inject them into simulated stationary Gaussian noise.
+Then we run our pipeline on the simulated data, and determine the credible
+interval at which the true parameters of the injected signals are recovered. From the set of
+credible values, we can check whether the true value lies within a certain
+credible interval at the expected frequency: if our pipeline is working as expected, we
+should find the true parameters lie within $x\%$ credible interval $x\%$ of the
+time, e.g., the true value should lie within the $50\%$ credible interval $50\%$
+of the time. In other word, the percentiles of the true parameters should be
+uniformly distributed. Deviation from this behavior suggests the pipeline is
+either over-confident or too conservative \cite{Cook2006,Talts2018}.
 
 % State the distribution of injected population
-We sample 1200 events from the following distribution of parameters detailed in
-table \ref{tab:parameters}.
-The same distribution of parameters are used as the prior in the PE process.
-The simulated signals have a 16 seconds segment length,
-and we project the signal on the LIGO Hanford, Livingston and Virgo detector.
-We used the designed sensitivity curve for each detector to generate the noise \kw{cite}.
-We use a minimum frequency cutoff of 30 Hz with a sampling rate of 2048 Hz.
+We sample 1200 events from the distribution of parameters detailed in Table
+\ref{tab:parameters}; the same distributions are used as the prior in the PE
+process.  We simulate signals over 16 seconds of data, with a minimum frequency
+cutoff of 30 Hz and a sampling rate of 2048 Hz.  We draw noise from the design
+PSDs for the LIGO Hanford, LIGO Livingston and Virgo detectors \cite{} \mi{what
+curves did you use?}.
+For both injection and recovery, we make use of the \textsc{IMRPhenomD}
+waveform \cite{Khan:2015jqa} via the fully-differentiable implementation
+presented in the \textsc{ripple} package \cite{}.
 
 \begin{table*}[hbt!]
     \begin{center}
     \begin{tabular}{ l l l l l }
     \hline
     \hline
-    Parameters &  Description & Injection & GW150914 & GW170817\\
+    Parameter &  Description & Injection & GW150914 & GW170817\\
+    \hline
 
-    $M_c$ & Chirp mass $[M_\odot]$& $[10, 50]$ & $[10,80]$ & $[1.18,1.21]$ \\
-    $q$ & Mass ratio & $[0.5, 1]$ & $[0.125,1]$ & $[0.125,1]$ \\
-    $\chi_1$ & Primary dimensionless spin& $[-0.5, 0.5]$ & $[-1,1]$ & $[-0.3,0.3]$ \\
-    $\chi_2$ & Secondary dimensionless spin & $[-0.5, 0.5]$ & $[-1,1]$ & $[-0.3,0.3]$ \\
-    $d_L$ & Luminosity distance $[\textrm{Mpc}]$ & $[300, 2000]$ & $[0, 2000]^\dag$ & $[1, 75]^\dag$ \\
-    $t_c$ & Coalescence time $[\textrm{s}]$& $[-0.5, 0.5]$ & $[-0.1, 0.1]$ & $[-0.1, 0.1]$ \\
-    $\phi_c$ & Coalescence phase & $[0, 2\pi]$ & $[0, 2\pi]$ & $[0, 2\pi]$ \\
-    $\cos{\iota}$ & Cosine of inclination angle & $[-1, 1]$ & $[-1, 1]$ & $[-1, 1]$ \\
-    $\psi$ & Polarization angle & $[0, \pi]$ & $[0, \pi]$ & $[0, \pi]$ \\
-    $\alpha$ & Right ascension & $[0, 2\pi]$ & $[0, 2\pi]$ & $[0, 2\pi]$ \\
-    $\sin{\delta}$ & Sine of declination & $[-1, 1]$ & $[-1, 1]$ & $[-1, 1]$ \\
+    $M_c$ & chirp mass $[M_\odot]$& $[10, 50]$ & $[10,80]$ & $[1.18,1.21]$ \\
+    $q$ & mass ratio & $[0.5, 1]$ & $[0.125,1]$ & $[0.125,1]$ \\
+    $\chi_1$ & primary dimensionless spin& $[-0.5, 0.5]$ & $[-1,1]$ & $[-0.3,0.3]$ \\
+    $\chi_2$ & secondary dimensionless spin & $[-0.5, 0.5]$ & $[-1,1]$ & $[-0.3,0.3]$ \\
+    $d_L$ & luminosity distance $[\textrm{Mpc}]$ & $[300, 2000]$ & $[0, 2000]^\dag$ & $[1, 75]^\dag$ \\
+    $t_c$ & coalescence time $[\textrm{s}]$& $[-0.5, 0.5]$ & $[-0.1, 0.1]$ & $[-0.1, 0.1]$ \\
+    $\phi_c$ & coalescence phase & $[0, 2\pi]$ & $[0, 2\pi]$ & $[0, 2\pi]$ \\
+    $\cos{\iota}$ & cosine of inclination angle & $[-1, 1]$ & $[-1, 1]$ & $[-1, 1]$ \\
+    $\psi$ & polarization angle & $[0, \pi]$ & $[0, \pi]$ & $[0, \pi]$ \\
+    $\alpha$ & right ascension & $[0, 2\pi]$ & $[0, 2\pi]$ & $[0, 2\pi]$ \\
+    $\sin{\delta}$ & sine of declination & $[-1, 1]$ & $[-1, 1]$ & $[-1, 1]$ \\
 
     \hline
     \hline
     \end{tabular}
-    \caption{Parameters used and the range of prior for the injection-recovery
-    test, GW150914, and GW170817. All priors assume a uniform distribution with
-    the range tabulated in the table. The coalescence time refers to a shift in
-    time around the trigger time. $^\dag$ Instead of uniform in luminosity
-    distance, the distance prior used for the GW150914 and GW170817 analysis are
-    uniform in comoving distance, with the range denote by the value in the
-    table in $\textrm{MPC}$}
+    \caption{Prior ranges for parameters varied in the injection-recovery
+    test, as well as the GW150914 and GW170817 analyses. All priors are uniform over the ranges shown, except for the luminosity distance prior in the GW150914 and GW170817 analyses ($^\dag$) for which we apply a prior unform in comoving volume. The coalescence time refers to a shift relative to the geocenter trigger time, and $M_c$ refers to the redshifted (detector-frame) chirp mass.}
     \label{tab:parameters}
     \end{center}
 \end{table*}
 
 % Show injection pp plot
-The result of this injection-recovery campaign is shown in fig. \ref{fig:ppplot}. We
-computed the quantile of which the true value lies for each marginalized
-distribution, then plotted the cumulative distribution of these quantiles. The
-shadow band denotes the 95\% credible interval drawn from a uniform distribution
-with the same number of events. We can see most the injection-recovery result
-lies within the band drawn from a uniform distribution, showing our inference
-results agree well with a uniform distribution. There is a small deviation from
-a uniform distribution for the secondary spin $\chi_2$, which is not too
-alarming since we are computing the quantile for 11 parameters. Having one of
-them lying briefly outside the 95\% band does not mean the inference is bias.
+We summarize the result of this injection-recovery campaign in
+Fig.~\ref{fig:ppplot}. This shows the cumulative distribution over injections
+of the quantile at which the true value lies in the marginalized distribution
+of each parameter. The shaded band denotes the 95\%-confident variation
+expected from draws from a uniform distribution with the same number of events.
+We can see that most of the measured curves lie within this band, showing that
+our inference results agree well with a uniform distribution. There is a small
+deviation from a uniform distribution for the secondary spin $\chi_2$, which is
+not alarming given that we are computing the quantile for 11 parameters.  This
+is what we expect if our pipeline is working as expected.
 
-To quantify how well our result agrees with a uniform distribution, we can
-compute the Kolmogorov-Smirnov test p-values for each marginalized distribution.
-If the p-value is too low, often chosen to be $0.05$, then it means our result
-does not agree with a uniform distribution, hence it could be biased. The
-p-values for each marginalized distribution are shown in the legend of fig.
-\ref{fig:ppplot}. We can see most of them are well above the $0.05$ threshold,
-except for $\chi_2$, which is mildly below the threshold. Once again, assuming
-these p-values are drawn from a uniform distribution, given $11$ draws (the
-number of parameters in our inference), it is not abnormal to have one of the
-parameters lies slightly outside the threshold. To assess whether this is
-expected, we can compute the combined p-value for these 11 parameters, which is $0.47$.
-This shows our inference pipeline performs properly on simulated data.
-Indeed, the accuracy of our inference pipeline is consistent with other works\kw{cite}.
+To further quantify how well our result agrees with a uniform distribution, we
+can compute the Kolmogorov-Smirnov $p$-values for each marginalized
+distribution \cite{}.  If this $p$-value were is low (with a threshold often
+chosen to be $p = 0.05$), then our result could be in tension with a uniform
+distribution. The $p$-values obtained for each parameter are shown in the
+legend of Fig.~\ref{fig:ppplot}.  Most of them are well above the $p = 0.05$
+threshold, except for $\chi_2$, which is mildly below the threshold. Once
+again, assuming these $p$-values are drawn from a uniform distribution, given
+11 draws (the number of parameters in our inference), it is not abnormal to
+have one of the parameters lying slightly outside the threshold. To assess
+whether this is expected, we can compute the combined $p$-value for these 11
+parameters, and find it to be $p = 0.47$.  This shows our inference pipeline
+performs properly on simulated data at a similar level as standard tools
+\cite{Veitch:2014wba,Romero-Shaw:2020owr}.
 
 \begin{figure}
     \script{ppplots.py}
@@ -689,30 +685,30 @@ Indeed, the accuracy of our inference pipeline is consistent with other works\kw
 \subsection{Real event parameter estimation}
 
 To demonstrate the performance of our parameter estimation pipeline, we apply
-our pipeline to analyze GW150914 and GW170817. The prior used for the two events
-are shown in table \ref{tab:parameters}. We use a 4 seconds long segment for the
-GW150914 analysis, and a 128 seconds long segment for the GW170817 analysis.
-Both data segment are fetched from GWOSC \kw{cite}. Given the specific sampler
-setting we use, we produce around an average of 2500 and 3500 \textbf{effective
-samples}\footnote{Note that effective sample measures the number of independent
-samples, which takes correlation between step into account, and it is not the
-same as the number of generated samples. The effective sample size is computed
-using
-\texttt{arviz},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.}
-for GW150914 and GW170817 in each analysis respectively, which is run on an
-Nvidia A100 GPU. The \texttt{wall} time for both event is around 10 minutes. The
-chain data and the analysis scripts which generate the chains can be found on
+it to two real LIGO-Virgo events: GW150914 and GW170817. We use the priors
+shown in Table \ref{tab:parameters}, and take 4 s of data sampled at 2048 Hz
+for the GW150914 analysis, and 128 s of data sampled at 4096 Hz for the
+GW170817 analysis; strain data and PSDs for both events are fetched from GWOSC
+\cite{GWOSC}. For our specific choice of sampler settings, we produce
+${\sim}$2500 and 3500 \emph{effective samples}\footnote{Effective
+samples here refers to the number of independent samples, which is the total
+number of generated samples divided by their correlation length; we compute the
+effective sample size using
+\textsc{arviz},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
+\mi{cite}} for GW150914 and GW170817 respectively. Running on an Nvidia A100
+GPU, the wall time for both events is around 10 minutes. Most of this
+time is spent on just-in-time (JIT) compilation of the code; the actual
+sampling time is only ${\sim}150$ s. We pre-compute the reference waveform
+parameters used in hetetrodyne likelihood for the two events, the time for
+which is omitted in the \texttt{wall} time calculation.  The chain data and the
+analysis scripts which generate the chains can be found in
 %\kw{\variable{data/} and \variable{script}}
-. Most of the time is spent on jit compilation of the code, and the actual
-sampling time was about \~150s. Note that we have pre-computed the reference
-waveform parameters used in hetetrodyne likelihood for the two events, so the
-time spent on solving for the reference waveform parameters is omitted in the
-\texttt{wall} time calculation.
+.
 
 \begin{figure}
 \includegraphics[width=0.99\linewidth]{static/GW150914.png}
 \caption{
-    hi
+    GW150914 posterior computed by our code (\mi{blue}) and \textsc{Bilby} (\mi{orange}).
 }
 \label{fig:GW150914}
 \end{figure}
@@ -720,25 +716,28 @@ time spent on solving for the reference waveform parameters is omitted in the
 \begin{figure}
 \includegraphics[width=0.99\linewidth]{static/GW170817.png}
 \caption{
-    hi
+    GW170817 posterior computed by our code (\mi{blue}) and \textsc{Bilby} (\mi{orange}).
 }
 \label{fig:GW170817}
 \end{figure}
 
-Since we are using the \texttt{IMRPhenomD} waveform and the open data release
-available on GWOSC \kw{cite} does not provide the posterior samples for this
-waveform, we run Bilby using the same prior and waveform model as a reference
-for comparison. From fig \ref{fig:GW150914} and \ref{fig:GW170817}, we can see
-the 11-dimensional posteriors results produced by our pipeline are consistent
-with the results obtained using Bilby \kw{cite}.
+For comparison, we produce equivalent runs with \textsc{Bilby}, using the same
+exact data and priors.  We use the \textsc{dynesty} sampler
+\cite{2020MNRAS.493.3132S,dynesty}, with 1000 live points and other settings as
+shown in \cite{release}.  We carry out these runs using \textsc{parallel Bilby}
+(\textsc{pBilby}) \cite{Smith:2019ucc} to distribute the computation over 400
+Intel Skylake CPUs for each event.  For the specific settings chosen, the
+wall-time duration of each run is ${\sim}1$ day for GW150914 and ${\sim}2$ days
+for GW170817.
 
 % Describe the distance between flowMC result and Bilby result using
 % Jensen-Shannon divergence, scipy has a function to compute that in
 % scipy.spatial.distance
 
-For a quantitative comparison between results obtained through our code and
-other existing tools, we compute the Jensen-Shannon divergence of the
-marginalized distribution between our code and \texttt{Bilby}. The
+Figs.~\ref{fig:GW150914} and \ref{fig:GW170817} show that our posteriors are
+consistent with those produced by \textsc{Bilby}.  For a quantitative
+comparison, we compute the Jensen-Shannon divergence between our code and
+\textsc{Bilby} for the marginalized distribution for each parameter. The
 Jensen-Shannon divergence is a symmetric measure of the distance between two
 probability distributions, with a value of 0 indicating identical distributions
 and a value of $\ln{2} \textrm{nat}$ representing the maximum possible
@@ -755,18 +754,17 @@ flexible. Our package put together a number of innovations, including
 differentiable waveform models from \texttt{ripple} \kw{cite}, heterodyned
 likelihood and normalizing flow enhanced sampler \texttt{flowMC}. We tested the
 robustness of our pipeline on a set of 1200 synthetic GW events, showing it is
-capable of handling catalog that will be available in the near future. We also
+capable of handling catalogs that will be available in the near future. We also
 demonstrate our pipeline can estimate the parameters of GW150914 and GW170817 in
 \kw{Quote speed}. 
 
 % Compared to other works
-There are recent works from different groups on speeding up parameter estimation
-of gravitational wave, including efficient reparameterization
+There are recent works from different groups on speeding up parameter
+estimation of gravitational wave, including efficient reparameterization
 \cite{Islam:2022afg,Roulet:2022kot} and deep learning
 \cite{Dax:2021tsq,Dax:2022pxd}. While all of these methods can get down to
-minutes-scale parameter estimation with high fidelity, we would like to
-highlight the unique strength of this work, and the potential interplay between
-our work and others' work.
+minutes-scale parameter estimation with high fidelity, our approach possesses
+unique strengths, and may complement some of those other techniques.
 
 % Stephen's work
 Compared to \cite{Dax:2021tsq,Dax:2022pxd}, we do not rely on pre-training the neural
@@ -893,6 +891,7 @@ Another overhead we are looking into reducing is the time needed to find the
 reference waveform for heterodyning the likelihood. Currently, we are using
 \texttt{differential evolution} \cite{Storn1997DifferentialE} available in
 \texttt{scipy} to find the waveform parameters which maximize the likelihood.
+\mi{we should say this in the het like sect}
 Since \texttt{differnetial evolution} has not been implemented in Jax, and the
 Jax waveform we use is not compatible with the parallelization scheme in the
 \texttt{scipy} library, it takes around 5 minutes \kw{Benchmark it in the code

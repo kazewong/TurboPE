@@ -313,7 +313,7 @@ the reference waveform on the sparse bins, which are explicitly given by
 Note that the sum within each bin should be done with the same sampling rate as
 the data, i.e., the same one would do without using the heterodyned likelihood.
 
-\te{Do we also already here want to make the point that it really helps with memory issues of GPUs if the frequency array isn't too large?}
+% \te{Do we also already here want to make the point that it really helps with memory issues of GPUs if the frequency array isn't too large?}
 
 \subsection{MCMC with Gradient-based sampler}
 \label{sec:gradient}
@@ -421,18 +421,19 @@ favorable in terms of computing cost.
 While gradient-based samplers have been shown to outperform gradient-free
 algorithms in many practical applications, there remain classes of problems that
 most gradient-based samplers do not solve well. For example, first-order
-gradient-based algorithms struggle with target distributions that exhibit locally-varying
-correlations, since they assume a uniform global structure by construction
-\cite{2017arXiv170102434B}.\footnote{Sampling algorithms that use the
-information of higher order derivatives such as manifold-MALA and
-Riemannian-HMC \cite{RMHMC} can in principle handle local correlations in the
-target distribution; however, they often encounter instabilities when used in
-real-life applications, so their use is rare practice.} Another example is
-multi-modality: if there are multiple modes in the target distribution,
-individual chains will likely be trapped in one mode and take an extremely long
-time to transverse between the modes \cite{2018arXiv180803230M}.  This means
-that the relative weights between modes will take much longer to estimate than
-the shape of each mode.
+gradient-based algorithms struggle with target distributions that exhibit
+locally-varying correlations, since they assume a single mass matrix that does
+not depend on the location of the chain by construction
+\cite{2017arXiv170102434B}. \footnote{Sampling algorithms that use the
+information of higher order derivatives such as manifold-MALA and Riemannian-HMC
+\cite{RMHMC} can in principle handle local correlations in the target
+distribution; however, they often encounter instabilities when used in real-life
+applications, so their use is a rare practice.} Another example is multi-modality:
+if there are multiple modes in the target distribution, individual chains will
+likely be trapped in one mode and take an extremely long time to transverse
+between the modes \cite{2018arXiv180803230M}.  This means that the relative
+weights between modes will take much longer to estimate than the shape of each
+mode.
 
 % Long burn-in too
 Moreover, before we can use the sampling chain to estimate the posterior
@@ -447,7 +448,7 @@ of the computation is not directly devoted to estimating the target quantities.
 
 % Crux of normalizing flow
 All the above issues can be mitigated by normalizing flows.  Normalizing flows
-are a technique based on neural networks that aims at learning a mapping from a
+is a technique based on neural networks that aims at learning a mapping from a
 simple distribution, such as a Gaussian, to a complex distribution, often given
 in the form of samples \cite{2019arXiv190809257K, 2019arXiv191202762P}. Once
 the network is trained, one can evaluate the probability density of the complex
@@ -465,9 +466,6 @@ flow. For a detailed discussion of the algorithm, we refer the readers to
 \cite{2019arXiv190809257K, 2019arXiv191202762P}.
 
 % The flowMC algorithm
-\mi{can we clarify what it means to learn the ``global landscape'', and how
-this jives with the fact that norm flows are supposed to help with the
-\emph{local} correlations?}
 Working in tandem, gradient-based MCMC and normalizing flows can efficiently
 explore posteriors with local and global correlations, as well as multiple
 separate modes.  The scheme relies on iteratively using draws from the
@@ -477,10 +475,9 @@ proposal for another stage of MCMC sampling.
 Concretely, we begin by producing initial training data for the normalizing
 flow by running multiple independent chains of the gradient-based algorithm for
 a fixed number of steps.  From the resulting pool of samples, the normalizing
-flow can begin to learn the global landscape of the target distribution.
-%
+flow can begin to learn the landscape of the target distribution.
 However, since the independent chains contain the same number of samples, the
-relative weight assigned to each chains will not represent the true target
+relative weight assigned to each chain will not represent the true target
 distribution (e.g., the relative importance of separate modes will not be
 correctly calibrated). This is mitigated by a second stage of gradient-based
 MCMC sampling that uses the distribution learned by the normalizing flow as a
@@ -512,7 +509,7 @@ the Markov properties since we are changing the proposal distribution. To
 produce final samples that can be used to estimate target quantities, one has to
 freeze the normalizing flow model and not retrain during the final sampling
 phase in order to satisfy the detailed balance condition. We use the package
-\textsc{flowMC} \cite{2022arXiv221106397W}. The pseudocode of the algorithm is
+\texttt{flowMC} \cite{2022arXiv221106397W}. The pseudocode of the algorithm is
 given in Algorithm \ref{alg:cap}.
 
 \begin{algorithm}
@@ -542,7 +539,7 @@ $cp \leftarrow ip$\\
 \subsection{Accelerators}
 \label{sec:accelerators}
 
-Modern \mi{hardware?} accelerators such as graphics processing units (GPUs) and
+Modern hardwares such as graphics processing units (GPUs) and
 tensor processing units (TPUs) are designed to execute large-scale dense
 computation. They are often much more cost-efficient than using many central
 processing units (CPUs) when it comes to solving problems that can be benefited
@@ -570,13 +567,12 @@ flow learn the global landscape faster in wall time.
 
 % GPU helps packing a shit ton of waveform evaluation
 Another benefit of accelerators is the parallel evaluation of waveforms. Since
-the waveform models used in PE are approximants, they can be evaluated at any
-given time or frequency independently \mi{is this true for SEOB, and for the
-surrogate?}. This means computing a waveform can be trivially parallelized over
-frequency bins. Together with the heterodyned likelihood, we can evaluate the
-likelihood at $\mathcal{O}(10^7)$ different locations on an Nvidia A100 GPU
-\mi{faster?}.  The high throughput of likelihood evaluations unlocks the
-potential of the \texttt{flowMC} sampling algorithms.
+the waveform model we use can be evaluated at any given time or frequency
+independently, this means computing a waveform can be trivially parallelized
+over frequency bins. Together with the heterodyned likelihood, we can evaluate
+the likelihood at $\mathcal{O}(10^7)$ different locations on an Nvidia A100 GPU.
+The high throughput of likelihood evaluations unlocks the potential of the
+\texttt{flowMC} sampling algorithms.
 
 \section{Result}
 \label{sec: Result}
@@ -600,11 +596,12 @@ We sample 1200 events from the distribution of parameters detailed in Table
 \ref{tab:parameters}; the same distributions are used as the prior in the PE
 process.  We simulate signals over 16 seconds of data, with a minimum frequency
 cutoff of 30 Hz and a sampling rate of 2048 Hz.  We draw noise from the design
-PSDs for the LIGO Hanford, LIGO Livingston and Virgo detectors \cite{} \mi{what
-curves did you use?}.
-For both injection and recovery, we make use of the \textsc{IMRPhenomD}
-waveform \cite{Khan:2015jqa} via the fully-differentiable implementation
-presented in the \textsc{ripple} package \cite{}.
+PSDs for the LIGO Hanford, LIGO Livingston
+(\textsc{SimNoisePSDaLIGOZeroDetHighPower}) and Virgo
+(\textsc{SimNoisePSDAdvVirgo}) detectors \cite{}.
+For both injection and recovery, we make use of the \textsc{IMRPhenomD} waveform
+\cite{Khan:2015jqa} via the fully-differentiable implementation presented in the
+\textsc{ripple} package \cite{}.
 
 \begin{table*}[hbt!]
     \begin{center}
@@ -686,7 +683,7 @@ samples here refers to the number of independent samples, which is the total
 number of generated samples divided by their correlation length; we compute the
 effective sample size using
 \textsc{arviz},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
-\mi{cite}} for GW150914 and GW170817 respectively. Running on an Nvidia A100
+\cite{arviz_2019}} for GW150914 and GW170817 respectively. Running on an Nvidia A100
 GPU, the wall time for both events is around 10 minutes. Most of this
 time is spent on just-in-time (JIT) compilation of the code; the actual
 sampling time is only ${\sim}150$ s. We pre-compute the reference waveform
@@ -699,7 +696,7 @@ analysis scripts which generate the chains can be found in
 \begin{figure}
 \includegraphics[width=0.99\linewidth]{static/GW150914.png}
 \caption{
-    GW150914 posterior computed by our code (\mi{blue}) and \textsc{Bilby} (\mi{orange}).
+    GW150914 posterior computed by our code (blue) and \textsc{Bilby} (orange).
 }
 \label{fig:GW150914}
 \end{figure}
@@ -707,7 +704,7 @@ analysis scripts which generate the chains can be found in
 \begin{figure}
 \includegraphics[width=0.99\linewidth]{static/GW170817.png}
 \caption{
-    GW170817 posterior computed by our code (\mi{blue}) and \textsc{Bilby} (\mi{orange}).
+    GW170817 posterior computed by our code (blue) and \textsc{Bilby} (orange).
 }
 \label{fig:GW170817}
 \end{figure}
@@ -882,7 +879,6 @@ Another overhead we are looking into reducing is the time needed to find the
 reference waveform for heterodyning the likelihood. Currently, we are using
 \texttt{differential evolution} \cite{Storn1997DifferentialE} available in
 \texttt{scipy} to find the waveform parameters which maximize the likelihood.
-\mi{we should say this in the het like sect}
 Since \texttt{differnetial evolution} has not been implemented in Jax, and the
 Jax waveform we use is not compatible with the parallelization scheme in the
 \texttt{scipy} library, it takes around 5 minutes \kw{Benchmark it in the code

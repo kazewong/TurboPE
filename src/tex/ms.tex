@@ -191,19 +191,19 @@ sample points. This makes evaluating the likelihood function often the most
 computationally intensive part of PE. The most accurate waveform model is
 numerical relativity (NR), which obtains waveforms by directly solving the
 Einstein equations numerically for a given system. However, depending on the
-source parameters, generating one time series of strain can take a day to half a
-year, which makes NR prohibitively expensive for PE. To circumvent this problem,
-there are several families of waveform ``approximants'', including the
+source parameters, generating one time series of strain can take a day to half
+a year, which makes NR prohibitively expensive for PE. To circumvent this
+problem, there are several families of waveform ``approximants'', including the
 \textsc{IMRPhenom} family \cite{Khan:2015jqa, Garcia-Quiros:2020qpx}, the
 \textsc{SEOB} family \cite{PhysRevD.89.061502}, and the NR surrogate
 family\cite{Varma:2019csw}. For shorter events, such as a $30-30\ M_{\odot}$
-BBH, one waveform call could take $10\text{ms}$ to ${\sim}1s$ \kw{verify number
-in lalsuite}. For longer events, such as a $1.4-1.4\ M_{\odot}$ BNS, the
-evaluation time could go up to \kw{Fill}. Since one needs to evaluate the
-likelihood millions of times during sampling,\footnote{A typical PE run with
-\texttt{Bilby} takes ${>}10^6$ likelihood evaluations to converge.} the
-computational cost in evaluating the waveform accumulates and is the main reason
-of the long runtime of GW PE.
+binary black hole, one waveform call could take $10\text{ms}$ to ${\sim}1s$
+\kw{verify number in lalsuite}. For longer events, such as a $1.4-1.4\
+M_{\odot}$ binary neutron star, the evaluation time could go up to \kw{Fill}.
+Since one needs to evaluate the likelihood millions of times during
+sampling,\footnote{A typical PE run with \texttt{Bilby} takes ${>}10^6$
+likelihood evaluations to converge.} the computational cost in evaluating the
+waveform accumulates and is the main reason of the long runtime of GW PE.
 
 \subsection{Heterodyned likelihood}
 

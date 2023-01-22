@@ -59,17 +59,18 @@ GitHub.
 \label{sec:intro}
 
 % Brief description of PE
-Parameter estimation (PE) is one of the most commonly performed data analysis
-tasks in gravitational-wave (GW) data analysis and it underpins all of GW
-physics and astrophysics \cite{Christensen:2022bxb, 2019PASA...36...10T}. The
-central goal of PE is to infer the parameters of a particular GW source given
-the strain data detected by instruments like LIGO \cite{LIGOScientific:2014pky},
-Virgo \cite{VIRGO:2014yos} and KAGRA \cite{KAGRA:2020tym}. In the standard
-compact binary coalescence (CBC) scenario, this could mean inferring intrinsic
-parameters such as the masses and spins of the compact objects, as well as
-extrinsic parameters such as their sky localization and distance from Earth. PE
-is also applied to test general relativity (GR) and constrain deviations away
-from its predictions in observed data
+Parameter estimation (PE) underpins all of gravitational-wave physics and
+astrophysics, and is one of the most commonly performed tasks in
+gravitational-wave (GW) data analysis \cite{Christensen:2022bxb,
+2019PASA...36...10T}. The central goal of PE is to infer the parameters of a
+particular GW source given the strain data recorded by instruments like LIGO
+\cite{LIGOScientific:2014pky}, Virgo \cite{VIRGO:2014yos} and KAGRA
+\cite{KAGRA:2020tym}.  In the standard compact binary coalescence (CBC)
+scenario, this could mean inferring intrinsic parameters such the masses and
+spins of the compact objects, as well as extrinsic parameters such as their sky
+localization and distance from Earth. PE is also applied to test general
+relativity (GR) and constrain deviations away from its predictions in observed
+data
 \cite{LIGOScientific:2016lio,LIGOScientific:2018dkp,LIGOScientific:2021sio}. PE
 is a crucial step in GW science, since it translates characteristics of the
 strain data into astrophysically relevant quantities that can be used to
@@ -83,16 +84,16 @@ matter.
 % \mi{what catalog do you mean? The LVK doesn't use PyCBC Inference}
 There exist a number of prominent, community-developed PE codes, including
 \textsc{LALInference} \cite{Veitch:2014wba}, \textsc{PyCBC Inference}
-\cite{Biwer:2018osg}, and \textsc{Bilby} \cite{Ashton:2018jfp}. These packages
-have been tested by a number of groups and are well regarded as the standard
-tools. However, while these tools have passed many robustness tests, they are
-known to be computationally intensive. The exact amount of time needed to
-analyze one event depends on factors like the duration and frequency of the
-signal, as well as features of the specific waveform model. Typical runtimes for
-production-level analyses can range from days to weeks. This expense precludes
-iterating quickly on results, launching large-scale measurement simulations, or
-obtaining results in low latency to inform astronomers for potential follow-up in
-real time.
+\cite{Biwer:2018osg}, and \textsc{Bilby} \cite{Ashton:2018jfp}.  These packages
+have been tested by a number of groups and are well regarded as standard tools.
+However, while these tools have passed many robustness tests, they are known to
+be computationally intensive. The exact amount of time needed to analyze one
+event depends on factors like the duration and frequency of the signal, as well
+as features of the specific waveform model. Typical runtimes for
+production-level analyses can range from hours to weeks. This expense precludes
+iterating quickly on results, launching large scale measurement simulations, or
+obtaining results in low latency to inform astronomers for potential followup
+in real time.
 
 Additionally, in the coming decade, there are planned upgrades for existing
 facilities, as well as plans for next-generation detectors such as the Einstein
@@ -105,23 +106,22 @@ million per year \cite{Baibhav:2019gxm}. This will put a significant strain on
 the current PE tools.
 
 % Effort going to new tools development.
-To address this, there are efforts from multiple groups developing
-tools to speed up the PE process. This includes methods that employ modern
-tools such as deep learning-based methods pre-trained on a large collection of
-waveforms \cite{Dax:2021tsq,Dax:2022pxd}, as well as methods that simplify the
-computational challenge by leveraging our knowledge of GW signals
+In order to address this, there are efforts from multiple groups to speed up
+the PE process. This includes methods that employ modern tools such as methods
+based on deep learning networks pre-trained on large collections of waveforms
+\cite{Dax:2021tsq,Dax:2022pxd}, as well as methods that reduce the
+computational expense of classical PE by leveraging our knowledge of GW signals
 \cite{Islam:2022afg,Roulet:2022kot}. While these methods are promising avenues
-to tackle standard GW analysis tasks in the coming decade, particularly about
-events involving CBCs in GR, they rely on assumptions that may not be valid for
-analysis involving additional physical effects such as lensing and beyond-GR
-analysis, or may use approximations that do not compute the Bayesian likelihood
-exactly.
+for standard GW problems, particularly for CBCs in GR, they rely on assumptions
+that may not hold for analyses involving additional physical effects such as
+lensing and deviations from GR, or may use approximations that do not compute
+the Bayesian likelihood exactly.
 
 %Basic idea and unique advantage of our tool
 
 In this work, we present a lightweight, flexible, and high performance
 framework to infer GW event parameters in a fully-Bayesian analysis. Our
-framework implements the following major features to achieve its performance:
+framework implements the following techniques to achieve its performance:
 \begin{enumerate}
 \setlength{\itemsep}{0pt}
 \item differentiable waveform models,
@@ -314,6 +314,13 @@ Note that the sum within each bin should be done with the same sampling rate as
 the data, i.e., the same one would do without using the heterodyned likelihood.
 
 % \te{Do we also already here want to make the point that it really helps with memory issues of GPUs if the frequency array isn't too large?}
+
+To obtain a reference waveform, we currently use the \texttt{differential
+evolution} algorithm \cite{Storn1997DifferentialE} available in the
+\textsc{scipy} package \cite{2020SciPy-NMeth} to find the waveform parameters which maximize the
+likelihood.
+\mi{The reference waveform could also be produced from trigger parameters
+precomputed by a search pipeline without additional computation.}
 
 \subsection{MCMC with Gradient-based sampler}
 \label{sec:gradient}
@@ -570,9 +577,9 @@ Another benefit of accelerators is the parallel evaluation of waveforms. Since
 the waveform model we use can be evaluated at any given time or frequency
 independently, this means computing a waveform can be trivially parallelized
 over frequency bins. Together with the heterodyned likelihood, we can evaluate
-the likelihood at $\mathcal{O}(10^7)$ different locations on an Nvidia A100 GPU.
-The high throughput of likelihood evaluations unlocks the potential of the
-\texttt{flowMC} sampling algorithms.
+the likelihood at $\mathcal{O}(10^7)$ different locations on an \textsc{Nvidia}
+A100 GPU.  The high throughput of likelihood evaluations unlocks the potential
+of the \textsc{flowMC} sampling algorithms.
 
 \section{Result}
 \label{sec: Result}
@@ -682,8 +689,8 @@ ${\sim}$2500 and 3500 \emph{effective samples}\footnote{Effective
 samples here refers to the number of independent samples, which is the total
 number of generated samples divided by their correlation length; we compute the
 effective sample size using
-\textsc{arviz},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
-\cite{arviz_2019}} for GW150914 and GW170817 respectively. Running on an Nvidia A100
+\textsc{arviz} \cite{arviz_2019},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
+} for GW150914 and GW170817 respectively. Running on an \textsc{Nvidia} A100
 GPU, the wall time for both events is around 10 minutes. Most of this
 time is spent on just-in-time (JIT) compilation of the code; the actual
 sampling time is only ${\sim}150$ s. We pre-compute the reference waveform
@@ -717,7 +724,7 @@ exact data and priors.  We use the \textsc{dynesty} sampler
 shown in \cite{release}.  We carry out these runs using \textsc{parallel Bilby}
 (\textsc{pBilby}) \cite{Smith:2019ucc} to distribute the computation over 400
 Intel Skylake CPUs for each event.  For the specific settings chosen, the
-wall-time duration of each run is ${\sim}1$ day for GW150914 and ${\sim}2$ days
+wall-time duration of each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day
 for GW170817.
 
 % Describe the distance between flowMC result and Bilby result using
@@ -738,192 +745,214 @@ divergence between two distributions.
 \section{Discussion}
 \label{sec: Discussion}
 
-% Brief summary
-In this work, we present a PE pipeline for GW events that is efficient and
-flexible. Our package put together a number of innovations, including
-differentiable waveform models from \texttt{ripple} \kw{cite}, heterodyned
-likelihood and normalizing flow enhanced sampler \texttt{flowMC}. We tested the
-robustness of our pipeline on a set of 1200 synthetic GW events, showing it is
-capable of handling catalogs that will be available in the near future. We also
-demonstrate our pipeline can estimate the parameters of GW150914 and GW170817 in
-\kw{Quote speed}. 
+\subsection{Comparison to other approaches}
 
 % Compared to other works
-There are recent works from different groups on speeding up parameter
-estimation of gravitational wave, including efficient reparameterization
-\cite{Islam:2022afg,Roulet:2022kot} and deep learning
-\cite{Dax:2021tsq,Dax:2022pxd}. While all of these methods can get down to
+There have been several recent efforts to speed up parameter estimation of
+gravitational wave, relying on techniques ranging from efficient
+reparameterizations \cite{Islam:2022afg,Roulet:2022kot} to deep learning
+\cite{Dax:2021tsq,Dax:2022pxd}. While all of these methods can achieve
 minutes-scale parameter estimation with high fidelity, our approach possesses
 unique strengths, and may complement some of those other techniques.
 
 % Stephen's work
-Compared to \cite{Dax:2021tsq,Dax:2022pxd}, we do not rely on pre-training the neural
-network on a large collection of waveforms and noise realization. This means as
-soon as new waveform models and noise models are available, our algorithm can
-already be deployed. Furthermore, our method is essentially an MCMC algorithm,
-which inherits the merit of convergence measures in MCMC. As we are only using
-the normalizing flow as a proposal distribution, and the normalizing flow is
-trained jointly with a local sampler, we do not suffer from overfitting since
-our training data is being generated on the fly and is always approaching the
-target distribution. In this sense, we do not introduce potential extra
-systematic error to inference results.
+In contrast to \cite{Dax:2021tsq,Dax:2022pxd}, we do not require pre-training
+the neural network on a large collection of waveforms and noise realizations.
+This means that our algorithm can be immediately deployed as soon as new
+waveform models and noise models are available. Furthermore, our method is at
+its core an MCMC algorithm, meaning it inherits the merit of convergence
+measures in MCMC. As we are only using the normalizing flow as a proposal
+distribution, and the normalizing flow is trained jointly with a local sampler,
+we do not risk overfitting since our training data is being generated on the
+fly and is always approaching the target distribution. In this sense, we do not
+introduce potential extra systematic errors to the inference results.
 
-While our pipeline uses the sample generated by the local sampler for training,
-one can also supply a pre-trained normalizing flow model to our pipeline to
-bypass the training stage. This can further reduce the total runtime of our
-inference pipeline. However, this may introduce potential systematic bias in the
-inference result if the pre-trained network is not able to capture the
-complexity presented in the data.
+While our pipeline uses samples generated by the local sampler for training,
+one could also supply a pre-trained normalizing flow to our pipeline to bypass
+the training stage. This would have the advantage of further reducing the total
+runtime; however, it could introduce systematic bias in the inference result if
+the pre-trained network is not able to capture the complexity presented in the
+data.
 
 %Tousif's work
-Compared to \cite{Islam:2022afg,Roulet:2022kot}, we do not rely on handcrafted
-reparameterization of the coordinate systems. If the reparameterization scheme
-is known ahead of time, a nice reparameterization is also encouraged. However,
-handcrafted reparameterization depends on the assumptions used in deriving the
-reparameterization scheme, which would inevitably run into limitations of use
-cases. Our work can be viewed as an automatic reparameterization powered by
-normalizing flow, while not being exact hence as efficient as an explicit
-reparameterization, the method proposed in this work applies to a much border
-class of problems, such as parameter estimation with precessing waveforms,
-testing GR, and multi-event joint inference.
+In contrast to \cite{Islam:2022afg,Roulet:2022kot}, we do not rely on
+handcrafted reparameterizations of the coordinate systems used for sampling. If
+a useful reparameterization scheme is known ahead of time, it could trivially
+be implemented within our pipeline, potentially easing convergence. However,
+handcrafted reparameterizations rely on specific assumptions about the targeted
+signal, which cannot always be generalized beyond specific applications. On the
+other hand, within our pipeline, the normalizing flow effectively discovers
+reparameterizations that ease sampling automatically without \emph{a priori}
+knowledge of the structure of the problem. In general, the transformation
+discovered by the normalizing flow will only be approximate and hence not as
+efficient as an explicit reparameterization of the problem; yet, our approach
+applies to a much border class of problems where clever reparameterizations are
+not known ahead of time, such as parameter estimation with precessing
+waveforms, calibration parameters, testing GR, and multi-event joint inference.
 
 It is always beneficial to reparameterize if the reparameterization is known
-ahead of time. For the class of problems where
-\cite{Islam:2022afg,Roulet:2022kot} applies, we can incorporate the
-reparameterization scheme into our MCMC pipeline to reduce the complexity of the
-problem, hence speeding up the training phase. On the other hand, if there is
-part of the target posterior that is not included in the reparameterization
-scheme, the normalizing flow should still be able to learn to produce accurate
-samples efficiently.
+ahead of time. For the class of problems treated in
+\cite{Islam:2022afg,Roulet:2022kot}, we can incorporate those
+reparameterizations directly into our MCMC pipeline to reduce the complexity of the
+problem, hence speeding up the training phase. If there are limitations to the
+reparameterization that mean it cannot properly encompass part of the target
+posterior, the normalizing flow should still be able to learn to produce
+accurate samples efficiently.
 
-The two relevant works represent two orthogonal directions one can take in
-building next generation tools in general. On one hand, there are modern tools
-such as deep learning that are very flexible and powerful, but may need to rely
-on having highly robust training data. On the other hand, there are traditional
-tools that make use of our understanding of the underlying physics to simplify
-the problem, which relies on having good intuition of the problem. Both
-approaches rely on having a somewhat reasonable prior on how to approach the
-problem. The main difference between methods used in industrial products and
-scientific problems is scientific problems often try to address questions one
-may have not been answered before, hence it is supposed to be far away from our
-prior knowledge, meaning one need to take capability to generalize beyond the
-current problem into account while building the tool. Our work utilizes both
-reparameterization and deep learning, yet our method can be trivially extended
-to problems beyond standard GW analysis that reparameterization or deep learning
-alone may have trouble dealing with. We believe such flexibility is crucial for
-building scientific tools.
+The two avenues discussed here (machine learning and reparameterizations)
+represent two orthogonal directions one can take in building next generation PE
+tools. On the one hand, there are modern techniques such as deep learning that
+are very flexible and powerful, but rely on having highly robust training data.
+On the other hand, there are traditional tools that make use of our
+understanding of the underlying physics to simplify the problem, which relies
+on having good intuition of the problem. Both approaches rely on having a
+somewhat reasonable prior to approach the problem. The main difference between
+methods used in industrial products and scientific problems is scientific
+problems often try to address questions one may have not been answered before,
+hence it is supposed to eventually depart from our prior knowledge, meaning its
+desirable to design methods that generalize beyond the current state of
+knowledge robustly. Our work utilizes both reparameterization and machine
+learning, yet our method can be trivially extended to problems beyond standard
+GW analysis that reparameterization or deep learning alone may have trouble
+dealing with. Beyond efficiency, we believe such flexibility and robustness are
+crucial for building scientific tools.
+
+\subsection{Future development}
 
 % Additional traits for having differentiable waveforms
-There are some future developments we are working on. While IMRPhenomD
-\cite{Khan:2015jqa} is a reasonable start, it lacks some qualitative features
-that other state-of-the-art models have, such as precession, higher mode, and
-eccentricity. It also has a higher mismatch with reference numerical relativity
-waveforms compared to more recent waveform models. Currently, we are working on
-building differentiable IMRPhenomPv2 \cite{Khan:2018fmp} and three-parameters
-NRSurrogate waveforms \cite{Varma:2018mmi}. Going forward, we encourage the
-waveform development community to leverage autodiff environments such as Jax
-when constructing new waveform models. Having a differentiable waveform model is
-not only beneficial for parameter estimation, but also for other applications
-such as calibrating waveforms to numerical relativity results, as detailed in
-\kw{cite}.
+We are currently working on a number of improvements and extensions to our
+current infrastructure. While the \textsc{IMRPhenomD} waveform approximant is a
+reasonable start, it lacks some qualitative features that other
+state-of-the-art models have, such as precession, subdominants moments of the
+radiation, and eccentricity. It also has a higher mismatch with reference
+numerical relativity waveforms compared to more recent waveform models.
+Currently, we are working on building differentiable implementations of
+\textsc{IMRPhenomPv2} \cite{Khan:2018fmp}, the precessing successor to
+\textsc{IMRPhenomD}, as well as the numerical relativity surrogate waveforms,
+including \textsc{NRSur7dq4} \cite{Varma:2018mmi}. Going forward, we expect the
+use of autodifferentiation environments like \textsc{Jax} \cite{} to become
+more prevalent in the waveform development community, increasing the number of
+differentiable waveform models available. This would not only be beneficial for
+parameter estimation, but also for a number of other applications such as
+Fisher matrix computations, template placement and calibrating waveforms to
+numerical relativity \kw{cite}.
 
 % Access to higher dimensional problem
-While standard GW analysis goes up to 17 dimensions. non-standard GW PE problems
+While standard CBC analyses go up to 17 dimensions, non-standard GW PE problems
 can have more parameters, which could potentially lead to more complicated
 geometry in the target posterior that is hard to reparameterize. For example,
-\cite{LIGOScientific:2021sio} introduces 10 extra parameters to modify the
-post-Newtonian coefficients predicted in GR, which should be taken care at the
-same time during inference. On top of the increase of dimensionality, these
-parameters often introduce non-trivial degeneracies such as local correlation
-and multi-modality. Therefore, currently testing GR is limited to varying these
-modifications one at a time, partially due to the bottleneck in the sampler.
-Given the gradient-based and normalizing flow-enhanced sampler, our code shows
-the potential in solving this problem in full at once.
+\cite{LIGOScientific:2021sio} introduces 10 extra parameters controlling
+deviations in the post-Newtonian coefficients predicted in GR. On top of the
+increase of dimensionality, these parameters often introduce non-trivial
+degeneracies such as local correlation and multi-modality. Therefore, currently
+testing GR is limited in practice to varying these modifications one at a time,
+partially due to the bottleneck in the sampler.  Given the gradient-based and
+normalizing flow-enhanced sampler, our code shows promise in tackling this
+problem.
 
 % Other detectors configuration
-
-To perform realistic PE with our pipeline, the antenna pattern of the
-detector network needed to be taken into account. Our current code can perform
-parameter estimation for any combination of the Hanford, Livingston, and Virgo
-detectors, under the assumption of short signals such that the effect of Earth's
-rotation can be ignored. For next-generation detector networks such as the
-Einstein Telescope and the Cosmic Explorer, a differentiable version
-of their antenna pattern is needed.
+Our current code can perform parameter estimation for any combination of
+ground-based detectors detectors, under the assumption that signals are
+transient and their wavelength is short. The first condition guarantees that
+the effect of Earth's rotation can be ignored when computing antenna patterns,
+while the second means that we can treat the antenna patterns as frequency
+independent constants. These assumptions break for next-generation detectors,
+whether on Earth or in space, like Cosmic Explorer, Einstein Telescope and
+LISA; differentiable implementations antenna patterns for those detectors is
+work in progress.
 
 % More features such as marginalization
-The features we have implemented are the barebone version of parameter
-estimation. We do not include marginalization schemes such as time, phase, and
-calibration lines marginalization \cite{2019PASA...36...10T}. Because of the reasonable performance of the
-sampler on accelerators, time and phase marginalization is not necessary, as the
-performance of our implementation is not significantly impacted by having two
-extra dimensions. Nevertheless, having less parameters in a PE is always
-appreciated, which we are looking into including in our code as well as other
-marginalization modes.
+Furthermore, our current implementation is minimal and we do not make use of
+most standard ``tricks'' to accelerate sampling.  In particular, we do not
+incorporate (semi)analytic marginalization schemes over parameters such as
+time, phase, and calibration parameters \cite{2019PASA...36...10T}. Because of
+the already reasonable performance of our sampler thanks to hardware
+accelerators, time and phase marginalization is not crucial, as the performance
+of our implementation is not significantly impacted by having two extra
+dimensions. Nevertheless, having fewer parameters cannot hurt in the future, so
+we are looking into incorporating analytic marginalization schemes in our code
+as well.
 
 % JIT overhead
-Jax's JIT compilation drastically reduces the computational time to evaluate the
-likelihood. However, it comes with a compilation overhead when the likelihood is
-evaluated for the first time. We observe that the compilation time could depend
-on the device where the code will be run. This is expected since Jax leverage
-Accelerated Linear Algebra (XLA) takes advantage of accelerators, which means
-Jax needs to compile the code for the specific device according to its
-architecture. On an Nvidia A100 GPU, the compilation overhead could go up to 8
-minutes for the waveform we are using. For the cases we have studied, the time
-needed to obtain converging results on an A100 is about 2-3 minutes. This means
-the compilation overhead is dominating the wall-clock time of the specific PE
-run we considered. To utilize our implementation to its full potential, we are
-looking into ways to reduce the compilation overhead or to cache the
-compilation results to avoid paying the compilation overhead for every event.
+When it comes to wall time, the just-in-time compilation of our code is the
+current limiting factor.  While \textsc{Jax}'s JIT compilation drastically
+quickens likelihood evaluations, it comes with a significant compilation
+overhead before the first evaluation. We observe that the compilation time
+depends on the device where the code is run; this is expected since
+\textsc{Jax} leverages the \textsc{Accelerated Linear Algebra} (XLA) compiler
+to take advantage of hardware accelerators, which means that \textsc{Jax} needs
+to compile the code for each specific device according to its architecture. On
+an \textsc{Nvidia} A100 GPU, the compilation overhead could go up to 8 minutes
+for our current waveform. Meanwhile, for the cases we have studied, the time
+needed to obtain converging sampling on an A100 is about 2-3 minutes. This
+means the compilation overhead dominates the wall-clock time of our current PE
+runs. To maximize the potential of our code, we are looking into ways to reduce
+the compilation overhead or to cache the compilation results to avoid paying
+the compilation overhead for every event.
 
 % Faster maximum likelihood finder
+Besides compilation, there is in principle also overhead from finding the
+reference waveform used in for heterodyning the likelihood. Since the
+\texttt{differential evolution} algorithm we currently use has not been
+implemented in \textsc{Jax}, and the \textsc{Jax} waveform we use is not
+compatible with the parallelization scheme in the \textsc{scipy} library,
+maximizing the likelihood currently takes us around 5 minutes \kw{Benchmark it
+in the code and make this number precise.} for GW170817. There are two ways to
+reduce this time.
 
-Another overhead we are looking into reducing is the time needed to find the
-reference waveform for heterodyning the likelihood. Currently, we are using
-\texttt{differential evolution} \cite{Storn1997DifferentialE} available in
-\texttt{scipy} to find the waveform parameters which maximize the likelihood.
-Since \texttt{differnetial evolution} has not been implemented in Jax, and the
-Jax waveform we use is not compatible with the parallelization scheme in the
-\texttt{scipy} library, it takes around 5 minutes \kw{Benchmark it in the code
-and make this number precise.} to find the reference waveform parameters for
-GW170817. There are two ways to improve the performance in finding the
-parameters of the reference waveform. First, we can explore different
-optimization strategy that is more compatible with the strength of our pipeline,
-in particular differentiability of our likelihood and the possibility to
-evaluate many waveforms in parallel with a GPU. Particle swarm \cite{7869491}
-and stochastic gradient descent methods \cite{10.5555/304710.304720} are
-promising candidates which we intend to investigate in the future. 
+First, we can explore a different optimization strategy that
+takes full advantage of the strengths of our pipeline, in particular the
+differentiability of our likelihood and the possibility to evaluate many
+waveforms in parallel with a GPU. Particle swarm \cite{7869491} and stochastic
+gradient descent methods \cite{10.5555/304710.304720} are promising candidates
+we are investigating.
 
-Another way to reduce the time of finding the maximum likelihood waveform is to
-incorporate marginalization of extrinsic parameters to reduce the dimensionality
-of the optimization problem. Currently, we simultaneously maximize all 11 GW
-parameters, which is unnecessarily complicated and expensive. There are
-long-existing marginalization schemes over extrinsic parameters such as the merger
-time and phase, which can find the corresponding maximum likelihood waveform
-much more efficiently when compared to differential evolution. We expect
-implementing these marginalization schemes will reduce the time needed to find
-the reference waveform parameters by obtaining the extrinsic parameters and by
-reducing the dimensionality of the optimization problem for the intrinsic
-parameters.
+Second, we may marginalize extrinsic parameters to reduce the dimensionality of
+the optimization problem. Currently, we simultaneously maximize all 11 CBC
+parameters in our problem numerically, which is unnecessary. There are
+long-existing, efficient maximization schemes for extrinsic parameters, such as
+the merger time and phase, which can find the corresponding maximum likelihood
+waveform much more efficiently when compared to differential evolution. We
+expect implementing these schemes will reduce the time needed
+to find the reference waveform parameters by fixing the extrinsic parameters
+and by reducing the dimensionality of the optimization problem.
 
 % Multi-device scaling
-One important aspect of modern computing is scalability, meaning it is generally
-favorable if one can simply put more computing units in the same problem and
-reduce the Wall time. In our case, this means we would like to use more than one
-GPU for the same PE process. More GPUs can help in the following ways: first,
-more GPUs means we can run more independent chains at the same time, which can
-generate more samples faster. But more importantly, as shown in this work and
-\kw{cite flowMC?}, more independent chains also help with reducing the burn-in
-time. Parallelizing over the number of chain dimension is trivial and does not
-require much change to the current infrastructure. Another way more GPUs can
-helps is by allowing faster training of larger flow models. While the training time
-is not the biggest bottleneck given the flow model used in this study, more GPUs
-means we can increase the bandwidth of the flow model by increasing its size
-while keeping the training time the same. This helps capture more complex
-geometry in the target space, which can lead to more accurate results in general.
+Finally, one important aspect of modern computing is scalability, meaning it is
+generally favorable if one can simply put more computing units in the same
+problem and reduce the wall time. In our case, this means that we would like to
+use more than one GPU for the same PE process. More GPUs can help in the
+following ways: first, more GPUs means we can run more independent chains at
+the same time, which can generate more samples faster; second, and more
+importantly, as shown in this work and \kw{cite flowMC?}, more independent
+chains also help with reducing the burn-in time. Parallelizing over the number
+of chain dimension is trivial and does not require much change to the current
+infrastructure. Additional GPUs can also help by enabling faster training of
+larger flow models. While the training time is not the biggest bottleneck given
+the flow model used in this study, more GPUs means we can increase the
+bandwidth of the flow model by increasing its size while keeping the training
+time the same. This would help capture more complex geometries in the target
+space, which can lead to better convergence in general.
 
+\section{Conclusion}
+
+% Brief summary
+In this work, we presented a PE pipeline for GW events that is efficient,
+flexible and reliable. Our package brings together a number of innovations,
+including differentiable waveform models, likelihood heterodyning, and
+normalizing-flow enhanced gradient-based sampling. We tested the robustness of
+our pipeline, currently built upon \textsc{ripple} and \textsc{flowMC}, on a
+set of 1200 synthetic GW events, showing it is robust, unbiased and efficient
+enough to handle the large catalogs of detections that will be available in the
+near future. We also show that our pipeline can estimate the parameters of
+GW150914 and GW170817 in \kw{Quote speed}, demonstrating the potential of our
+implementation on real data.
 
 \section{Acknowledgements}
-Thanks Will.
+We thank Will M.~Farr for illuminating discussions.
+The Flatiron Institute is a division of the Simons Foundation, supported through the generosity of Marilyn and Jim Simons.
+This material is based upon work supported by NSF's LIGO Laboratory which is a major facility fully funded by the National Science Foundation.
+This research has made use of data or software obtained from the Gravitational Wave Open Science Center (gw-openscience.org), a service of LIGO Laboratory, the LIGO Scientific Collaboration, the Virgo Collaboration, and KAGRA. LIGO Laboratory and Advanced LIGO are funded by the United States National Science Foundation (NSF) as well as the Science and Technology Facilities Council (STFC) of the United Kingdom, the Max-Planck-Society (MPS), and the State of Niedersachsen/Germany for support of the construction of Advanced LIGO and construction and operation of the GEO600 detector. Additional support for Advanced LIGO was provided by the Australian Research Council. Virgo is funded, through the European Gravitational Observatory (EGO), by the French Centre National de Recherche Scientifique (CNRS), the Italian Istituto Nazionale di Fisica Nucleare (INFN) and the Dutch Nikhef, with contributions by institutions from Belgium, Germany, Greece, Hungary, Ireland, Japan, Monaco, Poland, Portugal, Spain. The construction and operation of KAGRA are funded by Ministry of Education, Culture, Sports, Science and Technology (MEXT), and Japan Society for the Promotion of Science (JSPS), National Research Foundation (NRF) and Ministry of Science and ICT (MSIT) in Korea, Academia Sinica (AS) and the Ministry of Science and Technology (MoST) in Taiwan.
 
 \bibliography{bib}
 

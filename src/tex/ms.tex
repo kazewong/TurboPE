@@ -520,7 +520,7 @@ phase in order to satisfy the detailed balance condition. We use the package
 given in Algorithm \ref{alg:cap}.
 
 \begin{algorithm}
-\caption{\textsc{flowMC} pseudocode}\label{alg:cap}
+\caption{\texttt{flowMC} pseudocode}\label{alg:cap}
 \KwIn{initial position $ip$}
 \Parameters{number of training loops $nt$, number of production loops $np$}
 \Variables{current chain $cc$, current position $cp$, current NF parameters $\Theta$}
@@ -579,7 +579,7 @@ independently, this means computing a waveform can be trivially parallelized
 over frequency bins. Together with the heterodyned likelihood, we can evaluate
 the likelihood at $\mathcal{O}(10^7)$ different locations on an \textsc{Nvidia}
 A100 GPU.  The high throughput of likelihood evaluations unlocks the potential
-of the \textsc{flowMC} sampling algorithms.
+of the \texttt{flowMC} sampling algorithms.
 
 \section{Result}
 \label{sec: Result}
@@ -608,7 +608,7 @@ PSDs for the LIGO Hanford, LIGO Livingston
 (\textsc{SimNoisePSDAdvVirgo}) detectors \cite{}.
 For both injection and recovery, we make use of the \textsc{IMRPhenomD} waveform
 \cite{Khan:2015jqa} via the fully-differentiable implementation presented in the
-\textsc{ripple} package \cite{}.
+\texttt{ripple} package \cite{}.
 
 \begin{table*}[hbt!]
     \begin{center}
@@ -941,7 +941,7 @@ In this work, we presented a PE pipeline for GW events that is efficient,
 flexible and reliable. Our package brings together a number of innovations,
 including differentiable waveform models, likelihood heterodyning, and
 normalizing-flow enhanced gradient-based sampling. We tested the robustness of
-our pipeline, currently built upon \textsc{ripple} and \textsc{flowMC}, on a
+our pipeline, currently built upon \texttt{ripple} and \texttt{flowMC}, on a
 set of 1200 synthetic GW events, showing it is robust, unbiased and efficient
 enough to handle the large catalogs of detections that will be available in the
 near future. We also show that our pipeline can estimate the parameters of

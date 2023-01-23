@@ -201,7 +201,7 @@ binary black hole, one waveform call could take $10\text{ms}$ to ${\sim}1s$
 \kw{verify number in lalsuite}. For longer events, such as a $1.4-1.4\
 M_{\odot}$ binary neutron star, the evaluation time could go up to \kw{Fill}.
 Since one needs to evaluate the likelihood millions of times during
-sampling,\footnote{A typical PE run with \texttt{Bilby} takes ${>}10^6$
+sampling,\footnote{A typical PE run with \textsc{Bilby} takes ${>}10^6$
 likelihood evaluations to converge.} the computational cost in evaluating the
 waveform accumulates and is the main reason of the long runtime of GW PE.
 
@@ -315,7 +315,7 @@ the data, i.e., the same one would do without using the heterodyned likelihood.
 
 % \te{Do we also already here want to make the point that it really helps with memory issues of GPUs if the frequency array isn't too large?}
 
-To obtain a reference waveform, we currently use the \texttt{differential
+To obtain a reference waveform, we currently use the \textsc{differential
 evolution} algorithm \cite{Storn1997DifferentialE} available in the
 \textsc{scipy} package \cite{2020SciPy-NMeth} to find the waveform parameters
 which maximize the likelihood.  The reference waveform could also be produced
@@ -516,11 +516,11 @@ the Markov properties since we are changing the proposal distribution. To
 produce final samples that can be used to estimate target quantities, one has to
 freeze the normalizing flow model and not retrain during the final sampling
 phase in order to satisfy the detailed balance condition. We use the package
-\texttt{flowMC} \cite{2022arXiv221106397W}. The pseudocode of the algorithm is
+\textsc{flowMC} \cite{2022arXiv221106397W}. The pseudocode of the algorithm is
 given in Algorithm \ref{alg:cap}.
 
 \begin{algorithm}
-\caption{\texttt{flowMC} pseudocode}\label{alg:cap}
+\caption{\textsc{flowMC} pseudocode}\label{alg:cap}
 \KwIn{initial position $ip$}
 \Parameters{number of training loops $nt$, number of production loops $np$}
 \Variables{current chain $cc$, current position $cp$, current NF parameters $\Theta$}
@@ -579,7 +579,7 @@ independently, this means computing a waveform can be trivially parallelized
 over frequency bins. Together with the heterodyned likelihood, we can evaluate
 the likelihood at $\mathcal{O}(10^7)$ different locations on an \textsc{Nvidia}
 A100 GPU.  The high throughput of likelihood evaluations unlocks the potential
-of the \texttt{flowMC} sampling algorithms.
+of the \textsc{flowMC} sampling algorithms.
 
 \section{Result}
 \label{sec: Result}
@@ -608,7 +608,7 @@ PSDs for the LIGO Hanford, LIGO Livingston
 (\textsc{SimNoisePSDAdvVirgo}) detectors \cite{}.
 For both injection and recovery, we make use of the \textsc{IMRPhenomD} waveform
 \cite{Khan:2015jqa} via the fully-differentiable implementation presented in the
-\texttt{ripple} package \cite{}.
+\textsc{ripple} package \cite{}.
 
 \begin{table*}[hbt!]
     \begin{center}
@@ -893,7 +893,7 @@ the compilation overhead for every event.
 % Faster maximum likelihood finder
 Besides compilation, there is in principle also overhead from finding the
 reference waveform used in for heterodyning the likelihood. Since the
-\texttt{differential evolution} algorithm we currently use has not been
+\textsc{differential evolution} algorithm we currently use has not been
 implemented in \textsc{Jax}, and the \textsc{Jax} waveform we use is not
 compatible with the parallelization scheme in the \textsc{scipy} library,
 maximizing the likelihood currently takes us around 5 minutes \kw{Benchmark it
@@ -941,7 +941,7 @@ In this work, we presented a PE pipeline for GW events that is efficient,
 flexible and reliable. Our package brings together a number of innovations,
 including differentiable waveform models, likelihood heterodyning, and
 normalizing-flow enhanced gradient-based sampling. We tested the robustness of
-our pipeline, currently built upon \texttt{ripple} and \texttt{flowMC}, on a
+our pipeline, currently built upon \textsc{ripple} and \textsc{flowMC}, on a
 set of 1200 synthetic GW events, showing it is robust, unbiased and efficient
 enough to handle the large catalogs of detections that will be available in the
 near future. We also show that our pipeline can estimate the parameters of

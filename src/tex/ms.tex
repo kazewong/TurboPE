@@ -696,9 +696,8 @@ time is spent on just-in-time (JIT) compilation of the code; the actual
 sampling time is only ${\sim}150$ s. We pre-compute the reference waveform
 parameters used in hetetrodyne likelihood for the two events, the time for
 which is omitted in the \texttt{wall} time calculation.  The chain data and the
-analysis scripts which generate the chains can be found in
-%\kw{\variable{data/} and \variable{script}}
-.
+analysis scripts which generate the chains can be found in 
+% \kw{\variable{data/} and \variable{script}}.
 
 \begin{figure}
     \script{plotEvents.py}
@@ -735,12 +734,43 @@ Figs.~\ref{fig:GW150914} and \ref{fig:GW170817} show that our posteriors are
 consistent with those produced by \textsc{Bilby}.  For a quantitative
 comparison, we compute the Jensen-Shannon divergence between our code and
 \textsc{Bilby} for the marginalized distribution for each parameter. The
-Jensen-Shannon divergence is a symmetric measure of the distance between two
-probability distributions, with a value of 0 indicating identical distributions
-and a value of $\ln{2} \textrm{nat}$ representing the maximum possible
-divergence between two distributions.
+Jensen-Shannon divergence (JSD) is a symmetric measure of the distance between
+two probability distributions, with a value of 0 indicating identical
+distributions and a value of $\ln{2} \textrm{nat}$ representing the maximum
+possible divergence between two distributions. The JSD values for the two events
+are shown in Table \ref{tab:JSD}. The maximum JSDs for GW150914 and GW170817 are
+$0.0171$ and $0.0166$, and the mean JSDs are $0.0062$ and $0.0031$,
+respectively. The JSD values are comparable to those reported in
+\cite{Romero-Shaw:2020owr}, which show our code agrees with existing tools.
 
-\kw{Report JSO} 
+\begin{table}[hbt!]
+    \begin{center}
+    \begin{tabular}{ l l l}
+    \hline
+    \hline
+    Parameter & GW150914 & GW170817\\
+    \hline
+        $M_c$ & $\textbf{0.0171}$ & $\textbf{0.0166}$ \\
+        $q$ & $0.0036$ & $0.0004$ \\
+        $\chi_1$ & $0.0023$ & $0.0006$ \\
+        $\chi_2$ & $0.0098$ & $0.0004$ \\
+        $d_L$ & $0.0009$ & $0.0076$ \\
+        $\phi_c$ & $0.0003$ & $0.0024$ \\
+        $\iota$ & $0.0026$ & $0.0045$ \\
+        $\psi$ & $0.0005$ & $0.0034$ \\
+        $\alpha$ & $0.0007$ & $0.0242$ \\
+        $\delta$ & $0.0020$ & $0.0017$ \\
+    \hline
+    \hline
+    \end{tabular}
+    \caption{JSD values for the marginalized distribution of each parameter for
+    GW150914 and GW170817 between our code and \textsc{Bilby}. The bold values
+    indicate the parameters with the largest JSD.}
+    \label{tab:JSD}
+    \end{center}
+\end{table}
+
+
 
 \section{Discussion}
 \label{sec: Discussion}

@@ -577,10 +577,12 @@ time.
 Another benefit of accelerators is the parallel evaluation of waveforms. Since
 the waveform model we use can be evaluated at any given time or frequency
 independently, this means computing a waveform can be trivially parallelized
-over frequency bins. Together with the heterodyned likelihood, we can evaluate
-the likelihood at $\mathcal{O}(10^7)$ different locations on an \textsc{Nvidia}
-A100 GPU.  The high throughput of likelihood evaluations unlocks the potential
-of the \textsc{flowMC} sampling algorithm.
+over frequency bins. On an \textsc{Nvidia} A100 GPU, we can evaluate the
+waveform model $\sim \mathcal{O}(10^9)$ times in a second for different
+frequencies or source parameters. Together with the heterodyned likelihood, this
+allows us to run thousands of parallel chains in a PE run. The high throughput
+of waveform evaluations unlocks the potential of the \textsc{flowMC} sampling
+algorithm.
 
 \section{Result}
 \label{sec: Result}

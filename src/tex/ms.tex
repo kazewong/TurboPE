@@ -699,9 +699,9 @@ divided by their correlation length; we compute the effective sample size using
 \textsc{arviz}
 \cite{arviz_2019},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
 } for GW150914 and GW170817 respectively. Running on an \textsc{Nvidia} A100
-GPU, the wall time for both events is around 10 minutes. Most of this time is
+GPU, the wall time for both events is around 3 minutes. Most of this time is
 spent on just-in-time (JIT) compilation of the code; the actual sampling time is
-only ${\sim}150$ s. We pre-compute the reference waveform parameters used in
+only ${\sim}40$ s. We pre-compute the reference waveform parameters used in
 hetetrodyne likelihood for the two events, the time for which is omitted in the
 \texttt{wall} time calculation.
 
@@ -980,7 +980,7 @@ our pipeline, currently built upon \textsc{ripple} and \textsc{flowMC}, on a
 set of 1200 synthetic GW events, showing it is robust, unbiased and efficient
 enough to handle the large catalogs of detections that will be available in the
 near future. We also show that our pipeline can estimate the parameters of
-GW150914 and GW170817 in \kw{Quote speed}, demonstrating the potential of our
+GW150914 and GW170817 within a couple minutes, demonstrating the potential of our
 implementation on real data.
 
 \section{Acknowledgements}

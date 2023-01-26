@@ -69,14 +69,13 @@ particular GW source given the strain data recorded by instruments like LIGO
 scenario, this could mean inferring intrinsic parameters such the masses and
 spins of the compact objects, as well as extrinsic parameters such as their sky
 localization and distance from Earth. PE is also applied to test general
-relativity (GR) and constrain deviations away from its predictions in observed
-data
-\cite{LIGOScientific:2016lio,LIGOScientific:2018dkp,LIGOScientific:2021sio}. PE
-is a crucial step in GW science, since it translates characteristics of the
+relativity (GR)
+\cite{LIGOScientific:2016lio,LIGOScientific:2018dkp,LIGOScientific:2021sio},
+and constrain the properties of nuclear matter \cite{LIGOScientific:2018hze}.
+PE is a crucial step in GW science, since it translates characteristics of the
 strain data into astrophysically relevant quantities that can be used to
 constrain astrophysical phenomena, including informing theories of binary
-evolution \cite{LIGOScientific:2021psn} and measuring the properties of nuclear
-matter.
+evolution \cite{LIGOScientific:2021psn}.
 
 % Old codes have trouble handling next gen data
 % The PE results in the most recent catalog of GW events are produced by several
@@ -98,7 +97,7 @@ in real time.
 Additionally, in the coming decade, there are planned upgrades for existing
 facilities, as well as plans for next-generation detectors such as the Einstein
 Telescope (ET) \cite{Punturo:2010zz} and the Cosmic Explorer (CE)
-\cite{LIGOScientific:2016wof}. These upgrades will increase the sensitivity of
+\cite{LIGOScientific:2016wof}. These upgrades will increase sensitivity of
 the instruments and allow for the detection of more events with a better
 signal-to-noise ratio (SNR). The number of events that will be detected in the
 coming decade is expected to grow from around a thousand per year to over a
@@ -107,13 +106,13 @@ the current PE tools.
 
 % Effort going to new tools development.
 In order to address this, there are efforts from multiple groups to speed up
-the PE process. This includes methods that employ modern tools such as methods
-based on deep learning networks pre-trained on large collections of waveforms
+the PE process. This includes methods that employ modern techniques such as
+deep learning networks pre-trained on large collections of waveforms
 \cite{Dax:2021tsq,Dax:2022pxd}, as well as methods that reduce the
 computational expense of classical PE by leveraging our knowledge of GW signals
-\cite{Islam:2022afg,Roulet:2022kot}. While these methods are promising avenues
-for standard GW problems, particularly for CBCs in GR, they rely on assumptions
-that may not hold for analyses involving additional physical effects such as
+\cite{Islam:2022afg,Roulet:2022kot}. While these avenues are promising for
+standard GW problems, they rely on assumptions that may not hold for analyses
+targeting additional physical effects beyond standard CBCs in GR, such as
 lensing and deviations from GR, or may use approximations that do not compute
 the Bayesian likelihood exactly.
 
@@ -124,18 +123,17 @@ framework to infer GW event parameters in a fully-Bayesian analysis. Our
 framework implements the following techniques to achieve its performance:
 \begin{enumerate}
 \setlength{\itemsep}{0pt}
+\item likelihood heterodyning,
 \item differentiable waveform models,
-\item normalizing-flow enhanced Markov chain Monte-Carlo (MCMC) sampler,
-\item heterodyned likelihood,
+\item a normalizing-flow enhanced Markov chain Monte-Carlo (MCMC) sampler, and
 \item native support for hardware accelerators.
 \end{enumerate}
-The main advantage of our framework is it does not rely on specific assumptions
-about the problem to achieve its performance. This makes our method extensible
-to problems beyond the standard CBC analysis, without sacrificing accuracy for
-efficiency.
+All these components, working jointly, come together into a high-performance
+and high-fidelity PE pipeline, which can achieve ${\gtrsim}10^3\times$ speed
+ups relative to traditional tools without sacrificing accuracy for efficiency
+or making limiting assumptions about the target parameter space.
 
 %Structure of paper
-
 The rest of the paper is structured as follows: we review the basics of PE and
 introduce our framework in Sec.~\ref{sec: PE}; we present benchmarking results
 on both simulated and real data in Sec.~\ref{sec: Result}; and, finally, we
@@ -169,91 +167,101 @@ Gaussian process, the log-likelihood for GW data is given by
     \log{\mathcal{L}(d \mid \theta)} = -\frac{1}{2} \left\langle d-h(\mathbf{\theta}) \mid d-h(\mathbf{\theta})\right\rangle,
 \label{eq: loglikelihood}
 \end{align}
-where $d$ is the observed strain data, $h(\mathbf{\theta})$ is the signal
-predicted by a waveform model with a specific set of source parameters $\theta$.
-The right hand side of Eq.~\eqref{eq: loglikelihood} can be evaluated in either
-the time or frequency domains. For stationary noise, it is computationally
-cheaper to compute the likelihood in the frequency domain and the
-noise-weighted inner product can be written 
+where $d$ is the observed strain data, and $h(\mathbf{\theta})$ is the signal
+predicted by a waveform model with a specific set of source parameters
+$\theta$.  The right hand side of Eq.~\eqref{eq: loglikelihood} can be
+evaluated in either the time or frequency domains. For stationary noise, it is
+computationally cheaper to compute the likelihood in the frequency domain, with
+a noise-weighted inner product given by
 \begin{align}
     % \left<a|b\right> = 4 Re\int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)} df,
-    \left\langle a \mid b\right\rangle = 4 \Re \int \frac{a^*(f)b(f)}{\mathcal{S}_n(f)}\, \mathrm{d}f \, ,
+    \left\langle a \mid b\right\rangle = 4 \Re \int_0^\infty \frac{a^*(f)b(f)}{\mathcal{S}_n(f)}\, \mathrm{d}f \, ,
 \label{eq: innerproduct}
 \end{align}
-where $\mathcal{S}_n(f)$ is the noise power spectral density (PSD).
-In practice, the integral becomes a discrete sum over a finite number of
-samples determined by the sampling rate of the detector data and duration of
+where $\mathcal{S}_n(f)$ is the one-sided power spectral density (PSD) of the
+noise.  In practice, the integral becomes a discrete sum over a finite number
+of bins determined by the sampling rate of the detector data and duration of
 the observation.
 
-To compute the integral shown in Eq.~\eqref{eq: innerproduct}, we need to
-evaluate a chosen waveform model $h(\mathbf{\theta})$ at a number of frequency
-sample points. This makes evaluating the likelihood function often the most
-computationally intensive part of PE. The most accurate waveform model is
-numerical relativity (NR), which obtains waveforms by directly solving the
-Einstein equations numerically for a given system. However, depending on the
-source parameters, generating one time series of strain can take a day to half
-a year, which makes NR prohibitively expensive for PE. To circumvent this
-problem, there are several families of waveform ``approximants'', including the
-\textsc{IMRPhenom} family \cite{Khan:2015jqa, Garcia-Quiros:2020qpx}, the
-\textsc{SEOB} family \cite{PhysRevD.89.061502}, and the NR surrogate
-family\cite{Varma:2019csw}. For shorter events, such as a $30-30\ M_{\odot}$
-binary black hole, one waveform call could take $10\text{ms}$ to ${\sim}1s$
-\kw{verify number in lalsuite}. For longer events, such as a $1.4-1.4\
-M_{\odot}$ binary neutron star, the evaluation time could go up to \kw{Fill}.
-Since one needs to evaluate the likelihood millions of times during
-sampling,\footnote{A typical PE run with \textsc{Bilby} takes ${>}10^6$
-likelihood evaluations to converge.} the computational cost in evaluating the
-waveform accumulates and is the main reason of the long runtime of GW PE.
+To compute the integral in Eq.~\eqref{eq: innerproduct}, we need to evaluate a
+waveform model $h(\mathbf{\theta})$ at a number of frequency bins. This makes
+evaluating the likelihood function often the most computationally intensive
+part of PE. The most accurate waveforms are obtained via numerical relativity
+(NR) simulations, which directly solve the Einstein equations numerically for a
+given system. Unfortunately, such simulations can take anywhere from a day to
+half a year, making direct evaluation through NR prohibitively expensive. To
+circumvent this, there are several families of waveform ``approximants'',
+including the \textsc{IMRPhenom} family \cite{Khan:2015jqa,
+Garcia-Quiros:2020qpx}, the \textsc{SEOB} family \cite{PhysRevD.89.061502}, and
+the NR surrogate family \cite{Varma:2019csw}. Evaluating those approximants can
+take ${\sim}10$ ms to 1 s for short signals, such as a $30-30\ M_{\odot}$
+binary black hole, reaching up to \kw{Fill} for long signals, such as a
+$1.4-1.4\ M_{\odot}$ binary neutron star.  Since PE requires millions of
+likelihood evaluations during sampling, the computational cost in evaluating
+the waveform is a major contributor to the long runtimes of GW PE.
 
 \subsection{Heterodyned likelihood}
 
 Since the computational cost of evaluating a waveform model scales linearly
-with the number of sample points either in the time or frequency domain, the
-computational burden for longer-duration signals is often quite large. To
-reduce the computational cost, there are a number of methods to reduce the
-number of basis points one would need to compute the likelihood faithfully
-\cite{Field:2011mf, Field:2013cfa, Smith:2016qas, Vinciguerra:2017ngf}. In this
-work, we use likelihood heterodyning \cite{Cornish:2021lje} (also named
-relative binning in \cite{Zackay:2018qdy}).
+with the number of time or frequency bins, the computational burden for
+longer-duration signals is often quite large. To mitigate this, there are a
+number of methods to reduce the number of basis points needed to compute the
+likelihood faithfully \cite{Field:2011mf, Field:2013cfa, Smith:2016qas,
+Vinciguerra:2017ngf}. In this work, we take advantage of likelihood
+heterodyning \cite{Cornish:2021lje} (also known as relative binning
+\cite{Zackay:2018qdy}).
 
-The idea behind the heterodyned likelihood can be summarized as follows: the
-integrand in Eq.~\eqref{eq: innerproduct} is a highly oscillatory function, so
-one has to sample the integrand with sufficiently dense sampling to compute the
-integral faithfully. The number of sample points needed would be much smaller
-if the integrand was smooth. Given a pair of waveform parameters
-$\mathbf{\theta}$ and $\mathbf{\theta_0}$ that are close to each other, the
-waveforms generated using the pair of parameters are similar to each other,
-this means the ratio between the waveforms is a smoothly varying function.
-Given a reference waveform $h(\mathbf{\theta_0})$, we can exploit this
-similarity between waveforms to reduce the number of sample points needed to
-compute the likelihood for the set of $\mathbf{\theta}$ that is similar to
-$\mathbf{\theta_0}$. We decompose the integrand into two parts: (1) a highly
-oscillatory part that depends only on the reference waveform given by
-$\mathbf{\theta}$ and the data, and hence only needs to be evaluated once; and,
-(2) a smoothly varying part that depends on the target waveform parameters
-$\theta$, that needs to be evaluated for every new likelihood evaluation.
-Because the part that depends on the target waveform parameters is smooth, we
-can use far fewer sample points to compute the integral with sufficient
-accuracy.
+The idea behind the heterodyned likelihood can be summarized as follows: since
+the integrand in Eq.~\eqref{eq: innerproduct} is a highly oscillatory function,
+one has to sample it at a high rate to compute the integral faithfully;
+however, the number of sample points needed would be much smaller if the
+integrand was smooth. For a pair of points $\theta$ and $\theta_0$ that are
+close to each other in parameter space, the corresponding waveforms $h(\theta)$
+and $h(\theta_0)$ will necessarily be similar; this means that the ratio
+between waveforms is a smoothly function of frequency. Given a reference
+waveform $h(\theta_0)$, we can exploit this fact to reduce the number of
+frequency bins needed to compute the likelihood for the set of $\theta$ in the
+neighborhood of $\theta_0$.
 
-One may be concerned by the accuracy of this approximation over the target
-parameter space, especially in the region where the generated waveform is
-significantly different from the reference waveform. However, given that we are
-interested in the most probable set of parameters, if we choose the reference
-waveform to be close to the data, the waveforms that are different from the
-reference waveform should necessarily also differ significantly from the data.
-This means that the likelihood value for these waveforms should be
-significantly smaller than the likelihood of the waveforms that are similar to
-the reference waveform, and hence will not be relevant for the PE result. In
-practice, one will first optimize the likelihood function with full frequency
-resolution to obtain the reference waveform parameters, which can be run at a
-much lower cost compared to PE. 
+To do this, we decompose the integrand into two parts: (1) a highly oscillatory
+part that depends only on the reference waveform given by $\theta_0$ and
+the data, and which need only be evaluated once; and, (2) a smoothly
+varying part that depends on the target waveform parameters $\theta$, which
+must be evaluated for every likelihood computation. Because the part
+that depends on the target waveform parameters is smooth, we can use far fewer
+frequency samples to compute the integral with sufficient accuracy.
+
+One may be concerned about the accuracy of this scheme, especially in the
+region where the generated waveform is significantly different from the
+reference waveform. However, given that we are interested in the most probable
+set of parameters, if we choose the reference waveform to be close to the data,
+the waveforms that are different from the reference waveform will necessarily
+also differ significantly from the data. This means that the likelihood value
+for parameters far from the reference will be significantly smaller than the
+likelihood of those close to it, and hence will not be relevant for the PE
+result. To ensure that this is the case, we always pick reference parameters
+known to lie close to the target, e.g., by first maximizing the likelihood
+function using the highest frequency resolution available, which can be run at
+a much lower cost than to PE. 
 
 We now give a concise description of the implementation of this approach in our
 code; for a more extensive derivation of heterodyned likelihood, we refer the
-reader to the reference \cite{Zackay:2018qdy}. In the heterodyned likelihood
-framework, the two terms involving $h$ obtained by expanding Eq.~\eqref{eq:
-loglikelihood} can be approximated as
+reader to the reference \cite{Zackay:2018qdy}. Let $h(f)$ and $h_0(f)$
+represent the target and reference waveforms, respectively; then, for a given
+sparse binning of the frequency axis, the ratio $r(f) = h(f)/h_0(f)$ can be
+well approximated by a linear interpolation over the bin,
+\begin{align}
+r(f) \approx r_0(h,b) + r_1(h,b)(f- f_m(b)) + \cdots,
+\label{eq:definer}
+\end{align}
+where $b$ is the index of a particular bin, $r_0(h,b)$ and $r_1(h,b)$ are
+respectively the value and slope of the ratio at the center of the bin, and
+$f_m(b)$ is the central frequency of the bin. Since we have access to both
+$h(f)$ and $h_0(f)$, we can compute $r_0$ and $r_1$ by evaluating $r(f)$ at the
+edge of the bin and inverting Eq.~\eqref{eq:definer}.
+
+With this definition, the two terms involving $h$ obtained by expanding
+Eq.~\eqref{eq: loglikelihood} can be approximated as
 \begin{subequations} \label{eq: heterodynedlikelihood}
 \begin{equation}
     \langle d \mid h \rangle \approx \sum_b \left[ A_0(b)\, r^*_0(h,b) + A_1(b)\, r^*_1(h,b) \right] ,
@@ -263,33 +271,29 @@ loglikelihood} can be approximated as
     &\left. 2 B_1(b)\, \Re\{r_0(h,b)\, r_1(h,b)\} \right] 
 \end{align}
 \end{subequations} 
-where $b$ denotes the index of a \textit{sparse} set of bins over which the integrand
-will be computed; $A_0(b)$, $A_1(b)$, $B_0(b)$, and $B_1(b)$ are the
-heterodyning coefficients computed using the data and the reference waveform;
-and, finally, $r_0(h,b)$ and $r_1(h,b)$ are the ratios between the target waveform and the
-reference waveform at the center of the bin and its first derivative.
-For sufficiently fine bins, the ratio between the target waveform
-and the reference within a bin can be approximated by linear interpolation,
+where $A_0(b)$, $A_1(b)$, $B_0(b)$, and $B_1(b)$ are heterodyning coefficients
+computed using the data and the reference waveform. These are defined to be
 \begin{align}
-r(f) = \frac{h(f)}{h_0(f)} = r_0(h,b) + r_1(h,b)(f- f_m(b)) + \cdots,
-\label{eq:definer}
+    A_0(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)}{S_n(f)} \Delta f, \\
+    A_1(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)(f-f_m(b))}{S_n(f)} \Delta f, \\
+    B_0(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2}{S_n(f)} \Delta f, \\
+    B_1(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2(f-f_m(b))}{S_n(f)} \Delta f\, ,
 \end{align}
-where $b$ is the index of a particular bin, $r_0(h,b)$ and $r_1(h,b)$ are the
-value and slope of the ratio at the center of the bin respectively, and
-$f_m(b)$ is the center frequency of the bin. Since we have access to both $h(f)$
-and $h_0(f)$, we can compute $r_0$ and $r_1$ by evaluating the value of $r(f)$
-at the edge of the bin and inverting Eq.~\eqref{eq:definer}.
-To evaluate Eq.~\eqref{eq: heterodynedlikelihood}, we need to first choose a
-binning scheme, then evaluate the coefficients given the data and the reference
+where the sums within each bin ($f \in b$) should be done with the same, dense
+sampling rate as the original data (with thin frequency bins of width $\Delta f$).
+
+To evaluate
+Eq.~\eqref{eq: heterodynedlikelihood}, we need to first choose a binning
+scheme, then evaluate the coefficients given the data and the reference
 waveform, and at last the ratio between the target waveform and the reference
 waveform at the center of each bin.
 
-Considering the phasing of a waveform is denoted by a power series $\Psi(f) =
-\sum_i \alpha_i f^{\gamma_i}$, where $\alpha_i$ are some coefficients depending
-on the waveform parameters and $\gamma_i$ are powers motivated by post-Newtonian
-theory. For example, for the term $\gamma_i = -5/3$, $\alpha_i$ is related to
-the chirp mass. The maximum dephasing one can have within a frequency interval
-$[f_{\textrm{min}},f_{\textrm{max}}]$ is given by
+Considering the phasing of an inspiral waveform is denoted by a power series
+$\Psi(f) = \sum_i \alpha_i f^{\gamma_i}$, where $\alpha_i$ are some
+coefficients depending on the waveform parameters and $\gamma_i$ are powers
+motivated by post-Newtonian theory. For example, for the term $\gamma_i =
+-5/3$, $\alpha_i$ is related to the chirp mass. The maximum dephasing one can
+have within a frequency interval $[f_{\textrm{min}},f_{\textrm{max}}]$ is 
 \begin{align}
     \delta \Psi_{\textrm{max}}(f) = 2\pi \sum_{i} (f/f_{*,i})^{\gamma_i} \textrm{sgn}(\gamma_i),
 \label{eq: maxdephasing}
@@ -301,17 +305,6 @@ band of interest into a set of bins such that the maximum dephasing within each
 bin is smaller than a certain threshold $\epsilon$, i.e.,
 $|\delta\Psi_{\textrm{max}}(f_{\textrm{max}}) -
 \delta\Psi_{\textrm{max}}(f_{\textrm{min}})| < \epsilon$. 
-
-The final ingredient we need is the heterodyning coefficients for the data and
-the reference waveform on the sparse bins, which are explicitly given by
-\begin{align}
-    A_0(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)}{S_n(f)} \Delta f, \\
-    A_1(b) &= 4 \sum_{f \in b} \frac{d(f)h^*_0(f)(f-f_m(b))}{S_n(f)} \Delta f, \\
-    B_0(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2}{S_n(f)} \Delta f, \\
-    B_1(b) &= 4 \sum_{f \in b} \frac{|h_0(f)|^2(f-f_m(b))}{S_n(f)} \Delta f.
-\end{align}
-Note that the sum within each bin should be done with the same sampling rate as
-the data, i.e., the same one would do without using the heterodyned likelihood.
 
 % \te{Do we also already here want to make the point that it really helps with memory issues of GPUs if the frequency array isn't too large?}
 
@@ -326,35 +319,35 @@ computation.
 \label{sec:gradient}
 
 Given Eq.~\eqref{eq: loglikelihood} and the prior, one can evaluate the
-posterior density function, Eq.~\eqref{eq: bayes}, over the entire parameter
-space of interest to obtain the most probable set of values that are consistent
-with the data. However, directly sampling this posterior quickly becomes
-intractable as the dimensionality of the parameter space increases beyond a few
-dimensions. Markov chain Monte Carlo \cite{gelmanbda04} is a common
-method employed to generate samples from the target posterior when direct
-sampling is not possible.
+posterior density, Eq.~\eqref{eq: bayes}, over the entire parameter space of
+interest to obtain the most probable set of values that are consistent with the
+data. However, directly sampling this posterior quickly becomes intractable as
+the dimensionality of the parameter space increases beyond a few dimensions.
+Markov chain Monte Carlo \cite{gelmanbda04} is a common method employed to
+generate samples from the target posterior when direct sampling is not
+possible.
 
-In MCMC, the posterior distribution is approximated by a Markov chain that eventually
-converges to the target distribution \cite{10.1214/aos/1176325750}. The Markov
-chain is constructed by iteratively proposing a new point in the parameter space
-based on the current location of the chain. The proposed point is accepted with
-a probability that is usually set to be proportional to the ratio of the
-posterior density evaluated at the proposed point and the current point. The
-chain can either accept the proposal and move to the new location, or reject the
-proposal and stay at the current location. This process is repeated until the
-chain converges to the target distribution. The samples generated by the chain
-are then used as a fair sample to estimate the quantities of interest, such as the mean and
-credible intervals of the source parameters. In practice, since we do not know
-the target distribution ahead of time, the MCMC process is usually repeated
-until a certain criterion is met, such as a Gelman-Rubin convergence statistic
-\cite{10.2307/2246093} lower than certain threshold, or simply after a fixed number
-of iterations.
+In MCMC, the posterior distribution is approximated by a Markov chain that
+eventually converges to the target distribution \cite{10.1214/aos/1176325750}.
+The chain is constructed by iteratively proposing a new point in the
+parameter space based on the current location of the chain. The proposed point
+is accepted with a probability that is usually set to be proportional to the
+ratio of the posterior density evaluated at the proposed point and the current
+point. The chain can either accept the proposal and move to the new location,
+or reject the proposal and stay at the current location. This process is
+repeated until the chain converges to the target distribution. The samples
+generated by the chain are then used as a fair sample to estimate the
+quantities of interest, such as the mean and credible intervals of the source
+parameters. In practice, since we do not know the target distribution ahead of
+time, the MCMC process is usually repeated until a certain criterion is met,
+such as a Gelman-Rubin convergence statistic \cite{10.2307/2246093} lower than
+certain threshold, or simply after a fixed number of iterations.
 
 Compared to direct sampling, MCMC algorithms only explore regions that are
 highly probable, thus reducing the computational cost by not wasting resources
 in regions where it is unlikely to generate the observed data. However, MCMC
 algorithms come with their own set of issues. To illustrate what difficulties
-MCMC may face, we can examine one of the most vanilla MCMC algorithms: the
+MCMC may face, we can examine one of the most standard MCMC algorithms: the
 Metropolis-Hastings algorithm with a Gaussian kernel. Starting at some initial
 point, one can draw a proposed point from a Gaussian transition kernel, defined
 as
@@ -379,11 +372,11 @@ transition kernel. If we choose the variance of the transition kernel to be too
 large, this fraction will be small hence the acceptance rate will be poor. On
 the other hand, if one chooses the variance to be too small, nearby samples
 will be correlated, and it will take a long time for the chain to wander. In
-both cases, the efficiency in constructing the chain with a target number of
+both cases, the efficiency in constructing a chain with a target number of
 independent samples is suboptimal. Consequently, there is often a tuning
-process before we run the MCMC algorithm to find the optimal settings for the
-algorithm (in this example, the variance of the Gaussian) to ensure the best
-possible performance.
+process before we run the MCMC algorithm to find the optimal sampling settings
+(in this example, the variance of the Gaussian) to ensure the best possible
+performance.
 
 However, as we often deal with high-dimensional problems, even the optimally
 tuned Gaussian transition kernel does not guarantee good performance. In order
@@ -392,15 +385,15 @@ smaller in a higher dimensional space, which means that the transition kernel wi
 \cite{2017arXiv170102434B}.
 
 Transition kernels that leverage gradient information of the target
-distribution can help to address this issue of shortening steps in a high
+distribution can help address this issue of shortening steps in a high
 dimensional space. Instead of proposing a new point by drawing from a Gaussian,
 one can use the gradient evaluated at the current location to propose a new
 point, so that the evolution of the chain is preferentially directed to regions
-of higher probability. For example, Metropolis-adjusted Langevin algorithm
-(MALA) \cite{10.2307/2346184} place a unit Gaussian at the tip of the gradient
+of higher probability. For example, the Metropolis-adjusted Langevin algorithm
+(MALA) \cite{10.2307/2346184} places a unit Gaussian at the tip of the gradient
 vector at the current position,
 \begin{align}
-    \mathbf{x} = \mathbf{x_0} + \tau \nabla\log{p(\mathbf{x_0})} + \sqrt{2\tau}N(0,\mathbf{I}),
+    \mathbf{x} = \mathbf{x_0} + \tau \nabla\log{p(\mathbf{x_0})} + \sqrt{2\tau}N(0,\mathbf{I})\, ,
 \end{align}
 where $\tau$ is a step size chosen during the tuning stage. Compared to a
 Gaussian centered at the current location, the MALA transition kernel is more
@@ -421,26 +414,32 @@ posterior itself. Thus, having access to gradient information through automatic
 differentiation is crucial to making gradient-based transition kernels
 favorable in terms of computing cost.
 
+To leverage automatic differentiation, the entire posterior function must be
+implemented within \textsc{Jax} or a similar framework; this includes the
+likelihood and, therefore, the waveform approximant.  This means that the
+development of differentiable approximants is essential for leveraging
+gradient-based sampling in GW applications. We currently make use of the
+waveforms implemented in \textsc{ripple} \cite{}.
+
 \subsection{Normalizing Flow enhanced sampling}
 \label{sec:flow}
 
 % Problem with just HMC or MALA
 While gradient-based samplers have been shown to outperform gradient-free
-algorithms in many practical applications, there remain classes of problems that
-most gradient-based samplers do not solve well. For example, first-order
+algorithms in many practical applications, there remain classes of problems
+that most gradient-based samplers do not solve well. For example, first-order
 gradient-based algorithms struggle with target distributions that exhibit
 locally-varying correlations, since they assume a single mass matrix that does
 not depend on the location of the chain by construction
-\cite{2017arXiv170102434B}. \footnote{Sampling algorithms that use the
-information of higher order derivatives such as manifold-MALA and Riemannian-HMC
-\cite{RMHMC} can in principle handle local correlations in the target
-distribution; however, they often encounter instabilities when used in real-life
-applications, so their use is a rare practice.} Another example is multi-modality:
-if there are multiple modes in the target distribution, individual chains will
-likely be trapped in one mode and take an extremely long time to transverse
-between the modes \cite{2018arXiv180803230M}.  This means that the relative
-weights between modes will take much longer to estimate than the shape of each
-mode.
+\cite{2017arXiv170102434B}.\footnote{Sampling algorithms that use higher order
+derivatives such as manifold-MALA and Riemannian-HMC \cite{RMHMC} can in
+principle handle local correlations in the target distribution; however, they
+often encounter instabilities when used in real-life applications, so their use
+is a rare practice.} Another example is multi-modality: if there are multiple
+modes in the target distribution, individual chains will likely be trapped in
+one mode and take an extremely long time to transverse between the modes
+\cite{2018arXiv180803230M}.  This means that the relative weights between modes
+will take much longer to estimate than the shape of each mode.
 
 % Long burn-in too
 Moreover, before we can use the sampling chain to estimate the posterior
@@ -455,7 +454,7 @@ of the computation is not directly devoted to estimating the target quantities.
 
 % Crux of normalizing flow
 All the above issues can be mitigated by normalizing flows.  Normalizing flows
-is a technique based on neural networks that aims at learning a mapping from a
+are a technique based on neural networks that aims at learning a mapping from a
 simple distribution, such as a Gaussian, to a complex distribution, often given
 in the form of samples \cite{2019arXiv190809257K, 2019arXiv191202762P}. Once
 the network is trained, one can evaluate the probability density of the complex
@@ -469,8 +468,8 @@ distributions via a Jacobian, as given by
 where $p_x(X)$ is the complex target distribution, $p_z(Z)$ is the simple
 latent distribution and $f$ is an invertible parameterized transform that
 connects the two distributions, $x = f(z)$, to be learned by the normalizing
-flow. For a detailed discussion of the algorithm, we refer the readers to
-\cite{2019arXiv190809257K, 2019arXiv191202762P}.
+flow. See \cite{2019arXiv190809257K, 2019arXiv191202762P} for a detailed
+discussion of the algorithm.
 
 % The flowMC algorithm
 Working in tandem, gradient-based MCMC and normalizing flows can efficiently
@@ -508,16 +507,17 @@ proposed jumps will be accepted. This means an MCMC process using the
 normalizing flow model as the proposal distribution can adjust the
 normalization across different regions of the target parameter space by
 rejecting jumps into less likely regions. The training and sampling are then
-repeated until certain criteria, at each step combining global and local MCMC
-sampling which respectively do and do not use the normalizing flow as proposal.
+repeated until certain criteria are met, at each step combining global and
+local MCMC sampling which respectively do and do not use the normalizing flow
+as proposal.
 
-Note that every time we retrain the network, we are breaking
-the Markov properties since we are changing the proposal distribution. To
-produce final samples that can be used to estimate target quantities, one has to
-freeze the normalizing flow model and not retrain during the final sampling
-phase in order to satisfy the detailed balance condition. We use the package
-\textsc{flowMC} \cite{2022arXiv221106397W}. The pseudocode of the algorithm is
-given in Algorithm \ref{alg:cap}.
+Note that every time we retrain the network, we are breaking the Markov
+properties since we are changing the proposal distribution. To produce final
+samples that can be used to estimate target quantities, one has to freeze the
+normalizing flow model and not retrain during the final sampling phase in order
+to satisfy the detailed balance condition. We use the package \textsc{flowMC}
+\cite{2022arXiv221106397W}, with MALA as the gradient-based sampler. The
+pseudocode of the algorithm is given in Algorithm \ref{alg:cap}.
 
 \begin{algorithm}
 \caption{\textsc{flowMC} pseudocode}\label{alg:cap}
@@ -546,8 +546,8 @@ $cp \leftarrow ip$\\
 \subsection{Accelerators}
 \label{sec:accelerators}
 
-Modern hardwares such as graphics processing units (GPUs) and
-tensor processing units (TPUs) are designed to execute large-scale dense
+Modern hardware accelerators, such as graphics processing units (GPUs) and
+tensor processing units (TPUs), are designed to execute large-scale, dense
 computation. They are often much more cost-efficient than using many central
 processing units (CPUs) when it comes to solving problems that can be benefited
 from parallelization.  The downside of these accelerators compared to CPUs is
@@ -555,22 +555,23 @@ that they can only perform a more restricted set of operations and are often
 less performant when dealing with serial problems. Parameter estimation with
 MCMC is a serial problem since each new sample generated from a chain depends
 on the last sample in the chain. This means that naively putting the problem on
-an accelerator is more likely to harm performance than improve it.
+an accelerator is more likely to reduce performance than increase it.
 
 % More sample helps training normalizing flow
-Yet, in our work, the use of accelerators provides two independent perks that
-tremendously benefit the parameter estimation process. First, using
-accelerators allow us to run many independent MCMC chains simultaneously, which
-benefits the training of the normalizing flow. Since we generate the data we
-use to train the normalizing flow on the fly, the more independent data we can
-feed to the training process, the higher chance the normalizing flow can learn
-a reasonable representation of the global landscape of the target distribution.
-If we only used a small number of chains, we would be limited to the correlated
-samples from each chain and we would have to run more sequential steps to get
-the same amount of independent samples---with more chains the problem becomes
-parallelizable and we can obtain the same number of training samples sooner. In
-other words, being able to use many independent chains helps the normalizing
-flow learn the global landscape faster in wall time.
+Yet, in our work, the use of accelerators provides two independent advantages
+that tremendously benefit the parameter estimation process. First, using
+accelerators allows us to run many independent MCMC chains simultaneously,
+which benefits the training of the normalizing flow. Since we generate the data
+we use to train the normalizing flow on the fly, the more independent data we
+can feed to the training process, the higher chance the normalizing flow can
+learn a reasonable representation of the global landscape of the target
+distribution.  If we only used a small number of chains, we would be limited to
+the correlated samples from each chain and we would have to run more sequential
+steps to obtain the same amount of independent samples in the end---with more
+chains the problem becomes parallelizable and we can obtain the same number of
+training samples sooner. In other words, being able to use many independent
+chains helps the normalizing flow learn the global landscape faster in wall
+time.
 
 % GPU helps packing a shit ton of waveform evaluation
 Another benefit of accelerators is the parallel evaluation of waveforms. Since
@@ -579,33 +580,35 @@ independently, this means computing a waveform can be trivially parallelized
 over frequency bins. Together with the heterodyned likelihood, we can evaluate
 the likelihood at $\mathcal{O}(10^7)$ different locations on an \textsc{Nvidia}
 A100 GPU.  The high throughput of likelihood evaluations unlocks the potential
-of the \textsc{flowMC} sampling algorithms.
+of the \textsc{flowMC} sampling algorithm.
 
 \section{Result}
 \label{sec: Result}
 \subsection{Injection-recovery test}
 
 To demonstrate the robustness of our pipeline, we use it to recover the
-parameters of a set of simulated signals. We create a set of simulated signals
-and inject them into simulated stationary Gaussian noise.
-Then we run our pipeline on the simulated data, and determine the credible
-interval at which the true parameters of the injected signals are recovered. From the set of
-credible values, we can check whether the true value lies within a certain
-credible interval at the expected frequency: if our pipeline is working as expected, we
-should find the true parameters lie within $x\%$ credible interval $x\%$ of the
-time, e.g., the true value should lie within the $50\%$ credible interval $50\%$
-of the time. In other word, the percentiles of the true parameters should be
-uniformly distributed. Deviation from this behavior suggests the pipeline is
-either over-confident or too conservative \cite{Cook2006,Talts2018}.
+parameters of a set of simulated signals injected into different instantiations
+of synthetic stationary Gaussian noise. Then we run our pipeline on the
+simulated data, and determine the credible interval at which the true
+parameters of the injected signals are recovered. From the set of credible
+values, we can check whether the truth lies within a certain credible interval
+at the expected frequency: if our pipeline is working as expected, we should
+find that the true parameters lie within $x\%$ credible interval $x\%$ of the
+time, e.g., the true value should lie within the $50\%$ credible interval
+$50\%$ of the time. In other words, the recovered percentiles of the true
+parameters should be uniformly distributed. Deviation from this behavior would
+suggest the pipeline is either over-confident or too conservative
+\cite{Cook2006,Talts2018}.
 
 % State the distribution of injected population
 We sample 1200 events from the distribution of parameters detailed in Table
 \ref{tab:parameters}; the same distributions are used as the prior in the PE
-process.  We simulate signals over 16 seconds of data, with a minimum frequency
-cutoff of 30 Hz and a sampling rate of 2048 Hz.  We draw noise from the design
-PSDs for the LIGO Hanford, LIGO Livingston
-(\textsc{SimNoisePSDaLIGOZeroDetHighPower}) and Virgo
-(\textsc{SimNoisePSDAdvVirgo}) detectors \cite{}. For both injection and
+process.  We simulate signals over 16 s of data, with a minimum frequency
+cutoff of 30 Hz and a sampling rate of 2048 Hz. We draw noise from a set of
+projected design PSDs for the LIGO Hanford, LIGO Livingston
+(\texttt{SimNoisePSDaLIGOZeroDetHighPower}) and Virgo
+(\texttt{SimNoisePSDAdvVirgo}) detectors
+\cite{lalsuite,Shoemaker:T0900288,2012arXiv1202.4031M}. For both injection and
 recovery, we make use of the \textsc{IMRPhenomD} waveform \cite{Khan:2015jqa}
 via the fully-differentiable implementation presented in the \textsc{ripple}
 package \cite{}. We use a neural spline flow model \cite{2019arXiv190604032D}
@@ -654,16 +657,16 @@ of each parameter. The shaded band denotes the 95\%-confident variation
 expected from draws from a uniform distribution with the same number of events.
 We can see that most of the measured curves lie within this band, showing that
 our inference results agree well with a uniform distribution. There is a small
-deviation from a uniform distribution for the secondary spin $\chi_2$, which is
+deviation from uniformity for the secondary spin $\chi_2$, which is
 not alarming given that we are computing the quantile for 11 parameters.  This
 is what we expect if our pipeline is working as expected.
 
 To further quantify how well our result agrees with a uniform distribution, we
 can compute the Kolmogorov-Smirnov $p$-values for each marginalized
-distribution \cite{}.  If this $p$-value were is low (with a threshold often
-chosen to be $p = 0.05$), then our result could be in tension with a uniform
+distribution \cite{}.  A low $p$-value (with a threshold often
+chosen to be $p = 0.05$) could indicate that our result is in tension with a uniform
 distribution. The $p$-values obtained for each parameter are shown in the
-legend of Fig.~\ref{fig:ppplot}.  Most of them are well above the $p = 0.05$
+legend of Fig.~\ref{fig:ppplot}. Most of them are well above the $p = 0.05$
 threshold, except for $\chi_2$, which is mildly below the threshold. Once
 again, assuming these $p$-values are drawn from a uniform distribution, given
 11 draws (the number of parameters in our inference), it is not abnormal to
@@ -686,24 +689,23 @@ performs properly on simulated data at a similar level as standard tools
 
 \subsection{Real event parameter estimation}
 
-To demonstrate the performance of our parameter estimation pipeline, we apply it
-to two real LIGO-Virgo events: GW150914 and GW170817. We use the priors shown in
-Table \ref{tab:parameters}, and take 4 s of data sampled at 2048 Hz for the
-GW150914 analysis, and 128 s of data sampled at 4096 Hz for the GW170817
-analysis; strain data and PSDs for both events are fetched from GWOSC
-\cite{GWOSC}. We use the same normalizing flow model as the injection-recovery
-study. For our specific choice of sampler settings, we produce ${\sim}$2500 and
-3500 \emph{effective samples}\footnote{Effective samples here refers to the
-number of independent samples, which is the total number of generated samples
-divided by their correlation length; we compute the effective sample size using
-\textsc{arviz}
+To demonstrate the performance of our parameter estimation pipeline, we apply
+it to two real LIGO-Virgo events: GW150914 and GW170817. We use the priors
+shown in Table \ref{tab:parameters}, and take 4 s of data sampled at 2048 Hz
+for GW150914, and 128 s of data sampled at 4096 Hz for GW170817; strain data
+and PSDs for both events are fetched from GWOSC \cite{GWOSC}. We use the same
+normalizing flow model as the injection-recovery study. For our specific choice
+of sampler settings, we produce ${\sim}$2500 and 3500 \emph{effective
+samples}\footnote{Effective samples here refers to the number of independent
+samples, which is the total number of generated samples divided by their
+correlation length; we compute the effective sample size using \textsc{arviz}
 \cite{arviz_2019},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
 } for GW150914 and GW170817 respectively. Running on an \textsc{Nvidia} A100
 GPU, the wall time for both events is around 3 minutes. Most of this time is
 spent on just-in-time (JIT) compilation of the code; the actual sampling time is
 only ${\sim}40$ s. We pre-compute the reference waveform parameters used in
 hetetrodyne likelihood for the two events, the time for which is omitted in the
-\texttt{wall} time calculation.
+wall-time calculation.
 
 \begin{figure}
     \script{plotEvents.py}
@@ -726,11 +728,11 @@ hetetrodyne likelihood for the two events, the time for which is omitted in the
 For comparison, we produce equivalent runs with \textsc{Bilby}, using the same
 exact data and priors.  We use the \textsc{dynesty} sampler
 \cite{2020MNRAS.493.3132S,dynesty}, with 1000 live points and other settings as
-shown in \cite{release}.  We carry out these runs using \textsc{parallel Bilby}
-(\textsc{pBilby}) \cite{Smith:2019ucc} to distribute the computation over 400
-Intel Skylake CPUs for each event.  For the specific settings chosen, the
-wall-time duration of each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day
-for GW170817.
+in the configurations files included in our data release \cite{release}.  We
+carry out these runs using \textsc{parallel Bilby} (\textsc{pBilby})
+\cite{Smith:2019ucc} to distribute the computation over 400 Intel Skylake CPUs
+for each event.  For the specific settings chosen, the wall-time duration of
+each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day for GW170817.
 
 % Describe the distance between flowMC result and Bilby result using
 % Jensen-Shannon divergence, scipy has a function to compute that in
@@ -742,7 +744,7 @@ comparison, we compute the Jensen-Shannon divergence between our code and
 \textsc{Bilby} for the marginalized distribution for each parameter. The
 Jensen-Shannon divergence (JSD) is a symmetric measure of the distance between
 two probability distributions, with a value of 0 indicating identical
-distributions and a value of $\ln{2} \textrm{nat}$ representing the maximum
+distributions and a value of $\ln{2}$ nat representing the maximum
 possible divergence between two distributions. The JSD values for the two events
 are shown in Table \ref{tab:JSD}. The maximum JSDs for GW150914 and GW170817 are
 $0.0171$ and $0.0166$, and the mean JSDs are $0.0062$ and $0.0031$,

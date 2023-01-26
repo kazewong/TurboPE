@@ -406,20 +406,20 @@ introduces an additional computational cost, which is not necessarily
 beneficial in terms of sampling time. If one wants to compute the gradient
 through finite differencing, the additional computational cost goes as at least
 ${\sim} \mathcal{O}(2n)$, where $n$ is the dimension of the problem. On the
-other hand, automatic differentiation schemes like \textsc{Jax} allow us to
-compute the gradient of the likelihood function with respect to the parameters
-through automatic differentiation, which gives the gradient information down to
-machine precision at around the same order of time compared to evaluating the
-posterior itself. Thus, having access to gradient information through automatic
-differentiation is crucial to making gradient-based transition kernels
-favorable in terms of computing cost.
+other hand, automatic differentiation schemes like \textsc{Jax}
+\cite{jax2018github} allow us to compute the gradient of the likelihood
+function with respect to the parameters through automatic differentiation,
+which gives the gradient information down to machine precision at around the
+same order of time compared to evaluating the posterior itself. Thus, having
+access to gradient information through automatic differentiation is crucial to
+making gradient-based transition kernels favorable in terms of computing cost.
 
 To leverage automatic differentiation, the entire posterior function must be
 implemented within \textsc{Jax} or a similar framework; this includes the
 likelihood and, therefore, the waveform approximant.  This means that the
 development of differentiable approximants is essential for leveraging
 gradient-based sampling in GW applications. We currently make use of the
-waveforms implemented in \textsc{ripple} \cite{}.
+waveforms implemented in \textsc{ripple} \cite{ripplepaper}.
 
 \subsection{Normalizing Flow enhanced sampling}
 \label{sec:flow}
@@ -611,7 +611,7 @@ projected design PSDs for the LIGO Hanford, LIGO Livingston
 \cite{lalsuite,Shoemaker:T0900288,2012arXiv1202.4031M}. For both injection and
 recovery, we make use of the \textsc{IMRPhenomD} waveform \cite{Khan:2015jqa}
 via the fully-differentiable implementation presented in the \textsc{ripple}
-package \cite{}. We use a neural spline flow model \cite{2019arXiv190604032D}
+package \cite{ripplepaper}. We use a neural spline flow model \cite{2019arXiv190604032D}
 with 10 layers, each with 128 hidden units, and 8 bins per layer as our
 normalizing flow model.
 
@@ -784,12 +784,13 @@ respectively. The JSD values are comparable to those reported in
 \subsection{Comparison to other approaches}
 
 % Compared to other works
-There have been several recent efforts to speed up parameter estimation of
-gravitational wave, relying on techniques ranging from efficient
-reparameterizations \cite{Islam:2022afg,Roulet:2022kot} to deep learning
+There have been several recent efforts to speed up GW parameter estimation,
+relying on techniques ranging from efficient reparameterizations
+\cite{Islam:2022afg,Roulet:2022kot} to deep learning
 \cite{Dax:2021tsq,Dax:2022pxd}. While all of these methods can achieve
-minutes-scale parameter estimation with high fidelity, our approach possesses
-unique strengths, and may complement some of those other techniques.
+minutes-scale parameter estimation with high fidelity under some conditions,
+our approach possesses unique strengths, and may complement some of those other
+techniques.
 
 % Stephen's work
 In contrast to \cite{Dax:2021tsq,Dax:2022pxd}, we do not require pre-training
@@ -813,7 +814,7 @@ data.
 %Tousif's work
 In contrast to \cite{Islam:2022afg,Roulet:2022kot}, we do not rely on
 handcrafted reparameterizations of the coordinate systems used for sampling. If
-a useful reparameterization scheme is known ahead of time, it could trivially
+a useful reparameterization scheme is known ahead of time, it can trivially
 be implemented within our pipeline, potentially easing convergence. However,
 handcrafted reparameterizations rely on specific assumptions about the targeted
 signal, which cannot always be generalized beyond specific applications. On the
@@ -826,13 +827,13 @@ applies to a much border class of problems where clever reparameterizations are
 not known ahead of time, such as parameter estimation with precessing
 waveforms, calibration parameters, testing GR, and multi-event joint inference.
 
-It is always beneficial to reparameterize if the reparameterization is known
+It is always beneficial to reparameterize if the a convenient mapping is known
 ahead of time. For the class of problems treated in
 \cite{Islam:2022afg,Roulet:2022kot}, we can incorporate those
-reparameterizations directly into our MCMC pipeline to reduce the complexity of the
-problem, hence speeding up the training phase. If there are limitations to the
-reparameterization that mean it cannot properly encompass part of the target
-posterior, the normalizing flow should still be able to learn to produce
+reparameterizations directly into our MCMC pipeline to reduce the complexity of
+the problem, hence speeding up the training phase. If there are limitations to
+the reparameterization that mean it cannot properly encompass part of the
+target posterior, the normalizing flow should still be able to learn to produce
 accurate samples efficiently.
 
 The two avenues discussed here (machine learning and reparameterizations)
@@ -840,18 +841,19 @@ represent two orthogonal directions one can take in building next generation PE
 tools. On the one hand, there are modern techniques such as deep learning that
 are very flexible and powerful, but rely on having highly robust training data.
 On the other hand, there are traditional tools that make use of our
-understanding of the underlying physics to simplify the problem, which relies
+understanding of the underlying physics to ease sampling, which relies
 on having good intuition of the problem. Both approaches rely on having a
-somewhat reasonable prior to approach the problem. The main difference between
-methods used in industrial products and scientific problems is scientific
-problems often try to address questions one may have not been answered before,
-hence it is supposed to eventually depart from our prior knowledge, meaning its
-desirable to design methods that generalize beyond the current state of
-knowledge robustly. Our work utilizes both reparameterization and machine
-learning, yet our method can be trivially extended to problems beyond standard
-GW analysis that reparameterization or deep learning alone may have trouble
-dealing with. Beyond efficiency, we believe such flexibility and robustness are
-crucial for building scientific tools.
+somewhat reasonable prior to approach the problem.
+
+The main difference between methods used in industrial products and scientific
+problems is scientific problems often try to address questions one may have not
+been answered before, hence it is supposed to eventually depart from our prior
+knowledge, meaning its desirable to design methods that generalize beyond the
+current state of knowledge robustly. Our work leverages both reparameterization
+and machine learning, yet our method can be trivially extended to problems
+beyond standard CBC analysis that reparameterization or deep learning alone may
+have trouble dealing with. Beyond efficiency, such flexibility and robustness
+are crucial for building scientific tools.
 
 \subsection{Future development}
 
@@ -860,23 +862,23 @@ We are currently working on a number of improvements and extensions to our
 current infrastructure. While the \textsc{IMRPhenomD} waveform approximant is a
 reasonable start, it lacks some qualitative features that other
 state-of-the-art models have, such as precession, subdominants moments of the
-radiation, and eccentricity. It also has a higher mismatch with reference
+radiation, tdes or eccentricity. It also has a higher mismatch with reference
 numerical relativity waveforms compared to more recent waveform models.
 Currently, we are working on building differentiable implementations of
-\textsc{IMRPhenomPv2} \cite{Khan:2018fmp}, the precessing successor to
-\textsc{IMRPhenomD}, as well as the numerical relativity surrogate waveforms,
-including \textsc{NRSur7dq4} \cite{Varma:2018mmi}. Going forward, we expect the
-use of autodifferentiation environments like \textsc{Jax} \cite{} to become
-more prevalent in the waveform development community, increasing the number of
-differentiable waveform models available. This would not only be beneficial for
-parameter estimation, but also for a number of other applications such as
-Fisher matrix computations, template placement and calibrating waveforms to
-numerical relativity \kw{cite}.
+\textsc{IMRPhenomXPHM} \cite{Pratten:2020ceb}, a precessing successor to
+\textsc{IMRPhenomD} including subdominant harmonics, as well as the numerical
+relativity surrogate waveforms, including \textsc{NRSur7dq4}
+\cite{Varma:2018mmi}. Going forward, we expect the use of autodifferentiation
+environments like \textsc{Jax} to become more prevalent in the waveform
+development community, increasing the number of differentiable waveform models
+available. This would not only be beneficial for parameter estimation, but also
+for a number of other applications such as Fisher matrix computations, template
+placement and calibrating waveforms to numerical relativity \kw{cite}.
 
 % Access to higher dimensional problem
 While standard CBC analyses go up to 17 dimensions, non-standard GW PE problems
 can have more parameters, which could potentially lead to more complicated
-geometry in the target posterior that is hard to reparameterize. For example,
+geometries in the target posterior that is hard to reparameterize. For example,
 \cite{LIGOScientific:2021sio} introduces 10 extra parameters controlling
 deviations in the post-Newtonian coefficients predicted in GR. On top of the
 increase of dimensionality, these parameters often introduce non-trivial

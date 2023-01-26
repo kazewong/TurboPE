@@ -523,15 +523,15 @@ given in Algorithm \ref{alg:cap}.
 \caption{\textsc{flowMC} pseudocode}\label{alg:cap}
 \KwIn{initial position $ip$}
 \Parameters{number of training loops $nt$, number of production loops $np$}
-\Variables{current chain $cc$, current position $cp$, current NF parameters $\Theta$}
-\KwResult{$chains$}
+\Variables{current chains $cc$, current position $cp$, current NF parameters $\Theta$, chains from local sampler $c_{local}$, chains from global sampler $c_{global}$}
+\KwResult{output chains $chains$}
 $cp \leftarrow ip$\\
 \tcc{Training loop}
     \For{$i<nt$}{
         $cc, cp \leftarrow LocalSampling(cp)$\\
         $\Theta \leftarrow TuneNF(cc)$\\
-        $chains, cp \leftarrow GlobalSampling(cp, \Theta)$ \\
-        $cc \leftarrow Append(cc, chains)$
+        $c_{global}, cp \leftarrow GlobalSampling(cp, \Theta)$ \\
+        $cc \leftarrow Append(cc, c_{global})$
     }
 \tcc{Production loop}
     \For{$i<np$}{
@@ -605,10 +605,12 @@ process.  We simulate signals over 16 seconds of data, with a minimum frequency
 cutoff of 30 Hz and a sampling rate of 2048 Hz.  We draw noise from the design
 PSDs for the LIGO Hanford, LIGO Livingston
 (\textsc{SimNoisePSDaLIGOZeroDetHighPower}) and Virgo
-(\textsc{SimNoisePSDAdvVirgo}) detectors \cite{}.
-For both injection and recovery, we make use of the \textsc{IMRPhenomD} waveform
-\cite{Khan:2015jqa} via the fully-differentiable implementation presented in the
-\textsc{ripple} package \cite{}.
+(\textsc{SimNoisePSDAdvVirgo}) detectors \cite{}. For both injection and
+recovery, we make use of the \textsc{IMRPhenomD} waveform \cite{Khan:2015jqa}
+via the fully-differentiable implementation presented in the \textsc{ripple}
+package \cite{}. We use a neural spline flow model \cite{2019arXiv190604032D}
+with 10 layers, each with 128 hidden units, and 8 bins per layer as our
+normalizing flow model.
 
 \begin{table*}[hbt!]
     \begin{center}
@@ -633,8 +635,13 @@ For both injection and recovery, we make use of the \textsc{IMRPhenomD} waveform
     \hline
     \hline
     \end{tabular}
-    \caption{Prior ranges for parameters varied in the injection-recovery
-    test, as well as the GW150914 and GW170817 analyses. All priors are uniform over the ranges shown, except for the luminosity distance prior in the GW150914 and GW170817 analyses ($^\dag$) for which we apply a prior unform in comoving volume. The coalescence time refers to a shift relative to the geocenter trigger time, and $M_c$ refers to the redshifted (detector-frame) chirp mass.}
+    \caption{Prior ranges for parameters varied in the injection-recovery test,
+    as well as the GW150914 and GW170817 analyses. All priors are uniform over
+    the ranges shown, except for the luminosity distance prior in the GW150914
+    and GW170817 analyses ($^\dag$) for which we apply a prior unform in
+    comoving volume. The coalescence time refers to a shift relative to the
+    geocenter trigger time, and $M_c$ refers to the redshifted (detector-frame)
+    chirp mass.}
     \label{tab:parameters}
     \end{center}
 \end{table*}
@@ -675,29 +682,28 @@ performs properly on simulated data at a similar level as standard tools
     events as the injection campaign. The legend shows the p-values for each
     marginalized distribution.}
     \label{fig:ppplot}
-    \end{figure}
+\end{figure}
 
 \subsection{Real event parameter estimation}
 
-To demonstrate the performance of our parameter estimation pipeline, we apply
-it to two real LIGO-Virgo events: GW150914 and GW170817. We use the priors
-shown in Table \ref{tab:parameters}, and take 4 s of data sampled at 2048 Hz
-for the GW150914 analysis, and 128 s of data sampled at 4096 Hz for the
-GW170817 analysis; strain data and PSDs for both events are fetched from GWOSC
-\cite{GWOSC}. For our specific choice of sampler settings, we produce
-${\sim}$2500 and 3500 \emph{effective samples}\footnote{Effective
-samples here refers to the number of independent samples, which is the total
-number of generated samples divided by their correlation length; we compute the
-effective sample size using
-\textsc{arviz} \cite{arviz_2019},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
+To demonstrate the performance of our parameter estimation pipeline, we apply it
+to two real LIGO-Virgo events: GW150914 and GW170817. We use the priors shown in
+Table \ref{tab:parameters}, and take 4 s of data sampled at 2048 Hz for the
+GW150914 analysis, and 128 s of data sampled at 4096 Hz for the GW170817
+analysis; strain data and PSDs for both events are fetched from GWOSC
+\cite{GWOSC}. We use the same normalizing flow model as the injection-recovery
+study. For our specific choice of sampler settings, we produce ${\sim}$2500 and
+3500 \emph{effective samples}\footnote{Effective samples here refers to the
+number of independent samples, which is the total number of generated samples
+divided by their correlation length; we compute the effective sample size using
+\textsc{arviz}
+\cite{arviz_2019},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
 } for GW150914 and GW170817 respectively. Running on an \textsc{Nvidia} A100
-GPU, the wall time for both events is around 10 minutes. Most of this
-time is spent on just-in-time (JIT) compilation of the code; the actual
-sampling time is only ${\sim}150$ s. We pre-compute the reference waveform
-parameters used in hetetrodyne likelihood for the two events, the time for
-which is omitted in the \texttt{wall} time calculation.  The chain data and the
-analysis scripts which generate the chains can be found in 
-% \kw{\variable{data/} and \variable{script}}.
+GPU, the wall time for both events is around 10 minutes. Most of this time is
+spent on just-in-time (JIT) compilation of the code; the actual sampling time is
+only ${\sim}150$ s. We pre-compute the reference waveform parameters used in
+hetetrodyne likelihood for the two events, the time for which is omitted in the
+\texttt{wall} time calculation.
 
 \begin{figure}
     \script{plotEvents.py}
@@ -769,8 +775,6 @@ respectively. The JSD values are comparable to those reported in
     \label{tab:JSD}
     \end{center}
 \end{table}
-
-
 
 \section{Discussion}
 \label{sec: Discussion}
@@ -926,9 +930,8 @@ reference waveform used in for heterodyning the likelihood. Since the
 \textsc{differential evolution} algorithm we currently use has not been
 implemented in \textsc{Jax}, and the \textsc{Jax} waveform we use is not
 compatible with the parallelization scheme in the \textsc{scipy} library,
-maximizing the likelihood currently takes us around 5 minutes \kw{Benchmark it
-in the code and make this number precise.} for GW170817. There are two ways to
-reduce this time.
+maximizing the likelihood currently takes us around 1 minute for GW170817. There
+are two ways to reduce this time.
 
 First, we can explore a different optimization strategy that
 takes full advantage of the strengths of our pipeline, in particular the
@@ -943,9 +946,11 @@ parameters in our problem numerically, which is unnecessary. There are
 long-existing, efficient maximization schemes for extrinsic parameters, such as
 the merger time and phase, which can find the corresponding maximum likelihood
 waveform much more efficiently when compared to differential evolution. We
-expect implementing these schemes will reduce the time needed
-to find the reference waveform parameters by fixing the extrinsic parameters
-and by reducing the dimensionality of the optimization problem.
+expect implementing these schemes will reduce the time needed to find the
+reference waveform parameters by fixing the extrinsic parameters and by reducing
+the dimensionality of the optimization problem. Furthermore, the search pipeline
+provides a subset of number such as the masses, which can be fixed during the
+optimization to further reduce the dimensionality of the problem.
 
 % Multi-device scaling
 Finally, one important aspect of modern computing is scalability, meaning it is

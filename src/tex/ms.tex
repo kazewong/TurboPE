@@ -917,14 +917,17 @@ work in progress.
 % More features such as marginalization
 Furthermore, our current implementation is minimal and we do not make use of
 most standard ``tricks'' to accelerate sampling.  In particular, we do not
-incorporate (semi)analytic marginalization schemes over parameters such as
-time, phase, and calibration parameters \cite{2019PASA...36...10T}. Because of
-the already reasonable performance of our sampler thanks to hardware
-accelerators, time and phase marginalization is not crucial, as the performance
-of our implementation is not significantly impacted by having two extra
-dimensions. Nevertheless, having fewer parameters cannot hurt in the future, so
-we are looking into incorporating analytic marginalization schemes in our code
-as well.
+incorporate (semi)analytic marginalization schemes over parameters such as time
+and phase\cite{2019PASA...36...10T}. Because of the already reasonable
+performance of our sampler thanks to hardware accelerators, time and phase
+marginalization are not crucial, as the performance of our implementation is not
+significantly impacted by having two extra dimensions. We also do not include
+calibration uncertainties in this study because of simplicity reason. On top of that, since we are planning
+to deploy this pipeline to near online PE, we also need to consider estimating
+the PSD on the same timescale, which \cite{Cornish:2021wxy} have proposed
+a solution for. We are looking into incorporating analytic marginalization
+schemes, calibration uncertainties, and real-time PSD estimation in our code as
+well.
 
 % JIT overhead
 When it comes to wall time, the just-in-time compilation of our code is the

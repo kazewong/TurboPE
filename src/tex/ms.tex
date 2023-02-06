@@ -665,10 +665,7 @@ of the quantile at which the true value lies in the marginalized distribution
 of each parameter. The shaded band denotes the 95\%-confident variation
 expected from draws from a uniform distribution with the same number of events.
 We can see that most of the measured curves lie within this band, showing that
-our inference results agree well with a uniform distribution. There is a small
-deviation from uniformity for the secondary spin $\chi_2$, which is
-not alarming given that we are computing the quantile for 11 parameters.  This
-is what we expect if our pipeline is working as expected.
+our inference results agree well with a uniform distribution.
 
 To further quantify how well our result agrees with a uniform distribution, we
 can compute the Kolmogorov-Smirnov $p$-values for each marginalized
@@ -676,12 +673,12 @@ distribution \cite{}.  A low $p$-value (with a threshold often
 chosen to be $p = 0.05$) could indicate that our result is in tension with a uniform
 distribution. The $p$-values obtained for each parameter are shown in the
 legend of Fig.~\ref{fig:ppplot}. Most of them are well above the $p = 0.05$
-threshold, except for $\chi_2$, which is mildly below the threshold. Once
+threshold, except for $\psi$, which is close to the threshold. Once
 again, assuming these $p$-values are drawn from a uniform distribution, given
 11 draws (the number of parameters in our inference), it is not abnormal to
 have one of the parameters lying slightly outside the threshold. To assess
 whether this is expected, we can compute the combined $p$-value for these 11
-parameters, and find it to be $p = 0.47$.  This shows our inference pipeline
+parameters, and find it to be $p = 0.70$.  This shows our inference pipeline
 performs properly on simulated data at a similar level as standard tools
 \cite{Veitch:2014wba,Romero-Shaw:2020owr}.
 

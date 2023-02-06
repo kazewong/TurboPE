@@ -382,8 +382,9 @@ performance.
 However, as we often deal with high-dimensional problems, even the optimally
 tuned Gaussian transition kernel does not guarantee good performance. In order
 to have a reasonable acceptance rate, the variance of the Gaussian has to be
-smaller in a higher dimensional space, which means that the transition kernel will generally make smaller and smaller steps as we increase the dimensionality of the problem
-\cite{2017arXiv170102434B}.
+smaller in a higher dimensional space, which means that the transition kernel
+will generally make smaller and smaller steps as we increase the dimensionality
+of the problem \cite{2017arXiv170102434B}.
 
 Transition kernels that leverage gradient information of the target
 distribution can help address this issue of shortening steps in a high
@@ -398,8 +399,10 @@ vector at the current position,
 \end{align}
 where $\tau$ is a step size chosen during the tuning stage. Compared to a
 Gaussian centered at the current location, the MALA transition kernel is more
-likely to propose a point in the higher posterior density region because of
-the gradient term, which helps boost the acceptance rate.
+likely to propose a point in the higher posterior density region because of the
+gradient term, which helps boost the acceptance rate. \cite{Bouffanais:2018hoz}
+has shown promising result in using Hamiltonian Monte Carlo in gravitational
+waves PE.
 
 While transition kernels that use gradient information can help improve the
 acceptance rate, computing the gradient of the posterior density function

@@ -314,7 +314,11 @@ evolution} algorithm \cite{Storn1997DifferentialE} available in the
 \textsc{scipy} package \cite{2020SciPy-NMeth} to find the waveform parameters
 which maximize the likelihood.  The reference waveform could also be produced
 from trigger parameters precomputed by a search pipeline without additional
-computation.
+computation. Once we obtained the reference waveform, we can check the accuracy
+of the heterodyned-likelihood by comparing its value to the original likelihood
+at several points in the parameter space. We can choose the number of bins such
+that the difference between the values of the two likelihoods is smaller than
+chosen tolerance threshold.
 
 \subsection{MCMC with Gradient-based sampler}
 \label{sec:gradient}

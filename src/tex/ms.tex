@@ -40,6 +40,7 @@ Flatiron Institute, New York, NY 10010, USA}}
 
 % Abstract with filler text
 \begin{abstract}
+\te{There are a couple of KW:fills remaining in the text!}
 We present a lightweight, flexible, and high-performance framework for inferring
 the properties of gravitational-wave events. By combining likelihood
 heterodyning, automatically-differentiable and accelerator-compatible waveforms,
@@ -51,7 +52,7 @@ to handle higher dimensional problems. We present the details of our
 implementation and discuss trade-offs and future developments in the context of
 other proposed strategies for real-time parameter estimation. Our code for
 generating the manuscript and running the analysis is publicly available on
-GitHub.
+GitHub. \te{Add link to Github}
 \end{abstract}
 
 % Main body with filler text
@@ -97,8 +98,8 @@ latency to inform astronomers for potential followup in real time.
 Additionally, in the coming decade, there are planned upgrades for existing
 facilities, as well as plans for next-generation detectors such as the Einstein
 Telescope (ET) \citep{Punturo:2010zz} and the Cosmic Explorer (CE)
-\citep{LIGOScientific:2016wof}. These upgrades will increase sensitivity of
-the instruments and allow for the detection of more events with a better
+\citep{LIGOScientific:2016wof}. These upgrades will increase the instrument's sensitivity
+and allow for the detection of more events with a better
 signal-to-noise ratio (SNR). The number of events that will be detected in the
 coming decade is expected to grow from around a thousand per year to over a
 million per year \citep{Baibhav:2019gxm}. This will put a significant strain on
@@ -149,8 +150,8 @@ Sec.~\ref{sec: Discussion}.
 
 The main objective of PE is to obtain a multidimensional posterior distribution
 $p(\mathbf{\theta} \mid d)$ on parameters $\mathbf{\theta}$ given strain
-data $d$.  Such probability density represents our best inference of
-the source properties, an encodes all relevant information contained in the
+data $d$.  This probability density represents our best inference of
+the source properties, and encodes all relevant information contained in the
 observed data.
 To compute this object, we use Bayes' theorem to write
 \begin{align} \label{eq: bayes}
@@ -160,9 +161,8 @@ where $\mathcal{L}(d \mid \theta)$ is the likelihood function, $\pi(\theta)$ is
 the prior distribution, and $p(d)$ is the evidence. Since the evidence is a
 normalization constant that does not depend on the source parameters, it is
 often omitted if we are only interested in the posterior distribution. The prior
-distribution is often chosen to be some simple distribution, such as uniformly
-distributed in the component masses or a Gaussian distribution in the spins, or
-it could encode astrophysical information. Assuming the noise is drawn from a
+distribution is often chosen to be something simple (e.g., uniform in the component masses or a Gaussian distribution in the spins), or
+it could directly encode astrophysical information. Assuming the noise is drawn from a
 Gaussian process, the log-likelihood for GW data is given by
 \begin{align}
     \log{\mathcal{L}(d \mid \theta)} = -\frac{1}{2} \left\langle d-h(\mathbf{\theta}) \mid d-h(\mathbf{\theta})\right\rangle,
@@ -243,11 +243,11 @@ likelihood of those close to it, and hence will not be relevant for the PE
 result. To ensure that this is the case, we always pick reference parameters
 known to lie close to the target, e.g., by first maximizing the likelihood
 function using the highest frequency resolution available, which can be run at
-a much lower cost than PE. 
+a much lower cost than full PE. 
 
 We now give a concise description of the implementation of this approach in our
 code; for a more extensive derivation of heterodyned likelihood, we refer the
-reader to the reference \cite{Zackay:2018qdy}. Let $h(f)$ and $h_0(f)$
+reader to \cite{Zackay:2018qdy}. Let $h(f)$ and $h_0(f)$
 represent the target and reference waveforms, respectively; then, for a given
 sparse binning of the frequency axis, the ratio $r(f) = h(f)/h_0(f)$ can be
 well approximated by a linear interpolation over the bin,
@@ -291,7 +291,7 @@ the data and the reference waveform, and at last the ratio between the target
 waveform and the reference waveform at the center of each bin via
 Eq.~\eqref{eq:definer}.
 
-Considering the phasing of an inspiral waveform is denoted by a power series
+The phasing of an inspiral waveform is denoted by a power series
 $\Psi(f) = \sum_i \alpha_i f^{\gamma_i}$, where $\alpha_i$ are some
 coefficients depending on the waveform parameters and $\gamma_i$ are powers
 motivated by post-Newtonian theory. For example, for the term $\gamma_i =
@@ -318,7 +318,7 @@ which maximize the likelihood.  The reference waveform could also be produced
 from trigger parameters precomputed by a search pipeline without additional
 computation. Once we have obtained a reference waveform, we can check the accuracy
 of the heterodyned likelihood by comparing its value to the original likelihood
-at several points in the parameter space. We can choose the number of bins such
+at several points in the parameter space. We can then choose the number of bins such
 that the difference between the values of the two likelihoods is smaller than
 chosen tolerance threshold.
 
@@ -616,8 +616,8 @@ suggest the pipeline is either over-confident or too conservative
 % State the distribution of injected population
 We sample 1200 events from the distribution of parameters detailed in Table
 \ref{tab:parameters}; the same distributions are used as the prior in the PE
-process.  We simulate signals over 16 s of data, with a minimum frequency
-cutoff of 30 Hz and a sampling rate of 2048 Hz. We draw noise from a set of
+process.  We simulate signals over $16\,$s of data, with a minimum frequency
+cutoff of $30\,$Hz and a sampling rate of $2048\,$Hz. We draw noise from a set of
 projected design PSDs for the LIGO Hanford, LIGO Livingston
 (\texttt{SimNoisePSDaLIGOZeroDetHighPower}) and Virgo
 (\texttt{SimNoisePSDAdvVirgo}) detectors
@@ -673,7 +673,8 @@ our inference results agree well with a uniform distribution.
 
 To further quantify how well our result agrees with a uniform distribution, we
 can compute the Kolmogorov-Smirnov $p$-values for each marginalized
-distribution \citep{}.  A low $p$-value (with a threshold often
+distribution \citep{}\te{There is apparently supposed to be a citation here?}.
+A low $p$-value (with a threshold often
 chosen to be $p = 0.05$) could indicate that our result is in tension with a uniform
 distribution. The $p$-values obtained for each parameter are shown in the
 legend of Fig.~\ref{fig:ppplot}. Most of them are well above the $p = 0.05$
@@ -722,7 +723,7 @@ wall-time calculation.
     \script{plotEvents.py}
     \includegraphics[width=0.99\linewidth]{figures/GW150914.pdf}
     \caption{
-      GW150914 posterior computed by our code (blue) and \textsc{Bilby} (orange).
+      GW150914 posterior computed by our code (blue) and \textsc{Bilby} (orange). \te{Change font to be latex, make labels larger, make figure full page.}
     }
     \label{fig:GW150914}
 \end{figure}
@@ -731,7 +732,7 @@ wall-time calculation.
     \script{plotEvents.py}
 \includegraphics[width=0.99\linewidth]{figures/GW170817.pdf}
 \caption{
-    GW170817 posterior computed by our code (blue) and \textsc{Bilby} (orange).
+    GW170817 posterior computed by our code (blue) and \textsc{Bilby} (orange). \te{Same as Fig 2}
 }
 \label{fig:GW170817}
 \end{figure}
@@ -841,7 +842,7 @@ transformations are not known ahead of time, such as parameter estimation with
 precessing waveforms, calibration parameters, testing GR, and multi-event joint
 inference.
 
-It is always beneficial to reparameterize if the a convenient mapping is known
+It is always beneficial to reparameterize if a convenient mapping is known
 ahead of time. For the class of problems treated in
 \cite{Islam:2022afg,Roulet:2022kot}, we can incorporate those
 reparameterizations directly into our MCMC pipeline to reduce the complexity of
@@ -878,7 +879,7 @@ We are currently working on a number of improvements and extensions to our
 current infrastructure. While the \textsc{IMRPhenomD} waveform approximant is a
 reasonable start, it lacks some qualitative features that other
 state-of-the-art models have, such as precession, subdominants moments of the
-radiation, tides or eccentricity. It also has a higher mismatch with reference
+radiation, tides, or eccentricity. It also has a higher mismatch with reference
 numerical relativity waveforms compared to more recent waveform models.
 Currently, we are working on building differentiable implementations of
 \textsc{IMRPhenomXPHM} \citep{Pratten:2020ceb}, a precessing successor to
@@ -936,15 +937,15 @@ marginalization schemes and calibration uncertainties, into our pipeline.
 % JIT overhead
 When it comes to wall time, the just-in-time compilation of our code is the
 current limiting factor.  While \textsc{Jax}'s JIT compilation drastically
-quickens likelihood evaluations, it comes with a significant compilation
+accelerates likelihood evaluations, it comes with a significant compilation
 overhead before the first evaluation. We observe that the compilation time
 depends on the device where the code is run; this is expected since
 \textsc{Jax} leverages the \textsc{Accelerated Linear Algebra} (XLA) compiler
 to take advantage of hardware accelerators, which means that \textsc{Jax} needs
 to compile the code for each specific device according to its architecture. On
-an \textsc{Nvidia} A100 GPU, the compilation overhead could go up to 8 minutes
+an \textsc{Nvidia} A100 GPU, the compilation overhead could go up to 3 minutes
 for our current waveform. Meanwhile, for the cases we have studied, the time
-needed to obtain converging sampling on an A100 is about 2-3 minutes. This
+needed to obtain converging sampling on an A100 is about $\sim 40\,$s. This
 means the compilation overhead dominates the wall-clock time of our current PE
 runs. To maximize the potential of our code, we are looking into ways to reduce
 the compilation overhead or to cache the compilation results to avoid paying
@@ -975,19 +976,19 @@ waveform much more efficiently when compared to differential evolution. We
 expect implementing these schemes will reduce the time needed to find the
 reference waveform parameters by fixing the extrinsic parameters and by reducing
 the dimensionality of the optimization problem. Furthermore, the search pipeline
-provides a subset of number such as the masses, which can be fixed during the
+provides a subset of the parameters such as the masses, which can be fixed during the
 optimization to further reduce the dimensionality of the problem.
 
 % Multi-device scaling
 Finally, one important aspect of modern computing is scalability, meaning it is
 generally favorable if one can simply devote more computing units to the same
-problem and reduce the wall time. In our case, this means that we would like to
+problem in order to reduce the wall time. In our case, this means that we would like to
 use more than one GPU for the same PE process. More GPUs can help in the
-following ways: first, more GPUs means we can run more independent chains at
+following ways: first, we can run more independent chains at
 the same time, which can generate more samples faster; second, and more
 importantly, as shown in this work and \cite{2022arXiv221106397W}, more independent
-chains also help with reducing the burn-in time. Parallelizing over the number
-of chain dimension is trivial and does not require much change to the current
+chains also help reduce the burn-in time. Parallelizing over the number
+of chains dimension is trivial and does not require much change to the current
 infrastructure. Additional GPUs can also help by enabling faster training of
 larger flow models. While the training time is not the biggest bottleneck given
 the flow model used in this study, more GPUs means we can increase the
@@ -1014,6 +1015,7 @@ We thank Will M.~Farr, Aaron Zimmerman, Daniel Foreman-Mackey and Marylou Gabri\
 The Flatiron Institute is a division of the Simons Foundation.
 This material is based upon work supported by NSF's LIGO Laboratory which is a major facility fully funded by the National Science Foundation.
 This research has made use of data or software obtained from the Gravitational Wave Open Science Center (gw-openscience.org), a service of LIGO Laboratory, the LIGO Scientific Collaboration, the Virgo Collaboration, and KAGRA. LIGO Laboratory and Advanced LIGO are funded by the United States National Science Foundation (NSF) as well as the Science and Technology Facilities Council (STFC) of the United Kingdom, the Max-Planck-Society (MPS), and the State of Niedersachsen/Germany for support of the construction of Advanced LIGO and construction and operation of the GEO600 detector. Additional support for Advanced LIGO was provided by the Australian Research Council. Virgo is funded, through the European Gravitational Observatory (EGO), by the French Centre National de Recherche Scientifique (CNRS), the Italian Istituto Nazionale di Fisica Nucleare (INFN) and the Dutch Nikhef, with contributions by institutions from Belgium, Germany, Greece, Hungary, Ireland, Japan, Monaco, Poland, Portugal, Spain. The construction and operation of KAGRA are funded by Ministry of Education, Culture, Sports, Science and Technology (MEXT), and Japan Society for the Promotion of Science (JSPS), National Research Foundation (NRF) and Ministry of Science and ICT (MSIT) in Korea, Academia Sinica (AS) and the Ministry of Science and Technology (MoST) in Taiwan.
+T.E.\ is supported by the Horizon Postdoctoral Fellowship.
 
 \bibliography{bib}
 

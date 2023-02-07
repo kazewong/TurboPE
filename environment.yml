@@ -3,6 +3,8 @@ dependencies:
   - pip>=20.3.3
   - python=3.9
   - scipy
+  - seaborn=0.12
+  - jinja2
   - pip:
       - matplotlib>=3.3.3
       - corner

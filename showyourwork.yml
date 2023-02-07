@@ -1,3 +1,11 @@
 version: 0.3.1
 
+# Custom file dependencies
+dependencies:
+  src/scripts/plot_GW150914.py:
+    - src/data/GW150914_flowMC.npz
+    - src/data/GW150914_Bilby.dat
+  src/scripts/plot_GW170817.py:
+    - src/data/GW170817_flowMC_1800.npz
+    - src/data/GW170817_Bilby_flat.dat
 

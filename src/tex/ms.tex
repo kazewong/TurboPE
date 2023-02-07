@@ -4,7 +4,7 @@
 \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 \usepackage{algorithmic}
 \usepackage{color}
-%\usepackage[dvipsnames]{xcolor}
+\usepackage{booktabs}
 
 \definecolor{rb4}{HTML}{27408B}
 \newcommand{\kw}[1]{{\color{rb4}[KW: #1 ]}}
@@ -719,21 +719,21 @@ hetetrodyne the likelihood for the two events, which is omitted in the
 wall-time calculation.
 
 \begin{figure}
-    \script{plotEvents.py}
     \includegraphics[width=0.99\linewidth]{figures/GW150914.pdf}
     \caption{
       GW150914 posterior computed by our code (blue) and \textsc{Bilby} (orange).
     }
     \label{fig:GW150914}
+    \script{plot_GW150914.py}
 \end{figure}
 
 \begin{figure}
-    \script{plotEvents.py}
 \includegraphics[width=0.99\linewidth]{figures/GW170817.pdf}
 \caption{
     GW170817 posterior computed by our code (blue) and \textsc{Bilby} (orange).
 }
 \label{fig:GW170817}
+    \script{plot_GW170817.py}
 \end{figure}
 
 For comparison, we produce equivalent runs with \textsc{Bilby}, using the same
@@ -764,24 +764,7 @@ respectively. The JSD values are comparable to those reported in
 
 \begin{table}[hbt!]
     \begin{center}
-    \begin{tabular}{ l l l}
-    \hline
-    \hline
-    Parameter & GW150914 & GW170817\\
-    \hline
-        $M_c$ & $\textbf{0.0171}$ & $\textbf{0.0166}$ \\
-        $q$ & $0.0036$ & $0.0004$ \\
-        $\chi_1$ & $0.0023$ & $0.0006$ \\
-        $\chi_2$ & $0.0098$ & $0.0004$ \\
-        $d_L$ & $0.0009$ & $0.0076$ \\
-        $\phi_c$ & $0.0003$ & $0.0024$ \\
-        $\iota$ & $0.0026$ & $0.0045$ \\
-        $\psi$ & $0.0005$ & $0.0034$ \\
-        $\alpha$ & $0.0007$ & $0.0242$ \\
-        $\delta$ & $0.0020$ & $0.0017$ \\
-    \hline
-    \hline
-    \end{tabular}
+    \variable{output/js_table.tex}
     \caption{JSD values for the marginalized distribution of each parameter for
     GW150914 and GW170817 between our code and \textsc{Bilby}. The bold values
     indicate the parameters with the largest JSD.}

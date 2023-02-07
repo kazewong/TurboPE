@@ -8,4 +8,6 @@ dependencies:
   src/scripts/plot_GW170817.py:
     - src/data/GW170817_flowMC_1800.npz
     - src/data/GW170817_Bilby_flat.dat
+  src/scripts/ppplots.py:
+    - src/data/combined_quantile_balance_LVK.npz
 

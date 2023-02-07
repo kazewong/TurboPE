@@ -1,10 +1,22 @@
 import numpy as np
 import paths
 import seaborn as sns
-import numpy as np
 import pandas as pd
+import matplotlib as mpl
 
 sns.set(context='notebook', palette='colorblind', style='ticks', font_scale=1.5)
+
+params = {
+    "axes.labelsize": 22,
+    "axes.titlesize": 22,
+    "text.usetex": False,
+    "font.family": "serif",
+    "font.serif": "cmr10",
+    "mathtext.fontset": "cm",
+    "axes.formatter.use_mathtext": True,  # needed when using cm=cmr10 for normal text
+}
+
+mpl.rcParams.update(params)
 
 labels = [r'$M_c/M_\odot$', r'$q$', r'$\chi_1$', r'$\chi_2$', r'$d_{\rm{L}}/{\rm Mpc}$',
                r'$\phi_c$', r'$\iota$', r'$\psi$', r'$\alpha$', r'$\delta$']

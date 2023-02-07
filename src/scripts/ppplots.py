@@ -6,13 +6,13 @@ from scipy.stats import kstest
 import paths
 
 params = {
-    "font.size": 18,
-    "legend.fontsize": 18,
+    "font.size": 22,
+    "legend.fontsize": 22,
     "legend.frameon": False,
-    "axes.labelsize": 18,
-    "axes.titlesize": 18,
-    "xtick.labelsize": 18,
-    "ytick.labelsize": 18,
+    "axes.labelsize": 22,
+    "axes.titlesize": 22,
+    "xtick.labelsize": 22,
+    "ytick.labelsize": 22,
     "figure.figsize": (7, 5),
     "xtick.top": True,
     "axes.unicode_minus": False,
@@ -46,7 +46,7 @@ mean_global_accs = ppPlot_data['mean_global_accs']
 mean_local_accs = ppPlot_data['mean_local_accs']
 
 def makeCumulativeHist(data):
-    h = np.histogram(data,bins=100,range=(0,1),density=True)
+    h = np.histogram(data, bins=100, range=(0,1), density=True)
     return np.cumsum(h[0])/100.
 
 counts = 1200
@@ -61,22 +61,33 @@ upper_quantile_array = []
 lower_quantile_array = []
 percentile = 0.05
 for i in range(100):
-    upper_quantile_array.append(np.quantile(cum_hist[:,i],(1-percentile/2)))
-    lower_quantile_array.append(np.quantile(cum_hist[:,i],(percentile/2)))
+    upper_quantile_array.append(np.quantile(cum_hist[:,i], (1-percentile/2)))
+    lower_quantile_array.append(np.quantile(cum_hist[:,i], (percentile/2)))
 
-axis_labels=  [r'$M_c$', r'$q$', r'$\chi_1$', r'$\chi_2$', r'$d_{\rm{L}}$', r'$t_c$', r'$\phi_c$', r'$\cos{i}$', r'$\psi$', r'$\alpha$', r'$\sin{\delta}$']
+axis_labels=  [r'$M_c$', r'$q$', r'$\chi_1$', r'$\chi_2$', r'$d_{\rm{L}}$',
+               r'$t_c$', r'$\phi_c$', r'$\cos\iota$', r'$\psi$', r'$\alpha$', r'$\sin{\delta}$']
 
 plt.figure(figsize=(10,9))
 bins = np.linspace(0,1,101)
 bins = (bins[1:]+bins[:-1])/2
-plt.fill_between(bins,lower_quantile_array,upper_quantile_array,alpha=0.5)
-pvalues = []
-for i in range(11):
-    pvalues.append(kstest(result[:counts,i],cdf=uniform(0,1).cdf).pvalue)
-    plt.plot(np.append(0,bins),np.append(0,makeCumulativeHist(result[:counts,i])), label=axis_labels[i]+" "+str(round(pvalues[-1],2)))
-plt.legend(loc='upper left',fontsize=14)
-plt.xlabel(r'Confidence Level')
-plt.ylabel(r'Fraction of Samples with Confidence Level $\leq$ x')
-plt.title('Combined p-value: '+str(round(kstest(pvalues,cdf=uniform(0,1).cdf).pvalue,2)))
+plt.fill_between(bins, lower_quantile_array, upper_quantile_array, alpha=0.5)
 
-plt.savefig(paths.figures / "ppplot.pdf", bbox_inches="tight")
+x = np.append(0,bins)
+pvalues = []
+for i, l in enumerate(axis_labels):
+    p = kstest(result[:counts,i], cdf=uniform(0,1).cdf).pvalue
+    y = np.append(0,makeCumulativeHist(result[:counts,i]))
+    plt.plot(x, y, label=f"{l} ($p = {p:.2f}$) ")
+    pvalues.append(p)
+plt.legend(loc='upper left', fontsize=20, handlelength=1)
+plt.xlabel(r'confidence level')
+plt.ylabel(r'fraction of samples with confidence level $\leq x$')
+
+ptotal = kstest(pvalues, cdf=uniform(0,1).cdf).pvalue
+
+p = paths.figures / "ppplot.pdf"
+plt.savefig(p, bbox_inches="tight")
+print(f"Saved: {p}")
+
+# cache p-values
+np.savetxt(paths.data / "pvalues.txt", pvalues)

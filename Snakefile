@@ -8,3 +8,9 @@ rule table:
         "src/tex/output/js_table.tex"
     script:
         "src/scripts/get_js.py"
+
+rule macros:
+    output:
+        "src/tex/output/macros.tex"
+    script:
+        "src/scripts/make_macros.py"

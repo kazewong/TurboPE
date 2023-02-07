@@ -21,7 +21,7 @@ lims = [
     [-0.05, 0.05],
     None,
     [0, 2*np.pi],
-    [0, np.pi],
+    [np.pi/2, np.pi],
     [0, np.pi],
     None,
     None,

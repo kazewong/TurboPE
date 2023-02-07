@@ -63,3 +63,6 @@ p = paths.output / "js_table.tex"
 with open(p, 'w') as f:
     f.write(table)
 print(f"Saved: {p}")
+
+# cache JS divergences
+df.to_csv(paths.data / "jsd.txt")

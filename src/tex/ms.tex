@@ -5,6 +5,7 @@
 \usepackage{algorithmic}
 \usepackage{color}
 \usepackage{booktabs}
+\usepackage{xspace}
 
 \definecolor{rb4}{HTML}{27408B}
 \newcommand{\kw}[1]{{\color{rb4}[KW: #1 ]}}
@@ -19,6 +20,7 @@ Flatiron Institute, New York, NY 10010, USA}}
 \SetKwInput{Parameters}{Parameters}
 \SetKwInput{Variables}{Variables}
 
+% initialize and load programatically-generated macros
 % Begin!
 \begin{document}
 
@@ -54,6 +56,13 @@ other proposed strategies for real-time parameter estimation. Our code for
 generating the manuscript and running the analysis is publicly available on
 GitHub. \te{Add link to Github}
 \end{abstract}
+
+\newcommand{\ptot}{}
+\newcommand{\jsdMaxBBH}{}
+\newcommand{\jsdAvgBBH}{}
+\newcommand{\jsdMaxBNS}{}
+\newcommand{\jsdAvgBNS}{}
+\variable{output/macros.tex}
 
 % Main body with filler text
 \section{Introduction}
@@ -683,7 +692,7 @@ again, assuming these $p$-values are drawn from a uniform distribution, given
 11 draws (the number of parameters in our inference), it is not abnormal to
 have one of the parameters lying slightly outside the threshold. To assess
 whether this is expected, we can compute the combined $p$-value for these 11
-parameters, and find it to be $p = 0.70$.  This shows our inference pipeline
+parameters, and find it to be $p = \ptot$.  This shows our inference pipeline
 performs properly on simulated data at a similar level as standard tools
 \citep{Veitch:2014wba,Romero-Shaw:2020owr}.
 
@@ -693,8 +702,8 @@ performs properly on simulated data at a similar level as standard tools
     \caption{Cumulative distribution of the quantile of which the true value
     lies for each marginalized distribution. The shadow band denotes the 95\%
     credible interval drawn from a uniform distribution with the same number of
-    events as the injection campaign. The legend shows the p-values for each
-    marginalized distribution.}
+    events as the injection campaign. The legend shows the $p$-values for each
+    marginalized distribution, with a combined value of $p = \ptot$.}
     \label{fig:ppplot}
 \end{figure}
 
@@ -719,23 +728,23 @@ is only ${\sim}40$ s. We pre-compute the reference waveform parameters used to
 hetetrodyne the likelihood for the two events, which is omitted in the
 wall-time calculation.
 
-\begin{figure}
+\begin{figure*}
     \includegraphics[width=0.99\linewidth]{figures/GW150914.pdf}
     \caption{
       GW150914 posterior computed by our code (blue) and \textsc{Bilby} (orange). \te{Change font to be latex, make labels larger, make figure full page.}
     }
     \label{fig:GW150914}
     \script{plot_GW150914.py}
-\end{figure}
+\end{figure*}
 
-\begin{figure}
+\begin{figure*}
 \includegraphics[width=0.99\linewidth]{figures/GW170817.pdf}
 \caption{
     GW170817 posterior computed by our code (blue) and \textsc{Bilby} (orange). \te{Same as Fig 2}
 }
 \label{fig:GW170817}
     \script{plot_GW170817.py}
-\end{figure}
+\end{figure*}
 
 For comparison, we produce equivalent runs with \textsc{Bilby}, using the same
 exact data and priors.  We use the \textsc{dynesty} sampler
@@ -759,7 +768,7 @@ two probability distributions, with a value of 0 indicating identical
 distributions and a value of $\ln{2}$ nat representing the maximum
 possible divergence between two distributions. The JSD values for the two events
 are shown in Table \ref{tab:JSD}. The maximum JSDs for GW150914 and GW170817 are
-$0.0171$ and $0.0166$, and the mean JSDs are $0.0062$ and $0.0031$,
+\jsdMaxBBH and \jsdMaxBNS, and the mean JSDs are \jsdAvgBBH and \jsdAvgBNS,
 respectively. The JSD values are comparable to those reported in
 \cite{Romero-Shaw:2020owr}, which show our code agrees with existing tools.
 

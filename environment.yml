@@ -5,6 +5,7 @@ dependencies:
   - scipy
   - seaborn=0.12
   - jinja2
+  - tqdm
   - pip:
       - matplotlib>=3.3.3
       - corner

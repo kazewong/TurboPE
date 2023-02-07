@@ -61,30 +61,30 @@ GitHub.
 % Brief description of PE
 Parameter estimation (PE) underpins all of gravitational-wave physics and
 astrophysics, and is one of the most commonly performed tasks in
-gravitational-wave (GW) data analysis \cite{Christensen:2022bxb,
+gravitational-wave (GW) data analysis \citep{Christensen:2022bxb,
 2019PASA...36...10T}. The central goal of PE is to infer the parameters of a
 particular GW source given the strain data recorded by instruments like LIGO
-\cite{LIGOScientific:2014pky,LIGOScientific:2021usb,LIGOScientific:2021djp}, Virgo \cite{VIRGO:2014yos} and KAGRA
-\cite{KAGRA:2020tym}.  In the standard compact binary coalescence (CBC)
+\citep{LIGOScientific:2014pky,LIGOScientific:2021usb,LIGOScientific:2021djp}, Virgo \citep{VIRGO:2014yos} and KAGRA
+\citep{KAGRA:2020tym}.  In the standard compact binary coalescence (CBC)
 scenario, this could mean inferring intrinsic parameters such as the masses and
 spins of the compact objects, as well as extrinsic parameters such as their sky
 localization and distance from Earth. PE is also applied to test general
 relativity (GR)
-\cite{LIGOScientific:2016lio,LIGOScientific:2018dkp,LIGOScientific:2021sio},
-and constrain the properties of nuclear matter \cite{LIGOScientific:2018hze}.
+\citep{LIGOScientific:2016lio,LIGOScientific:2018dkp,LIGOScientific:2021sio},
+and constrain the properties of nuclear matter \citep{LIGOScientific:2018hze}.
 PE is a crucial step in GW science, since it translates characteristics of the
 strain data into astrophysically relevant quantities that can be used to
 constrain astrophysical phenomena, including informing theories of binary
-evolution \cite{LIGOScientific:2021psn}.
+evolution \citep{LIGOScientific:2021psn}.
 
 % Old codes have trouble handling next gen data
 % The PE results in the most recent catalog of GW events are produced by several
 % community-developed PE codes
 % \mi{what catalog do you mean? The LVK doesn't use PyCBC Inference}
 There exist a number of prominent, community-developed PE codes, including
-\textsc{LALInference} \cite{Veitch:2014wba}, \textsc{PyCBC Inference}
-\cite{Biwer:2018osg}, and \textsc{Bilby}
-\cite{Ashton:2018jfp,Romero-Shaw:2020owr}.  These packages have been tested by a
+\textsc{LALInference} \citep{Veitch:2014wba}, \textsc{PyCBC Inference}
+\citep{Biwer:2018osg}, and \textsc{Bilby}
+\citep{Ashton:2018jfp,Romero-Shaw:2020owr}.  These packages have been tested by a
 number of groups and are well regarded as standard tools. However, while these
 tools have passed many robustness tests, they are known to be computationally
 intensive. The exact amount of time needed to analyze one event depends on
@@ -96,22 +96,22 @@ latency to inform astronomers for potential followup in real time.
 
 Additionally, in the coming decade, there are planned upgrades for existing
 facilities, as well as plans for next-generation detectors such as the Einstein
-Telescope (ET) \cite{Punturo:2010zz} and the Cosmic Explorer (CE)
-\cite{LIGOScientific:2016wof}. These upgrades will increase sensitivity of
+Telescope (ET) \citep{Punturo:2010zz} and the Cosmic Explorer (CE)
+\citep{LIGOScientific:2016wof}. These upgrades will increase sensitivity of
 the instruments and allow for the detection of more events with a better
 signal-to-noise ratio (SNR). The number of events that will be detected in the
 coming decade is expected to grow from around a thousand per year to over a
-million per year \cite{Baibhav:2019gxm}. This will put a significant strain on
+million per year \citep{Baibhav:2019gxm}. This will put a significant strain on
 the current PE tools.
 
 % Effort going to new tools development.
 In order to address this, there are efforts from multiple groups to speed up the
 PE process. This includes methods that employ techniques such as
-reduced-order quadrature \cite{Canizares:2014fya,Smith:2016qas}, adaptive proposal distributions in nested sampling
-\cite{Williams:2021qyt}, deep learning networks pre-trained on large collections
-of waveforms \cite{Dax:2021tsq,Dax:2022pxd}, as well as methods that reduce the
+reduced-order quadrature \citep{Canizares:2014fya,Smith:2016qas}, adaptive proposal distributions in nested sampling
+\citep{Williams:2021qyt}, deep learning networks pre-trained on large collections
+of waveforms \citep{Dax:2021tsq,Dax:2022pxd}, as well as methods that reduce the
 computational expense of classical PE by leveraging our knowledge of GW signals
-\cite{Veitch:2014wba,Ashton:2021anp,Cornish:2021wxy,Islam:2022afg,Roulet:2022kot,Lee:2022jpn,Lange:2018pyp,Wofford:2022ykb}.
+\citep{Veitch:2014wba,Ashton:2021anp,Cornish:2021wxy,Islam:2022afg,Roulet:2022kot,Lee:2022jpn,Lange:2018pyp,Wofford:2022ykb}.
 While these avenues are promising for standard GW problems, they rely on
 assumptions that may not hold for analyses targeting additional physical effects
 beyond standard CBCs in GR, such as matter effects, lensing and deviations from GR.
@@ -188,13 +188,13 @@ To compute the integral in Eq.~\eqref{eq: innerproduct}, we need to evaluate a
 waveform model $h(\mathbf{\theta})$ at a number of frequency bins. This makes
 evaluating the likelihood function often the most computationally intensive
 part of PE. The most accurate waveforms are obtained via numerical relativity
-(NR) simulations \cite{BaumgarteShaprio:NumRel}, which directly solve the Einstein equations numerically for a
+(NR) simulations \citep{BaumgarteShaprio:NumRel}, which directly solve the Einstein equations numerically for a
 given system. Unfortunately, such simulations can take anywhere from a day to
 half a year, making direct evaluation through NR prohibitively expensive. To
 circumvent this, there are several families of waveform ``approximants'',
-including the \textsc{IMRPhenom} family \cite{Khan:2015jqa,
-Garcia-Quiros:2020qpx}, the \textsc{SEOB} family \cite{PhysRevD.89.061502}, and
-the NR surrogate family \cite{Varma:2019csw}. Evaluating those approximants can
+including the \textsc{IMRPhenom} family \citep{Khan:2015jqa,
+Garcia-Quiros:2020qpx}, the \textsc{SEOB} family \citep{PhysRevD.89.061502}, and
+the NR surrogate family \citep{Varma:2019csw}. Evaluating those approximants can
 take ${\sim}10$ ms to 1 s for short signals, such as a $30-30\ M_{\odot}$
 binary black hole, reaching up to \kw{Fill} for long signals, such as a
 $1.4-1.4\ M_{\odot}$ binary neutron star.  Since PE requires millions of
@@ -207,10 +207,10 @@ Since the cost of evaluating a waveform model scales linearly with the number
 of time or frequency bins, the computational burden for longer-duration signals
 is often quite large. To mitigate this, there are a number of methods to reduce
 the number of basis points needed to compute the likelihood faithfully
-\cite{Field:2011mf, Field:2013cfa, Smith:2016qas,
+\citep{Field:2011mf, Field:2013cfa, Smith:2016qas,
 Vinciguerra:2017ngf,Morisaki:2020oqk,Morisaki:2021ngj}. In this work, we take
-advantage of likelihood heterodyning \cite{Cornish:2010kf,Cornish:2021lje}
-(also known as relative binning \cite{Zackay:2018qdy}).
+advantage of likelihood heterodyning \citep{Cornish:2010kf,Cornish:2021lje}
+(also known as relative binning \citep{Zackay:2018qdy}).
 
 The idea behind the heterodyned likelihood can be summarized as follows: since
 the integrand in Eq.~\eqref{eq: innerproduct} is a highly oscillatory function,
@@ -312,8 +312,8 @@ $|\delta\Psi_{\textrm{max}}(f_{\textrm{max}}) -
 % \te{Do we also already here want to make the point that it really helps with memory issues of GPUs if the frequency array isn't too large?}
 
 To obtain a reference waveform, we currently use the \textsc{differential
-evolution} algorithm \cite{Storn1997DifferentialE} available in the
-\textsc{scipy} package \cite{2020SciPy-NMeth} to find the waveform parameters
+evolution} algorithm \citep{Storn1997DifferentialE} available in the
+\textsc{scipy} package \citep{2020SciPy-NMeth} to find the waveform parameters
 which maximize the likelihood.  The reference waveform could also be produced
 from trigger parameters precomputed by a search pipeline without additional
 computation. Once we have obtained a reference waveform, we can check the accuracy
@@ -330,12 +330,12 @@ posterior density, Eq.~\eqref{eq: bayes}, over the entire parameter space of
 interest to obtain the most probable set of values that are consistent with the
 data. However, directly sampling this posterior quickly becomes intractable as
 the dimensionality of the parameter space increases beyond a few dimensions.
-Markov chain Monte Carlo \cite{gelmanbda04} is a common method employed to
+Markov chain Monte Carlo \citep{gelmanbda04} is a common method employed to
 generate samples from the target posterior when direct sampling is not
 possible.
 
 In MCMC, the posterior distribution is approximated by a Markov chain that
-eventually converges to the target distribution \cite{10.1214/aos/1176325750}.
+eventually converges to the target distribution \citep{10.1214/aos/1176325750}.
 The chain is constructed by iteratively proposing a new point in the
 parameter space based on the current location of the chain. The proposed point
 is accepted with a probability that is usually set to be proportional to the
@@ -347,7 +347,7 @@ generated by the chain are then used as a fair sample to estimate the
 quantities of interest, such as the mean and credible intervals of the source
 parameters. In practice, since we do not know the target distribution ahead of
 time, the MCMC process is usually repeated until a certain criterion is met,
-such as a Gelman-Rubin convergence statistic \cite{10.2307/2246093} lower than
+such as a Gelman-Rubin convergence statistic \citep{10.2307/2246093} lower than
 certain threshold, or simply after a fixed number of iterations.
 
 Compared to direct sampling, MCMC algorithms only explore regions that are
@@ -390,7 +390,7 @@ tuned Gaussian transition kernel does not guarantee good performance. In order
 to have a reasonable acceptance rate, the variance of the Gaussian has to be
 smaller in a higher dimensional space, which means that the transition kernel
 will generally make smaller and smaller steps as we increase the dimensionality
-of the problem \cite{2017arXiv170102434B}.
+of the problem \citep{2017arXiv170102434B}.
 
 Transition kernels that leverage gradient information of the target
 distribution can help address this issue of shortening steps in a high
@@ -398,7 +398,7 @@ dimensional space. Instead of proposing a new point by drawing from a Gaussian,
 one can use the gradient evaluated at the current location to propose a new
 point, so that the evolution of the chain is preferentially directed to regions
 of higher probability. For example, the Metropolis-adjusted Langevin algorithm
-(MALA) \cite{10.2307/2346184} places a unit Gaussian at the tip of the gradient
+(MALA) \citep{10.2307/2346184} places a unit Gaussian at the tip of the gradient
 vector at the current position,
 \begin{align}
     \mathbf{x} = \mathbf{x_0} + \tau \nabla\log{p(\mathbf{x_0})} + \sqrt{2\tau}N(0,\mathbf{I})\, ,
@@ -407,9 +407,9 @@ where $\tau$ is a step size chosen during the tuning stage. Compared to a
 Gaussian centered at the current location, the MALA transition kernel is more
 likely to propose a point in the higher posterior density region because of the
 gradient term, which helps boost the acceptance rate.
-Hamiltonian Monte Carlo \cite{2017arXiv170102434B} is another gradient-based
+Hamiltonian Monte Carlo \citep{2017arXiv170102434B} is another gradient-based
 algorithm that has been explored for neutron star inspirals
-\cite{Bouffanais:2018hoz}.
+\citep{Bouffanais:2018hoz}.
 
 While transition kernels that use gradient information can help improve the
 acceptance rate, computing the gradient of the posterior density function
@@ -418,7 +418,7 @@ beneficial in terms of sampling time. If one wants to compute the gradient
 through finite differencing, the additional computational cost goes as at least
 ${\sim} \mathcal{O}(2n)$, where $n$ is the dimension of the problem. On the
 other hand, schemes like \textsc{Jax}
-\cite{jax2018github} allow us to compute the gradient of the likelihood
+\citep{jax2018github} allow us to compute the gradient of the likelihood
 function with respect to the parameters through automatic differentiation,
 which gives the gradient information down to machine precision at around the
 same order of time compared to evaluating the posterior itself. Thus, having
@@ -430,7 +430,7 @@ implemented within \textsc{Jax} or a similar framework; this includes the
 likelihood and, therefore, the waveform approximant.  This means that the
 development of differentiable approximants is essential for leveraging
 gradient-based sampling in GW applications. We currently make use of the
-waveforms implemented in \textsc{ripple} \cite{ripplepaper}.
+waveforms implemented in \textsc{ripple} \citep{ripplepaper}.
 
 \subsection{Normalizing Flow enhanced sampling}
 \label{sec:flow}
@@ -442,14 +442,14 @@ that most gradient-based samplers do not solve well. For example, first-order
 gradient-based algorithms struggle with target distributions that exhibit
 locally-varying correlations, since they assume a single mass matrix that does
 not depend on the location of the chain by construction
-\cite{2017arXiv170102434B}.\footnote{Sampling algorithms that use higher order
-derivatives such as manifold-MALA and Riemannian-HMC \cite{RMHMC} can in
+\citep{2017arXiv170102434B}.\footnote{Sampling algorithms that use higher order
+derivatives such as manifold-MALA and Riemannian-HMC \citep{RMHMC} can in
 principle handle local correlations in the target distribution; however, they
 often encounter instabilities when used in real-life applications, so their use
 is a rare practice.} Another example is multi-modality: if there are multiple
 modes in the target distribution, individual chains will likely be trapped in
 one mode and take an extremely long time to transverse between the modes
-\cite{2018arXiv180803230M}.  This means that the relative weights between modes
+\citep{2018arXiv180803230M}.  This means that the relative weights between modes
 will take much longer to estimate than the shape of each mode.
 
 % Long burn-in too
@@ -467,7 +467,7 @@ of the computation is not directly devoted to estimating the target quantities.
 All the above issues can be mitigated by normalizing flows.  Normalizing flows
 are a technique based on neural networks that aims at learning a mapping from a
 simple distribution, such as a Gaussian, to a complex distribution, often given
-in the form of samples \cite{2019arXiv190809257K, 2019arXiv191202762P}. Once
+in the form of samples \citep{2019arXiv190809257K, 2019arXiv191202762P}. Once
 the network is trained, one can evaluate the probability density of the complex
 distribution and sample from it very efficiently, by first evaluating the
 simple distribution and then applying the learned mapping. The core equation
@@ -527,7 +527,7 @@ properties since we are changing the proposal distribution. To produce final
 samples that can be used to estimate target quantities, one has to freeze the
 normalizing flow model and not retrain during the final sampling phase in order
 to satisfy the detailed balance condition. We use the package \textsc{flowMC}
-\cite{2022arXiv221106397W,Gabrie:2021tlu}, with MALA as the gradient-based sampler. The
+\citep{2022arXiv221106397W,Gabrie:2021tlu}, with MALA as the gradient-based sampler. The
 pseudocode of the algorithm is given in Algorithm \ref{alg:cap}.
 
 \begin{algorithm}
@@ -611,7 +611,7 @@ time, e.g., the true value should lie within the $50\%$ credible interval
 $50\%$ of the time. In other words, the recovered percentiles of the true
 parameters should be uniformly distributed. Deviation from this behavior would
 suggest the pipeline is either over-confident or too conservative
-\cite{Cook2006,Talts2018}.
+\citep{Cook2006,Talts2018}.
 
 % State the distribution of injected population
 We sample 1200 events from the distribution of parameters detailed in Table
@@ -621,10 +621,10 @@ cutoff of 30 Hz and a sampling rate of 2048 Hz. We draw noise from a set of
 projected design PSDs for the LIGO Hanford, LIGO Livingston
 (\texttt{SimNoisePSDaLIGOZeroDetHighPower}) and Virgo
 (\texttt{SimNoisePSDAdvVirgo}) detectors
-\cite{lalsuite,Shoemaker:T0900288,2012arXiv1202.4031M}. For both injection and
-recovery, we make use of the \textsc{IMRPhenomD} waveform \cite{Khan:2015jqa}
+\citep{lalsuite,Shoemaker:T0900288,2012arXiv1202.4031M}. For both injection and
+recovery, we make use of the \textsc{IMRPhenomD} waveform \citep{Khan:2015jqa}
 via the fully-differentiable implementation presented in the \textsc{ripple}
-package \cite{ripplepaper}. We use a neural spline flow model \cite{2019arXiv190604032D}
+package \citep{ripplepaper}. We use a neural spline flow model \citep{2019arXiv190604032D}
 with 10 layers, each with 128 hidden units, and 8 bins per layer as our
 normalizing flow model.
 
@@ -673,7 +673,7 @@ our inference results agree well with a uniform distribution.
 
 To further quantify how well our result agrees with a uniform distribution, we
 can compute the Kolmogorov-Smirnov $p$-values for each marginalized
-distribution \cite{}.  A low $p$-value (with a threshold often
+distribution \citep{}.  A low $p$-value (with a threshold often
 chosen to be $p = 0.05$) could indicate that our result is in tension with a uniform
 distribution. The $p$-values obtained for each parameter are shown in the
 legend of Fig.~\ref{fig:ppplot}. Most of them are well above the $p = 0.05$
@@ -684,7 +684,7 @@ have one of the parameters lying slightly outside the threshold. To assess
 whether this is expected, we can compute the combined $p$-value for these 11
 parameters, and find it to be $p = 0.70$.  This shows our inference pipeline
 performs properly on simulated data at a similar level as standard tools
-\cite{Veitch:2014wba,Romero-Shaw:2020owr}.
+\citep{Veitch:2014wba,Romero-Shaw:2020owr}.
 
 \begin{figure}
     \script{ppplots.py}
@@ -704,13 +704,13 @@ it to two real LIGO-Virgo events: GW150914 and GW170817. We use the priors
 shown in Table \ref{tab:parameters}, and take 4 s of data sampled at 2048 Hz
 starting at 20 Hz for GW150914, and 128 s of data sampled at 4096 Hz starting
 at 23 Hz for GW170817; strain data and PSDs for both events are fetched from
-GWOSC \cite{GWOSC}. We use the same normalizing flow model as the
+GWOSC \citep{GWOSC}. We use the same normalizing flow model as the
 injection-recovery study. For our specific choice of sampler settings, we
 produce ${\sim}$2500 and 3500 \emph{effective samples}\footnote{Effective
 samples here refers to the number of independent samples, which is the total
 number of generated samples divided by their correlation length; we compute the
 effective sample size using \textsc{arviz}
-\cite{arviz_2019},\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
+\citep{arviz_2019}, \url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
 } for GW150914 and GW170817 respectively. Running on an \textsc{Nvidia} A100
 GPU, the wall time for both events is around 3 minutes. Most of this time is
 spent on just-in-time (JIT) compilation of the code; the actual sampling time
@@ -738,10 +738,10 @@ wall-time calculation.
 
 For comparison, we produce equivalent runs with \textsc{Bilby}, using the same
 exact data and priors.  We use the \textsc{dynesty} sampler
-\cite{2020MNRAS.493.3132S,dynesty}, with 1000 live points and other settings as
-in the configurations files included in our data release \cite{release}.  We
+\citep{2020MNRAS.493.3132S,dynesty}, with 1000 live points and other settings as
+in the configurations files included in our data release \citep{release}.  We
 carry out these runs using \textsc{parallel Bilby} (\textsc{pBilby})
-\cite{Smith:2019ucc} to distribute the computation over 400 Intel Skylake CPUs
+\citep{Smith:2019ucc} to distribute the computation over 400 Intel Skylake CPUs
 for each event.  For the specific settings chosen, the wall-time duration of
 each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day for GW170817.
 
@@ -797,8 +797,8 @@ respectively. The JSD values are comparable to those reported in
 % Compared to other works
 There have been several recent efforts to speed up GW parameter estimation,
 relying on techniques ranging from efficient reparameterizations
-\cite{Islam:2022afg,Roulet:2022kot} to deep learning
-\cite{Dax:2021tsq,Dax:2022pxd}. While all of these methods can achieve
+\citep{Islam:2022afg,Roulet:2022kot} to deep learning
+\citep{Dax:2021tsq,Dax:2022pxd}. While all of these methods can achieve
 minutes-scale parameter estimation with high fidelity under some conditions,
 our approach possesses unique strengths, and may complement some of those other
 techniques. Additional approaches for speeding up GW parameter estimation include
@@ -881,15 +881,15 @@ state-of-the-art models have, such as precession, subdominants moments of the
 radiation, tides or eccentricity. It also has a higher mismatch with reference
 numerical relativity waveforms compared to more recent waveform models.
 Currently, we are working on building differentiable implementations of
-\textsc{IMRPhenomXPHM} \cite{Pratten:2020ceb}, a precessing successor to
+\textsc{IMRPhenomXPHM} \citep{Pratten:2020ceb}, a precessing successor to
 \textsc{IMRPhenomD} including subdominant harmonics, as well as the numerical
 relativity surrogate waveforms, including \textsc{NRSur7dq4}
-\cite{Varma:2018mmi}. Going forward, we expect the use of autodifferentiation
+\citep{Varma:2018mmi}. Going forward, we expect the use of autodifferentiation
 environments like \textsc{Jax} to become more prevalent in the waveform
 development community, increasing the number of differentiable waveform models
 available. This would not only be beneficial for parameter estimation, but also
 for a number of other applications such as Fisher matrix computations, template
-placement and calibrating waveforms to numerical relativity \cite{Coogan:2022qxs,Iacovelli:2022bbs,Iacovelli:2022mbg,ripplepaper}.
+placement and calibrating waveforms to numerical relativity \citep{Coogan:2022qxs,Iacovelli:2022bbs,Iacovelli:2022mbg,ripplepaper}.
 
 % Access to higher dimensional problem
 While standard CBC analyses go up to 17 dimensions, non-standard GW PE problems
@@ -919,7 +919,7 @@ work in progress.
 Furthermore, our current implementation is minimal and we do not make use of
 most standard ``tricks'' to accelerate sampling.  In particular, we do not
 incorporate (semi)analytic marginalization schemes over parameters such as time
-and phase \cite{2019PASA...36...10T}. As the performance of our implementation is not
+and phase \citep{2019PASA...36...10T}. As the performance of our implementation is not
 significantly impacted by having two extra dimensions, time and phase
 marginalization are not crucial for us;
 however, their implementation within our framework would be trivial.
@@ -962,8 +962,8 @@ are two ways to reduce this time.
 First, we can explore a different optimization strategy that
 takes full advantage of the strengths of our pipeline, in particular the
 differentiability of our likelihood and the possibility to evaluate many
-waveforms in parallel with a GPU. Particle swarm \cite{7869491} and stochastic
-gradient descent methods \cite{10.5555/304710.304720} are promising candidates
+waveforms in parallel with a GPU. Particle swarm \citep{7869491} and stochastic
+gradient descent methods \citep{10.5555/304710.304720} are promising candidates
 we are investigating.
 
 Second, we may marginalize extrinsic parameters to reduce the dimensionality of

@@ -5,9 +5,19 @@ rule table:
         "src/data/GW170817_flowMC_1800.npz",
         "src/data/GW170817_Bilby_flat.dat"
     output:
-        "src/tex/output/js_table.tex"
+        "src/tex/output/js_table.tex",
+        "src/data/jsd.txt"
     script:
         "src/scripts/get_js.py"
+
+rule pp:
+    input:
+        "src/data/combined_quantile_balance_LVK.npz"
+    output:
+        "src/tex/figures/ppplot.pdf",
+        "src/data/pvalues.txt"
+    script:
+        "src/scripts/ppplots.py"
 
 rule macros:
     output:

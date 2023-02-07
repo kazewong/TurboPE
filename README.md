@@ -18,3 +18,5 @@
 Fast gravitational waves parameter estimation without compromise
 
 An open source scientific article created using the [showyourwork](https://github.com/showyourwork/showyourwork) workflow.
+
+Click [here](https://github.com/kazewong/TurboPE/blob/main-pdf/ms.pdf) to view PDF without automatically downloading.

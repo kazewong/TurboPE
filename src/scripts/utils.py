@@ -23,7 +23,7 @@ labels = [r'$M_c/M_\odot$', r'$q$', r'$\chi_1$', r'$\chi_2$', r'$d_{\rm{L}}/{\rm
 
 CLINE = sns.color_palette(desat=0.5)[0]
 
-def plot_corner(chains1, chains2, nsamp=1000, cline=CLINE, lims=None, rng=None):
+def plot_corner(chains1, chains2, nsamp=5000, cline=CLINE, lims=None, rng=None):
     df1 = pd.DataFrame(chains1, columns=labels).sample(nsamp, random_state=rng)
     df2 = pd.DataFrame(chains2, columns=labels).sample(nsamp, random_state=rng)
 

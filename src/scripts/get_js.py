@@ -1,6 +1,7 @@
 import numpy as np
 import paths
 import pandas as pd
+import utils
 from scipy.spatial.distance import jensenshannon
 from scipy.special import kl_div
 from scipy.stats import gaussian_kde
@@ -23,28 +24,10 @@ def get_js(flowMC_chains, bilby_chains):
 # LOAD DATA
 ##############################################################################
 
-#------------------------------------------------------------------------------
-# GW150914
-
-flowMC_data = np.load(paths.data / 'GW150914_flowMC.npz')
-bilby_data = np.genfromtxt(paths.data / 'GW150914_Bilby.dat')
-flowMC_chains = flowMC_data['chains'][:,:,[0,1,2,3,4,6,7,8,9,10]].reshape(-1,10)
-bilby_chains = bilby_data[1:,[1,0,2,3,6,11,9,10,8,7]]
-flowMC_chains[:,6] = np.arccos(flowMC_chains[:,6])
-flowMC_chains[:,9] = np.arcsin(flowMC_chains[:,9])
-
+flowMC_chains, bilby_chains = utils.get_chains('GW150914')
 js_bbh = get_js(flowMC_chains, bilby_chains)
 
-#------------------------------------------------------------------------------
-# GW170817
-
-flowMC_data = np.load(paths.data / 'GW170817_flowMC_1800.npz')
-bilby_data = np.genfromtxt(paths.data / 'GW170817_Bilby_flat.dat')
-flowMC_chains = flowMC_data['chains'][:,:,[0,1,2,3,4,6,7,8,9,10]].reshape(-1,10)
-bilby_chains = bilby_data[1:,[0,1,2,3,4,8,9,7,6,5]]
-flowMC_chains[:,6] = np.arccos(flowMC_chains[:,6])
-flowMC_chains[:,9] = np.arcsin(flowMC_chains[:,9])
-
+flowMC_chains, bilby_chains = utils.get_chains('GW170817')
 js_bns = get_js(flowMC_chains, bilby_chains)
 
 ##############################################################################

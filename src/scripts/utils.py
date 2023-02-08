@@ -4,6 +4,35 @@ import seaborn as sns
 import pandas as pd
 import matplotlib as mpl
 
+##############################################################################
+# I/O
+##############################################################################
+
+# helper function
+def get_chains(event):
+    """Retrieve chains for each event.
+    """
+    if event.upper() == 'GW150914':
+        flowMC_data = np.load(paths.data / 'GW150914_flowMC.npz')
+        bilby_data = np.genfromtxt(paths.data / 'GW150914_Bilby.dat')
+        flowMC_chains = flowMC_data['chains'][:,:,[0,1,2,3,4,6,7,8,9,10]].reshape(-1,10)
+        bilby_chains = bilby_data[1:,[1,0,2,3,6,11,9,10,8,7]]
+        flowMC_chains[:,6] = np.arccos(flowMC_chains[:,6])
+        flowMC_chains[:,9] = np.arcsin(flowMC_chains[:,9])
+    elif event.upper() == 'GW170817':
+        flowMC_data = np.load(paths.data / 'GW170817_flowMC_1800.npz')
+        bilby_data = np.genfromtxt(paths.data / 'GW170817_Bilby_flat.dat')
+        flowMC_chains = flowMC_data['chains'][:,:,[0,1,2,3,4,6,7,8,9,10]].reshape(-1,10)
+        bilby_chains = bilby_data[1:,[0,1,2,3,4,8,10,7,6,5]]
+        flowMC_chains[:,6] = np.arccos(flowMC_chains[:,6])
+        flowMC_chains[:,9] = np.arcsin(flowMC_chains[:,9])
+    return flowMC_chains, bilby_chains
+
+
+##############################################################################
+# PLOTTING
+##############################################################################
+
 sns.set(context='notebook', palette='colorblind', style='ticks', font_scale=1.5)
 
 params = {
@@ -23,7 +52,7 @@ labels = [r'$M_c/M_\odot$', r'$q$', r'$\chi_1$', r'$\chi_2$', r'$d_{\rm{L}}/{\rm
 
 CLINE = sns.color_palette(desat=0.5)[0]
 
-def plot_corner(chains1, chains2, nsamp=5000, cline=CLINE, lims=None, rng=None):
+def plot_corner(chains1, chains2, nsamp=4000, cline=CLINE, lims=None, rng=None):
     df1 = pd.DataFrame(chains1, columns=labels).sample(nsamp, random_state=rng)
     df2 = pd.DataFrame(chains2, columns=labels).sample(nsamp, random_state=rng)
 
@@ -52,4 +81,3 @@ def plot_corner(chains1, chains2, nsamp=5000, cline=CLINE, lims=None, rng=None):
     ax.legend(loc='center left', bbox_to_anchor=(1.25, 0.5), frameon=False,
               fontsize=20);
     return g
-

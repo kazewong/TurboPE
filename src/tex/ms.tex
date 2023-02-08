@@ -42,7 +42,6 @@ Flatiron Institute, New York, NY 10010, USA}}
 
 % Abstract with filler text
 \begin{abstract}
-\te{There is still a "KW:fill" remaining in the text!}
 We present a lightweight, flexible, and high-performance framework for inferring
 the properties of gravitational-wave events. By combining likelihood
 heterodyning, automatically-differentiable and accelerator-compatible waveforms,
@@ -52,9 +51,8 @@ like GW150914 and GW170817 within a minute of sampling time.  Our framework does
 not require pre-training or explicit reparameterizations and can be generalized
 to handle higher dimensional problems. We present the details of our
 implementation and discuss trade-offs and future developments in the context of
-other proposed strategies for real-time parameter estimation. Our code for
-generating the manuscript and running the analysis is publicly available on
-GitHub. \te{Add link to Github}
+other proposed strategies for real-time parameter estimation. Our code for running the analysis is publicly available on
+GitHub \url{https://github.com/kazewong/jim}.
 \end{abstract}
 
 \newcommand{\ptot}{}
@@ -203,10 +201,7 @@ half a year, making direct evaluation through NR prohibitively expensive. To
 circumvent this, there are several families of waveform ``approximants'',
 including the \textsc{IMRPhenom} family \citep{Khan:2015jqa,
 Garcia-Quiros:2020qpx}, the \textsc{SEOB} family \citep{PhysRevD.89.061502}, and
-the NR surrogate family \citep{Varma:2019csw}. Evaluating those approximants can
-take ${\sim}10$ ms to 1 s for short signals, such as a $30-30\ M_{\odot}$
-binary black hole, reaching up to \kw{Fill} for long signals, such as a
-$1.4-1.4\ M_{\odot}$ binary neutron star.  Since PE requires millions of
+the NR surrogate family \citep{Varma:2019csw}. Since PE requires millions of
 likelihood evaluations during sampling, the computational cost in evaluating
 the waveform is a major contributor to the long runtimes of GW PE.
 
@@ -682,7 +677,7 @@ our inference results agree well with a uniform distribution.
 
 To further quantify how well our result agrees with a uniform distribution, we
 can compute the Kolmogorov-Smirnov $p$-values for each marginalized
-distribution \citep{}\te{There is apparently supposed to be a citation here?}.
+distribution \citep{doi:10.1080/01621459.1968.11009335}.
 A low $p$-value (with a threshold often
 chosen to be $p = 0.05$) could indicate that our result is in tension with a uniform
 distribution. The $p$-values obtained for each parameter are shown in the
@@ -729,18 +724,18 @@ hetetrodyne the likelihood for the two events, which is omitted in the
 wall-time calculation.
 
 \begin{figure*}
-    \includegraphics[width=0.99\linewidth]{figures/GW150914.pdf}
+    \includegraphics[width=0.99\textwidth]{figures/GW150914.pdf}
     \caption{
-      GW150914 posterior computed by our code (blue) and \textsc{Bilby} (orange). \te{Change font to be latex, make labels larger, make figure full page.}
+      GW150914 posterior computed by our code (grey contour) and \textsc{Bilby} (blue line).
     }
     \label{fig:GW150914}
     \script{plot_GW150914.py}
 \end{figure*}
 
 \begin{figure*}
-\includegraphics[width=0.99\linewidth]{figures/GW170817.pdf}
+\includegraphics[width=0.99\textwidth]{figures/GW170817.pdf}
 \caption{
-    GW170817 posterior computed by our code (blue) and \textsc{Bilby} (orange). \te{Same as Fig 2}
+    GW170817 posterior computed by our code (grey contour) and \textsc{Bilby} (blue line).
 }
 \label{fig:GW170817}
     \script{plot_GW170817.py}
@@ -749,7 +744,7 @@ wall-time calculation.
 For comparison, we produce equivalent runs with \textsc{Bilby}, using the same
 exact data and priors.  We use the \textsc{dynesty} sampler
 \citep{2020MNRAS.493.3132S,dynesty}, with 1000 live points and other settings as
-in the configurations files included in our data release \citep{release} \te{Add citation}.  We
+in the configurations files available on github \url{https://github.com/kazewong/TurboPE/tree/main/src}.  We
 carry out these runs using \textsc{parallel Bilby} (\textsc{pBilby})
 \citep{Smith:2019ucc} to distribute the computation over 400 Intel Skylake CPUs
 for each event.  For the specific settings chosen, the wall-time duration of

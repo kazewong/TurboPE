@@ -16,7 +16,7 @@ flowMC_chains[:,9] = np.arcsin(flowMC_chains[:,9])
 # parameter ranges
 lims = [
     None,
-    [0.125, 1],
+    [0.5, 1],
     [-0.05, 0.05],
     [-0.05, 0.05],
     None,

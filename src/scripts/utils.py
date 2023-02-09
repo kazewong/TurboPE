@@ -55,7 +55,12 @@ labels = [r'$M_c/M_\odot$', r'$q$', r'$\chi_1$', r'$\chi_2$', r'$d_{\rm{L}}/{\rm
 
 CLINE = sns.color_palette(desat=0.5)[0]
 
-def plot_corner(chains1, chains2, nsamp=4000, cline=CLINE, lims=None, rng=None):
+NSAMP_DEF = 4000
+def plot_corner(chains1, chains2, nsamp=NSAMP_DEF, cline=CLINE, lims=None,
+                rng=None):
+    nsamp = min([nsamp, len(chains1), len(chains2)])
+    if nsamp != NSAMP_DEF:
+        print(f"WARNING: only {nsamp} samples available.")
     df1 = pd.DataFrame(chains1, columns=labels).sample(nsamp, random_state=rng)
     df2 = pd.DataFrame(chains2, columns=labels).sample(nsamp, random_state=rng)
 

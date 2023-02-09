@@ -24,6 +24,9 @@ def get_chains(event):
         bilby_data = np.genfromtxt(paths.data / 'GW170817_Bilby_flat.dat')
         flowMC_chains = flowMC_data['chains'][:,:,[0,1,2,3,4,6,7,8,9,10]].reshape(-1,10)
         bilby_chains = bilby_data[1:,[0,1,2,3,4,8,10,7,6,5]]
+        # the bilby run had an extended spin prior to avoid boundary issues,
+        # so reject-sample down to our spin bounds of -0.05 < chi < 0.05
+        bilby_chains = bilby_chains[(np.abs(bilby_chains[:,2]) < 0.05) & (np.abs(bilby_chains[:,3]) < 0.05)]
         flowMC_chains[:,6] = np.arccos(flowMC_chains[:,6])
         flowMC_chains[:,9] = np.arcsin(flowMC_chains[:,9])
     return flowMC_chains, bilby_chains

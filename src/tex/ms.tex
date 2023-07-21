@@ -611,7 +611,7 @@ model on a GPU with a typical sampler, in the sense that we cannot run many
 chains for one step and expect unbias posterior samples.
 
 This is precisely why \textsc{flowMC} is necessary for our approach. Since every
-accepted sample generated using the normalizing flow as proposal is independent,
+accepted sample generated using the normalizing flow as proposal is nearly independent,
 and the sampling from the normalizing flow is an embarrassingly parallel
 process, the name of the game then becomes training the normalizing flow as fast as
 possible. Having many chains helps to produce the necessary amount of samples
@@ -745,7 +745,20 @@ time for both events is around 3 minutes. Most of this time is spent on
 just-in-time (JIT) compilation of the code; the actual sampling time is only
 ${\sim}40$ s. We pre-compute the reference waveform parameters used to
 hetetrodyne the likelihood for the two events, which is omitted in the wall-time
-calculation.
+calculation. \corr{In terms of specific configuration of the sampler, we used
+1000 chains for both of the events. We run both the tuning phase and the
+production phase for 20 loops each. Within each phase, the global sampler and
+local sampler are stepped 200 times. This translates into a total number of
+likelihood evaluation is $1.6*10^7$. \footnote{While in principle adding more
+chains makes the algorithm less efficient in terms of acceptance/evaluation
+ratio, since GPUs can evaluate a fixed number of instruction per cycle, we can
+keep adding chains without paying extra computational cost before we saturate
+the GPU. This results in an improvement in wall time while being less efficient.
+We decide to choose a setting that improve wall time instead of efficiency.} The
+acceptance rate of the global proposal is about $2\%$ and $5\%$ for GW150914 and
+GW170817 respectively. Note that the setting is chosen to run longer than
+necessary to ensure convergence, we are currently pursing tuning studies to
+understand trade-offs in the algorithms and improve the efficiency further.}
 
 \begin{figure*}
     \includegraphics[width=0.99\textwidth]{figures/GW150914.pdf}
@@ -771,12 +784,9 @@ exact data and priors.  We use the \textsc{dynesty} sampler
 in the configurations files available on github \url{https://github.com/kazewong/TurboPE/tree/main/src}.  We
 carry out these runs using \textsc{parallel Bilby} (\textsc{pBilby})
 \citep{Smith:2019ucc} to distribute the computation over 400 Intel Skylake CPUs
-for each event.  For the specific settings chosen, the wall-time duration of
+for each event. For the specific settings chosen, the wall-time duration of
 each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day for GW170817.
-
-% Describe the distance between flowMC result and Bilby result using
-% Jensen-Shannon divergence, scipy has a function to compute that in
-% scipy.spatial.distance
+\corr{We have also benchmarked the wall-time performance }
 
 Figs.~\ref{fig:GW150914} and \ref{fig:GW170817} show that our posteriors are
 consistent with those produced by \textsc{Bilby}.  For a quantitative

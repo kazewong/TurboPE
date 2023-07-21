@@ -702,24 +702,28 @@ performs properly on simulated data at a similar level as standard tools
 
 \subsection{Real event parameter estimation}
 
-To demonstrate the performance of our parameter estimation pipeline, we apply
-it to two real LIGO-Virgo events: GW150914 and GW170817. We use the priors
-shown in Table \ref{tab:parameters}, and take 4 s of data sampled at 2048 Hz
-starting at 20 Hz for GW150914, and 128 s of data sampled at 4096 Hz starting
-at 23 Hz for GW170817; strain data and PSDs for both events are fetched from
-GWOSC \citep{GWOSC}. We use the same normalizing flow model as the
-injection-recovery study. For our specific choice of sampler settings, we
-produce ${\sim}$2500 and 3500 \emph{effective samples}\footnote{Effective
-samples here refers to the number of independent samples, which is the total
-number of generated samples divided by their correlation length; we compute the
-effective sample size using \software{arviz}
-\citep{arviz_2019}, \url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
-} for GW150914 and GW170817 respectively. Running on an \textsc{Nvidia} A100
-GPU, the wall time for both events is around 3 minutes. Most of this time is
-spent on just-in-time (JIT) compilation of the code; the actual sampling time
-is only ${\sim}40$ s. We pre-compute the reference waveform parameters used to
-hetetrodyne the likelihood for the two events, which is omitted in the
-wall-time calculation.
+To demonstrate the performance of our parameter estimation pipeline, we apply it
+to two real LIGO-Virgo events: GW150914 and GW170817. We use the priors shown in
+Table \ref{tab:parameters}, and take 4 s of data sampled at 2048 Hz starting at
+20 Hz for GW150914, and 128 s of data sampled at 4096 Hz starting at 23 Hz for
+GW170817; strain data and PSDs for both events are fetched from GWOSC
+\citep{GWOSC}. We use the same normalizing flow model as the injection-recovery
+study. For our specific choice of sampler settings, we produce ${\sim}$2500 and
+3500 \emph{effective samples}\footnote{Effective samples here refers to the
+number of independent samples, which is the total number of generated samples
+divided by their correlation length; we compute the effective sample size using
+\software{arviz} \citep{arviz_2019},
+\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}. } for
+GW150914 and GW170817 respectively. \corr{Running on a node with an
+\textsc{Nvidia} 80GB A100 GPU and 16 intel skylake CPUs} \footnote{Note that the
+CPU time is hard to benchmark in \software{Jax} due to JIT compilation and
+asynchronous dispatch. Overall, we find 4 CPUs to be sufficient for our use
+case. We chose 16 because of the ease of use of the local cluster.}, the wall
+time for both events is around 3 minutes. Most of this time is spent on
+just-in-time (JIT) compilation of the code; the actual sampling time is only
+${\sim}40$ s. We pre-compute the reference waveform parameters used to
+hetetrodyne the likelihood for the two events, which is omitted in the wall-time
+calculation.
 
 \begin{figure*}
     \includegraphics[width=0.99\textwidth]{figures/GW150914.pdf}

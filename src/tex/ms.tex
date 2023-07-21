@@ -573,18 +573,17 @@ an accelerator is more likely to reduce performance than increase it.
 % More sample helps training normalizing flow
 Yet, in our work, the use of accelerators provides two independent advantages
 that tremendously benefit the parameter estimation process. First, using
-accelerators allows us to run many independent MCMC chains simultaneously,
-which benefits the training of the normalizing flow. Since we generate the data
-we use to train the normalizing flow on the fly, the more independent data we
-can feed to the training process, the higher chance the normalizing flow can
-learn a reasonable representation of the global landscape of the target
-distribution.  If we only used a small number of chains, we would be limited to
-the correlated samples from each chain and we would have to run more sequential
-steps to obtain the same amount of independent samples in the end---with more
-chains the problem becomes parallelizable and we can obtain the same number of
-training samples sooner. In other words, being able to use many independent
-chains helps the normalizing flow learn the global landscape faster in wall
-time.
+accelerators allows us to run many independent MCMC chains simultaneously, which
+benefits the training of the normalizing flow. Since we generate the data we use
+to train the normalizing flow on the fly, the more independent data we can feed
+to the training process, the higher chance the normalizing flow can learn a
+reasonable representation of the target distribution.  If we only used a small
+number of chains, we would be limited to the correlated samples from each chain
+and we would have to run more sequential steps to obtain the same amount of
+independent samples in the end---with more chains the problem becomes
+parallelizable and we can obtain the same number of training samples sooner. In
+other words, being able to use many independent chains helps the normalizing
+flow approximating the target density faster in wall time.
 
 % GPU helps packing a shit ton of waveform evaluation
 Another benefit of accelerators is the parallel evaluation of waveforms. Since

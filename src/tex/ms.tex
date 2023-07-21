@@ -12,6 +12,7 @@
 \definecolor{pyRed}{RGB}{214, 39, 40}
 \newcommand{\te}[1]{\textbf{\color{pyRed}(TE: #1)}}
 \newcommand{\mi}[1]{\textsf{\color{teal}[\textbf{MI:} #1]}}
+\newcommand{\corr}[1]{\textbf{\color{pyRed}(Correction: #1)}}
 
 \newcommand{\flatiron}{\affiliation{Center for Computational Astrophysics,
 Flatiron Institute, New York, NY 10010, USA}}
@@ -91,7 +92,7 @@ evolution \citep{LIGOScientific:2021psn}.
 % \mi{what catalog do you mean? The LVK doesn't use PyCBC Inference}
 There exist a number of prominent, community-developed PE codes, including
 \software{LALInference} \citep{Veitch:2014wba}, \software{PyCBC Inference}
-\citep{Biwer:2018osg}, and \software{Bilby}
+\citep{Biwer:2018osg}, and \textsc{Bilby}
 \citep{Ashton:2018jfp,Romero-Shaw:2020owr}.  These packages have been tested by a
 number of groups and are well regarded as standard tools. However, while these
 tools have passed many robustness tests, they are known to be computationally
@@ -313,7 +314,7 @@ $|\delta\Psi_{\textrm{max}}(f_{\textrm{max}}) -
 
 % \te{Do we also already here want to make the point that it really helps with memory issues of GPUs if the frequency array isn't too large?}
 
-To obtain a reference waveform, we currently use the \software{differential
+To obtain a reference waveform, we currently use the \textsc{differential
 evolution} algorithm \citep{Storn1997DifferentialE} available in the
 \software{scipy} package \citep{2020SciPy-NMeth} to find the waveform parameters
 which maximize the likelihood.  The reference waveform could also be produced
@@ -582,8 +583,8 @@ number of chains, we would be limited to the correlated samples from each chain
 and we would have to run more sequential steps to obtain the same amount of
 independent samples in the end---with more chains the problem becomes
 parallelizable and we can obtain the same number of training samples sooner. In
-other words, being able to use many independent chains helps the normalizing
-flow approximating the target density faster in wall time.
+other words, \corr{being able to use many independent chains helps the normalizing
+flow approximating the target density faster in wall time.}
 
 % GPU helps packing a shit ton of waveform evaluation
 Another benefit of accelerators is the parallel evaluation of waveforms. Since
@@ -723,7 +724,7 @@ wall-time calculation.
 \begin{figure*}
     \includegraphics[width=0.99\textwidth]{figures/GW150914.pdf}
     \caption{
-      GW150914 posterior computed by our code (blue) and \software{Bilby} (gray).
+      GW150914 posterior computed by our code (blue) and \textsc{Bilby} (gray).
     }
     \label{fig:GW150914}
     \script{plot_GW150914.py}
@@ -732,17 +733,17 @@ wall-time calculation.
 \begin{figure*}
 \includegraphics[width=0.99\textwidth]{figures/GW170817.pdf}
 \caption{
-    GW170817 posterior computed by our code (blue) and \software{Bilby} (gray).
+    GW170817 posterior computed by our code (blue) and \textsc{Bilby} (gray).
 }
 \label{fig:GW170817}
     \script{plot_GW170817.py}
 \end{figure*}
 
-For comparison, we produce equivalent runs with \software{Bilby}, using the same
+For comparison, we produce equivalent runs with \textsc{Bilby}, using the same
 exact data and priors.  We use the \software{dynesty} sampler
 \citep{2020MNRAS.493.3132S,dynesty}, with 1000 live points and other settings as
 in the configurations files available on github \url{https://github.com/kazewong/TurboPE/tree/main/src}.  We
-carry out these runs using \software{parallel Bilby} (\software{pBilby})
+carry out these runs using \textsc{parallel Bilby} (\software{pBilby})
 \citep{Smith:2019ucc} to distribute the computation over 400 Intel Skylake CPUs
 for each event.  For the specific settings chosen, the wall-time duration of
 each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day for GW170817.
@@ -752,9 +753,9 @@ each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day for GW170817.
 % scipy.spatial.distance
 
 Figs.~\ref{fig:GW150914} and \ref{fig:GW170817} show that our posteriors are
-consistent with those produced by \software{Bilby}.  For a quantitative
+consistent with those produced by \textsc{Bilby}.  For a quantitative
 comparison, we compute the Jensen-Shannon divergence between our code and
-\software{Bilby} for the marginalized distribution for each parameter. The
+\textsc{Bilby} for the marginalized distribution for each parameter. The
 Jensen-Shannon divergence (JSD) is a symmetric measure of the distance between
 two probability distributions, with a value of 0 indicating identical
 distributions and a value of $\ln{2}$ nat representing the maximum
@@ -768,7 +769,7 @@ respectively. The JSD values are comparable to those reported in
     \begin{center}
     \variable{output/js_table.tex}
     \caption{JSD values for the marginalized distribution of each parameter for
-    GW150914 and GW170817 between our code and \software{Bilby}. The bold values
+    GW150914 and GW170817 between our code and \textsc{Bilby}. The bold values
     indicate the parameters with the largest JSD.}
     \label{tab:JSD}
     \end{center}
@@ -843,9 +844,6 @@ On the other hand, there are traditional tools that make use of our
 understanding of the underlying physics to ease sampling, which relies
 on having good intuition of the problem and tends to not generalize.
 Our method achieves the key advantages of both approaches, without many of their limitations.
-%% [MI: the following is too vague, and we always rely on a reasonable prior,
-%% so I'm removing it.]
-% Both approaches rely on having a somewhat reasonable prior to approach the problem.
 
 The main difference between methods used in industrial products and scientific
 problems is that the latter must address questions that may not have been
@@ -861,20 +859,30 @@ for building scientific tools.
 % Additional traits for having differentiable waveforms
 We are currently working on a number of improvements and extensions to our
 current infrastructure. While the \textsc{IMRPhenomD} waveform approximant is a
-reasonable start, it lacks some qualitative features that other
-state-of-the-art models have, such as precession, subdominants moments of the
-radiation, tides, or eccentricity. It also has a higher mismatch with reference
-numerical relativity waveforms compared to more recent waveform models.
-Currently, we are working on building differentiable implementations of
-\textsc{IMRPhenomXPHM} \citep{Pratten:2020ceb}, a precessing successor to
-\textsc{IMRPhenomD} including subdominant harmonics, as well as the numerical
-relativity surrogate waveforms, including \textsc{NRSur7dq4}
-\citep{Varma:2018mmi}. Going forward, we expect the use of autodifferentiation
-environments like \software{Jax} to become more prevalent in the waveform
-development community, increasing the number of differentiable waveform models
-available. This would not only be beneficial for parameter estimation, but also
-for a number of other applications such as Fisher matrix computations, template
-placement and calibrating waveforms to numerical relativity \citep{Coogan:2022qxs,Iacovelli:2022bbs,Iacovelli:2022mbg,ripplepaper}.
+reasonable start, it lacks some qualitative features that other state-of-the-art
+models have, such as precession, subdominants moments of the radiation, tides,
+or eccentricity. It also has a higher mismatch with reference numerical
+relativity waveforms compared to more recent waveform models. Currently, we are
+working on building differentiable implementations of \textsc{IMRPhenomXPHM}
+\citep{Pratten:2020ceb}, a precessing successor to \textsc{IMRPhenomD} including
+subdominant harmonics, as well as the numerical relativity surrogate waveforms,
+including \textsc{NRSur7dq4} \citep{Varma:2018mmi}. Going forward, we expect the
+use of autodifferentiation environments like \software{Jax} to become more
+prevalent in the waveform development community, increasing the number of
+differentiable waveform models available. This would not only be beneficial for
+parameter estimation, but also for a number of other applications such as Fisher
+matrix computations, template placement and calibrating waveforms to numerical
+relativity
+\citep{Coogan:2022qxs,Iacovelli:2022bbs,Iacovelli:2022mbg,ripplepaper}.
+\corr{Another family of waveform models that could benefit from this approach is
+the effective-one-body (EOB) models \citep{Buonanno:1998gg,PhysRevD.89.061502}.
+However, the EOB family requires solving time-dependent ODEs to compute the
+waveform and the truncation of the ODEs is dynamically determined at runtime.
+JIT in \software{Jax} requires the computational graph of a function to be fixed
+at compile time, which means the ODEs solving part of EOB is not compatible with
+\software{Jax}, so the models in the EOB family may not benefit as much as the
+other families.}
+
 
 % Access to higher dimensional problem
 While standard CBC analyses go up to 17 dimensions, non-standard GW PE problems
@@ -938,7 +946,7 @@ the compilation overhead for every event.
 % Faster maximum likelihood finder
 Besides compilation, there is in principle also overhead from finding the
 reference waveform used in for heterodyning the likelihood. Since the
-\software{differential evolution} algorithm we currently use has not been
+\textsc{differential evolution} algorithm we currently use has not been
 implemented in \software{Jax}, and the \software{Jax} waveform we use is not
 compatible with the parallelization scheme in the \software{scipy} library,
 maximizing the likelihood currently takes us around 1 minute for GW170817. There

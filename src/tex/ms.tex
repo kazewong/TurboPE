@@ -91,7 +91,7 @@ evolution \citep{LIGOScientific:2021psn}.
 % community-developed PE codes
 % \mi{what catalog do you mean? The LVK doesn't use PyCBC Inference}
 There exist a number of prominent, community-developed PE codes, including
-\software{LALInference} \citep{Veitch:2014wba}, \software{PyCBC Inference}
+\textsc{LALInference} \citep{Veitch:2014wba}, \textsc{PyCBC Inference}
 \citep{Biwer:2018osg}, and \textsc{Bilby}
 \citep{Ashton:2018jfp,Romero-Shaw:2020owr}.  These packages have been tested by a
 number of groups and are well regarded as standard tools. However, while these
@@ -316,7 +316,7 @@ $|\delta\Psi_{\textrm{max}}(f_{\textrm{max}}) -
 
 To obtain a reference waveform, we currently use the \textsc{differential
 evolution} algorithm \citep{Storn1997DifferentialE} available in the
-\software{scipy} package \citep{2020SciPy-NMeth} to find the waveform parameters
+\textsc{scipy} package \citep{2020SciPy-NMeth} to find the waveform parameters
 which maximize the likelihood.  The reference waveform could also be produced
 from trigger parameters precomputed by a search pipeline without additional
 computation. Once we have obtained a reference waveform, we can check the accuracy
@@ -420,7 +420,7 @@ introduces an additional computational cost, which is not necessarily
 beneficial in terms of sampling time. If one wants to compute the gradient
 through finite differencing, the additional computational cost goes as at least
 ${\sim} \mathcal{O}(2n)$, where $n$ is the dimension of the problem. On the
-other hand, schemes like \software{Jax}
+other hand, schemes like \textsc{Jax}
 \citep{jax2018github} allow us to compute the gradient of the likelihood
 function with respect to the parameters through automatic differentiation,
 which gives the gradient information down to machine precision at around the
@@ -429,11 +429,11 @@ access to gradient information through automatic differentiation is crucial to
 making gradient-based transition kernels favorable in terms of computing cost.
 
 To leverage automatic differentiation, the entire posterior function must be
-implemented within \software{Jax} or a similar framework; this includes the
+implemented within \textsc{Jax} or a similar framework; this includes the
 likelihood and, therefore, the waveform approximant.  This means that the
 development of differentiable approximants is essential for leveraging
 gradient-based sampling in GW applications. We currently make use of the
-waveforms implemented in \software{ripple} \citep{ripplepaper}.
+waveforms implemented in \textsc{ripple} \citep{Edwards:2023sak}.
 
 \subsection{Normalizing Flow enhanced sampling}
 \label{sec:flow}
@@ -529,12 +529,12 @@ Note that every time we retrain the network, we are breaking the Markov
 properties since we are changing the proposal distribution. To produce final
 samples that can be used to estimate target quantities, one has to freeze the
 normalizing flow model and not retrain during the final sampling phase in order
-to satisfy the detailed balance condition. We use the package \software{flowMC}
+to satisfy the detailed balance condition. We use the package \textsc{flowMC}
 \citep{2022arXiv221106397W,Gabrie:2021tlu}, with MALA as the gradient-based sampler. The
 pseudocode of the algorithm is given in Algorithm \ref{alg:cap}.
 
 \begin{algorithm}
-\caption{\software{flowMC} pseudocode}\label{alg:cap}
+\caption{\textsc{flowMC} pseudocode}\label{alg:cap}
 \KwIn{initial position $ip$}
 \Parameters{number of training loops $nt$, number of production loops $np$}
 \Variables{current chains $cc$, current position $cp$, current NF parameters $\Theta$, chains from local sampler $c_{local}$, chains from global sampler $c_{global}$}
@@ -594,7 +594,7 @@ over frequency bins. On an \textsc{Nvidia} A100 GPU, we can evaluate the
 waveform model $\sim \mathcal{O}(10^9)$ times in a second for different
 frequencies or source parameters. Together with the heterodyned likelihood, this
 allows us to run thousands of parallel chains in a PE run. The high throughput
-of waveform evaluations unlocks the potential of the \software{flowMC} sampling
+of waveform evaluations unlocks the potential of the \textsc{flowMC} sampling
 algorithm.
 
 \section{Result}
@@ -625,8 +625,8 @@ projected design PSDs for the LIGO Hanford, LIGO Livingston
 (\texttt{SimNoisePSDAdvVirgo}) detectors
 \citep{lalsuite,Shoemaker:T0900288,2012arXiv1202.4031M}. For both injection and
 recovery, we make use of the \textsc{IMRPhenomD} waveform \citep{Khan:2015jqa}
-via the fully-differentiable implementation presented in the \software{ripple}
-package \citep{ripplepaper}. We use a neural spline flow model \citep{2019arXiv190604032D}
+via the fully-differentiable implementation presented in the \textsc{ripple}
+package \citep{Edwards:2023sak}. We use a neural spline flow model \citep{2019arXiv190604032D}
 with 10 layers, each with 128 hidden units, and 8 bins per layer as our
 normalizing flow model.
 
@@ -712,11 +712,11 @@ study. For our specific choice of sampler settings, we produce ${\sim}$2500 and
 3500 \emph{effective samples}\footnote{Effective samples here refers to the
 number of independent samples, which is the total number of generated samples
 divided by their correlation length; we compute the effective sample size using
-\software{arviz} \citep{arviz_2019},
+\textsc{arviz} \citep{arviz_2019},
 \url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}. } for
 GW150914 and GW170817 respectively. \corr{Running on a node with an
 \textsc{Nvidia} 80GB A100 GPU and 16 intel skylake CPUs} \footnote{Note that the
-CPU time is hard to benchmark in \software{Jax} due to JIT compilation and
+CPU time is hard to benchmark in \textsc{Jax} due to JIT compilation and
 asynchronous dispatch. Overall, we find 4 CPUs to be sufficient for our use
 case. We chose 16 because of the ease of use of the local cluster.}, the wall
 time for both events is around 3 minutes. Most of this time is spent on
@@ -744,10 +744,10 @@ calculation.
 \end{figure*}
 
 For comparison, we produce equivalent runs with \textsc{Bilby}, using the same
-exact data and priors.  We use the \software{dynesty} sampler
+exact data and priors.  We use the \textsc{dynesty} sampler
 \citep{2020MNRAS.493.3132S,dynesty}, with 1000 live points and other settings as
 in the configurations files available on github \url{https://github.com/kazewong/TurboPE/tree/main/src}.  We
-carry out these runs using \textsc{parallel Bilby} (\software{pBilby})
+carry out these runs using \textsc{parallel Bilby} (\textsc{pBilby})
 \citep{Smith:2019ucc} to distribute the computation over 400 Intel Skylake CPUs
 for each event.  For the specific settings chosen, the wall-time duration of
 each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day for GW170817.
@@ -871,20 +871,20 @@ working on building differentiable implementations of \textsc{IMRPhenomXPHM}
 \citep{Pratten:2020ceb}, a precessing successor to \textsc{IMRPhenomD} including
 subdominant harmonics, as well as the numerical relativity surrogate waveforms,
 including \textsc{NRSur7dq4} \citep{Varma:2018mmi}. Going forward, we expect the
-use of autodifferentiation environments like \software{Jax} to become more
+use of autodifferentiation environments like \textsc{Jax} to become more
 prevalent in the waveform development community, increasing the number of
 differentiable waveform models available. This would not only be beneficial for
 parameter estimation, but also for a number of other applications such as Fisher
 matrix computations, template placement and calibrating waveforms to numerical
 relativity
-\citep{Coogan:2022qxs,Iacovelli:2022bbs,Iacovelli:2022mbg,ripplepaper}.
+\citep{Coogan:2022qxs,Iacovelli:2022bbs,Iacovelli:2022mbg,Edwards:2023sak}.
 \corr{Another family of waveform models that could benefit from this approach is
 the effective-one-body (EOB) models \citep{Buonanno:1998gg,PhysRevD.89.061502}.
 However, the EOB family requires solving time-dependent ODEs to compute the
 waveform and the truncation of the ODEs is dynamically determined at runtime.
-JIT in \software{Jax} requires the computational graph of a function to be fixed
+JIT in \textsc{Jax} requires the computational graph of a function to be fixed
 at compile time, which means the ODEs solving part of EOB is not compatible with
-\software{Jax}, so the models in the EOB family may not benefit as much as the
+\textsc{Jax}, so the models in the EOB family may not benefit as much as the
 other families.}
 
 
@@ -932,12 +932,12 @@ marginalization schemes and calibration uncertainties, into our pipeline.
 
 % JIT overhead
 When it comes to wall time, the just-in-time compilation of our code is the
-current limiting factor.  While \software{Jax}'s JIT compilation drastically
+current limiting factor.  While \textsc{Jax}'s JIT compilation drastically
 accelerates likelihood evaluations, it comes with a significant compilation
 overhead before the first evaluation. We observe that the compilation time
 depends on the device where the code is run; this is expected since
-\software{Jax} leverages the \textsc{Accelerated Linear Algebra} (XLA) compiler
-to take advantage of hardware accelerators, which means that \software{Jax} needs
+\textsc{Jax} leverages the \textsc{Accelerated Linear Algebra} (XLA) compiler
+to take advantage of hardware accelerators, which means that \textsc{Jax} needs
 to compile the code for each specific device according to its architecture. On
 an \textsc{Nvidia} A100 GPU, the compilation overhead could go up to 3 minutes
 for our current waveform. Meanwhile, for the cases we have studied, the time
@@ -951,8 +951,8 @@ the compilation overhead for every event.
 Besides compilation, there is in principle also overhead from finding the
 reference waveform used in for heterodyning the likelihood. Since the
 \textsc{differential evolution} algorithm we currently use has not been
-implemented in \software{Jax}, and the \software{Jax} waveform we use is not
-compatible with the parallelization scheme in the \software{scipy} library,
+implemented in \textsc{Jax}, and the \textsc{Jax} waveform we use is not
+compatible with the parallelization scheme in the \textsc{scipy} library,
 maximizing the likelihood currently takes us around 1 minute for GW170817. There
 are two ways to reduce this time.
 
@@ -999,7 +999,7 @@ In this work, we presented a PE pipeline for GW events that is efficient,
 flexible and reliable. Our package brings together a number of innovations,
 including differentiable waveform models, likelihood heterodyning, and
 normalizing-flow enhanced gradient-based sampling. We tested the robustness of
-our pipeline, currently built upon \software{ripple} and \software{flowMC}, on a
+our pipeline, currently built upon \textsc{ripple} and \textsc{flowMC}, on a
 set of 1200 synthetic GW events, showing it is robust, unbiased and efficient
 enough to handle the large catalogs of detections that will be available in the
 near future. We also show that our pipeline can estimate the parameters of
@@ -1012,6 +1012,7 @@ The Flatiron Institute is a division of the Simons Foundation.
 This material is based upon work supported by NSF's LIGO Laboratory which is a major facility fully funded by the National Science Foundation.
 This research has made use of data or software obtained from the Gravitational Wave Open Science Center (gw-openscience.org), a service of LIGO Laboratory, the LIGO Scientific Collaboration, the Virgo Collaboration, and KAGRA. LIGO Laboratory and Advanced LIGO are funded by the United States National Science Foundation (NSF) as well as the Science and Technology Facilities Council (STFC) of the United Kingdom, the Max-Planck-Society (MPS), and the State of Niedersachsen/Germany for support of the construction of Advanced LIGO and construction and operation of the GEO600 detector. Additional support for Advanced LIGO was provided by the Australian Research Council. Virgo is funded, through the European Gravitational Observatory (EGO), by the French Centre National de Recherche Scientifique (CNRS), the Italian Istituto Nazionale di Fisica Nucleare (INFN) and the Dutch Nikhef, with contributions by institutions from Belgium, Germany, Greece, Hungary, Ireland, Japan, Monaco, Poland, Portugal, Spain. The construction and operation of KAGRA are funded by Ministry of Education, Culture, Sports, Science and Technology (MEXT), and Japan Society for the Promotion of Science (JSPS), National Research Foundation (NRF) and Ministry of Science and ICT (MSIT) in Korea, Academia Sinica (AS) and the Ministry of Science and Technology (MoST) in Taiwan.
 T.E.\ is supported by the Horizon Postdoctoral Fellowship.
+\software{scipy \citep{2020SciPy-NMeth}, flowMC \citep{2022arXiv221106397W,Gabrie:2021tlu}, ripple package \citep{Edwards:2023sak}, pBilby \citep{Smith:2019ucc}}
 
 \bibliography{bib}
 

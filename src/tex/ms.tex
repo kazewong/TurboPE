@@ -90,8 +90,8 @@ evolution \citep{LIGOScientific:2021psn}.
 % community-developed PE codes
 % \mi{what catalog do you mean? The LVK doesn't use PyCBC Inference}
 There exist a number of prominent, community-developed PE codes, including
-\textsc{LALInference} \citep{Veitch:2014wba}, \textsc{PyCBC Inference}
-\citep{Biwer:2018osg}, and \textsc{Bilby}
+\software{LALInference} \citep{Veitch:2014wba}, \software{PyCBC Inference}
+\citep{Biwer:2018osg}, and \software{Bilby}
 \citep{Ashton:2018jfp,Romero-Shaw:2020owr}.  These packages have been tested by a
 number of groups and are well regarded as standard tools. However, while these
 tools have passed many robustness tests, they are known to be computationally
@@ -313,9 +313,9 @@ $|\delta\Psi_{\textrm{max}}(f_{\textrm{max}}) -
 
 % \te{Do we also already here want to make the point that it really helps with memory issues of GPUs if the frequency array isn't too large?}
 
-To obtain a reference waveform, we currently use the \textsc{differential
+To obtain a reference waveform, we currently use the \software{differential
 evolution} algorithm \citep{Storn1997DifferentialE} available in the
-\textsc{scipy} package \citep{2020SciPy-NMeth} to find the waveform parameters
+\software{scipy} package \citep{2020SciPy-NMeth} to find the waveform parameters
 which maximize the likelihood.  The reference waveform could also be produced
 from trigger parameters precomputed by a search pipeline without additional
 computation. Once we have obtained a reference waveform, we can check the accuracy
@@ -419,7 +419,7 @@ introduces an additional computational cost, which is not necessarily
 beneficial in terms of sampling time. If one wants to compute the gradient
 through finite differencing, the additional computational cost goes as at least
 ${\sim} \mathcal{O}(2n)$, where $n$ is the dimension of the problem. On the
-other hand, schemes like \textsc{Jax}
+other hand, schemes like \software{Jax}
 \citep{jax2018github} allow us to compute the gradient of the likelihood
 function with respect to the parameters through automatic differentiation,
 which gives the gradient information down to machine precision at around the
@@ -428,11 +428,11 @@ access to gradient information through automatic differentiation is crucial to
 making gradient-based transition kernels favorable in terms of computing cost.
 
 To leverage automatic differentiation, the entire posterior function must be
-implemented within \textsc{Jax} or a similar framework; this includes the
+implemented within \software{Jax} or a similar framework; this includes the
 likelihood and, therefore, the waveform approximant.  This means that the
 development of differentiable approximants is essential for leveraging
 gradient-based sampling in GW applications. We currently make use of the
-waveforms implemented in \textsc{ripple} \citep{ripplepaper}.
+waveforms implemented in \software{ripple} \citep{ripplepaper}.
 
 \subsection{Normalizing Flow enhanced sampling}
 \label{sec:flow}
@@ -528,12 +528,12 @@ Note that every time we retrain the network, we are breaking the Markov
 properties since we are changing the proposal distribution. To produce final
 samples that can be used to estimate target quantities, one has to freeze the
 normalizing flow model and not retrain during the final sampling phase in order
-to satisfy the detailed balance condition. We use the package \textsc{flowMC}
+to satisfy the detailed balance condition. We use the package \software{flowMC}
 \citep{2022arXiv221106397W,Gabrie:2021tlu}, with MALA as the gradient-based sampler. The
 pseudocode of the algorithm is given in Algorithm \ref{alg:cap}.
 
 \begin{algorithm}
-\caption{\textsc{flowMC} pseudocode}\label{alg:cap}
+\caption{\software{flowMC} pseudocode}\label{alg:cap}
 \KwIn{initial position $ip$}
 \Parameters{number of training loops $nt$, number of production loops $np$}
 \Variables{current chains $cc$, current position $cp$, current NF parameters $\Theta$, chains from local sampler $c_{local}$, chains from global sampler $c_{global}$}
@@ -593,7 +593,7 @@ over frequency bins. On an \textsc{Nvidia} A100 GPU, we can evaluate the
 waveform model $\sim \mathcal{O}(10^9)$ times in a second for different
 frequencies or source parameters. Together with the heterodyned likelihood, this
 allows us to run thousands of parallel chains in a PE run. The high throughput
-of waveform evaluations unlocks the potential of the \textsc{flowMC} sampling
+of waveform evaluations unlocks the potential of the \software{flowMC} sampling
 algorithm.
 
 \section{Result}
@@ -624,7 +624,7 @@ projected design PSDs for the LIGO Hanford, LIGO Livingston
 (\texttt{SimNoisePSDAdvVirgo}) detectors
 \citep{lalsuite,Shoemaker:T0900288,2012arXiv1202.4031M}. For both injection and
 recovery, we make use of the \textsc{IMRPhenomD} waveform \citep{Khan:2015jqa}
-via the fully-differentiable implementation presented in the \textsc{ripple}
+via the fully-differentiable implementation presented in the \software{ripple}
 package \citep{ripplepaper}. We use a neural spline flow model \citep{2019arXiv190604032D}
 with 10 layers, each with 128 hidden units, and 8 bins per layer as our
 normalizing flow model.
@@ -711,7 +711,7 @@ injection-recovery study. For our specific choice of sampler settings, we
 produce ${\sim}$2500 and 3500 \emph{effective samples}\footnote{Effective
 samples here refers to the number of independent samples, which is the total
 number of generated samples divided by their correlation length; we compute the
-effective sample size using \textsc{arviz}
+effective sample size using \software{arviz}
 \citep{arviz_2019}, \url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
 } for GW150914 and GW170817 respectively. Running on an \textsc{Nvidia} A100
 GPU, the wall time for both events is around 3 minutes. Most of this time is
@@ -723,7 +723,7 @@ wall-time calculation.
 \begin{figure*}
     \includegraphics[width=0.99\textwidth]{figures/GW150914.pdf}
     \caption{
-      GW150914 posterior computed by our code (blue) and \textsc{Bilby} (gray).
+      GW150914 posterior computed by our code (blue) and \software{Bilby} (gray).
     }
     \label{fig:GW150914}
     \script{plot_GW150914.py}
@@ -732,17 +732,17 @@ wall-time calculation.
 \begin{figure*}
 \includegraphics[width=0.99\textwidth]{figures/GW170817.pdf}
 \caption{
-    GW170817 posterior computed by our code (blue) and \textsc{Bilby} (gray).
+    GW170817 posterior computed by our code (blue) and \software{Bilby} (gray).
 }
 \label{fig:GW170817}
     \script{plot_GW170817.py}
 \end{figure*}
 
-For comparison, we produce equivalent runs with \textsc{Bilby}, using the same
-exact data and priors.  We use the \textsc{dynesty} sampler
+For comparison, we produce equivalent runs with \software{Bilby}, using the same
+exact data and priors.  We use the \software{dynesty} sampler
 \citep{2020MNRAS.493.3132S,dynesty}, with 1000 live points and other settings as
 in the configurations files available on github \url{https://github.com/kazewong/TurboPE/tree/main/src}.  We
-carry out these runs using \textsc{parallel Bilby} (\textsc{pBilby})
+carry out these runs using \software{parallel Bilby} (\software{pBilby})
 \citep{Smith:2019ucc} to distribute the computation over 400 Intel Skylake CPUs
 for each event.  For the specific settings chosen, the wall-time duration of
 each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day for GW170817.
@@ -752,9 +752,9 @@ each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day for GW170817.
 % scipy.spatial.distance
 
 Figs.~\ref{fig:GW150914} and \ref{fig:GW170817} show that our posteriors are
-consistent with those produced by \textsc{Bilby}.  For a quantitative
+consistent with those produced by \software{Bilby}.  For a quantitative
 comparison, we compute the Jensen-Shannon divergence between our code and
-\textsc{Bilby} for the marginalized distribution for each parameter. The
+\software{Bilby} for the marginalized distribution for each parameter. The
 Jensen-Shannon divergence (JSD) is a symmetric measure of the distance between
 two probability distributions, with a value of 0 indicating identical
 distributions and a value of $\ln{2}$ nat representing the maximum
@@ -768,7 +768,7 @@ respectively. The JSD values are comparable to those reported in
     \begin{center}
     \variable{output/js_table.tex}
     \caption{JSD values for the marginalized distribution of each parameter for
-    GW150914 and GW170817 between our code and \textsc{Bilby}. The bold values
+    GW150914 and GW170817 between our code and \software{Bilby}. The bold values
     indicate the parameters with the largest JSD.}
     \label{tab:JSD}
     \end{center}
@@ -870,7 +870,7 @@ Currently, we are working on building differentiable implementations of
 \textsc{IMRPhenomD} including subdominant harmonics, as well as the numerical
 relativity surrogate waveforms, including \textsc{NRSur7dq4}
 \citep{Varma:2018mmi}. Going forward, we expect the use of autodifferentiation
-environments like \textsc{Jax} to become more prevalent in the waveform
+environments like \software{Jax} to become more prevalent in the waveform
 development community, increasing the number of differentiable waveform models
 available. This would not only be beneficial for parameter estimation, but also
 for a number of other applications such as Fisher matrix computations, template
@@ -920,12 +920,12 @@ marginalization schemes and calibration uncertainties, into our pipeline.
 
 % JIT overhead
 When it comes to wall time, the just-in-time compilation of our code is the
-current limiting factor.  While \textsc{Jax}'s JIT compilation drastically
+current limiting factor.  While \software{Jax}'s JIT compilation drastically
 accelerates likelihood evaluations, it comes with a significant compilation
 overhead before the first evaluation. We observe that the compilation time
 depends on the device where the code is run; this is expected since
-\textsc{Jax} leverages the \textsc{Accelerated Linear Algebra} (XLA) compiler
-to take advantage of hardware accelerators, which means that \textsc{Jax} needs
+\software{Jax} leverages the \textsc{Accelerated Linear Algebra} (XLA) compiler
+to take advantage of hardware accelerators, which means that \software{Jax} needs
 to compile the code for each specific device according to its architecture. On
 an \textsc{Nvidia} A100 GPU, the compilation overhead could go up to 3 minutes
 for our current waveform. Meanwhile, for the cases we have studied, the time
@@ -938,9 +938,9 @@ the compilation overhead for every event.
 % Faster maximum likelihood finder
 Besides compilation, there is in principle also overhead from finding the
 reference waveform used in for heterodyning the likelihood. Since the
-\textsc{differential evolution} algorithm we currently use has not been
-implemented in \textsc{Jax}, and the \textsc{Jax} waveform we use is not
-compatible with the parallelization scheme in the \textsc{scipy} library,
+\software{differential evolution} algorithm we currently use has not been
+implemented in \software{Jax}, and the \software{Jax} waveform we use is not
+compatible with the parallelization scheme in the \software{scipy} library,
 maximizing the likelihood currently takes us around 1 minute for GW170817. There
 are two ways to reduce this time.
 
@@ -987,7 +987,7 @@ In this work, we presented a PE pipeline for GW events that is efficient,
 flexible and reliable. Our package brings together a number of innovations,
 including differentiable waveform models, likelihood heterodyning, and
 normalizing-flow enhanced gradient-based sampling. We tested the robustness of
-our pipeline, currently built upon \textsc{ripple} and \textsc{flowMC}, on a
+our pipeline, currently built upon \software{ripple} and \software{flowMC}, on a
 set of 1200 synthetic GW events, showing it is robust, unbiased and efficient
 enough to handle the large catalogs of detections that will be available in the
 near future. We also show that our pipeline can estimate the parameters of

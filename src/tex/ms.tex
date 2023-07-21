@@ -591,11 +591,33 @@ Another benefit of accelerators is the parallel evaluation of waveforms. Since
 the waveform model we use can be evaluated at any given time or frequency
 independently, this means computing a waveform can be trivially parallelized
 over frequency bins. On an \textsc{Nvidia} A100 GPU, we can evaluate the
-waveform model $\sim \mathcal{O}(10^9)$ times in a second for different
+waveform model $\sim \mathcal{O}(10^9)$ in a second for different
 frequencies or source parameters. Together with the heterodyned likelihood, this
 allows us to run thousands of parallel chains in a PE run. The high throughput
 of waveform evaluations unlocks the potential of the \textsc{flowMC} sampling
-algorithm.
+algorithm. 
+
+\corr{The interplay between \textsc{flowMC} and GPU acceleration is critical to
+the performance of the code. A standard PE run using a nested sampler or
+standard MCMC requires around $10^6$ waveform evaluations, Assuming $10^5$
+frequency bins per waveform, that corresponds to evaluating the waveform model
+at $10^11$ frequency-parameter points. One would think this can be achieved
+within $\sim 100\textrm{s}$ by a A100 GPU given the benchmark mentioned above.
+However, a sampler requires sequential evaluation to accept or reject a sample,
+where what a GPU provide is parallel evaluation of the waveform, i.e. it can run
+many chains in parallel, but not many steps with the same amount of computation.
+This means one cannot just obtain the posterior samples by running the waveform
+model on a GPU with a typical sampler, in the sense that we cannot run many
+chains for one step and expect unbias posterior samples.
+
+This is precisely why \textsc{flowMC} is necessary for our approach. Since every
+accepted sample generated using the normalizing flow as proposal is independent,
+and the sampling from the normalizing flow is an embarrassingly parallel
+process, the name of the game then becomes training the normalizing flow as fast as
+possible. Having many chains helps to produce the necessary amount of samples
+for training the normalizing flow, which means now we can meaningfully harvest
+the benefit of having large throughput of GPU. Without either of this two,
+our approach would be significantly less performant.}
 
 \section{Result}
 \label{sec: Result}

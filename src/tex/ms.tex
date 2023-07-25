@@ -609,7 +609,6 @@ many chains in parallel, but not many steps with the same amount of computation.
 This means one cannot just obtain the posterior samples by running the waveform
 model on a GPU with a typical sampler, in the sense that we cannot run many
 chains for one step and expect unbias posterior samples.
-
 This is precisely why \textsc{flowMC} is necessary for our approach. Since every
 accepted sample generated using the normalizing flow as proposal is nearly independent,
 and the sampling from the normalizing flow is an embarrassingly parallel

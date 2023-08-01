@@ -99,7 +99,13 @@ tools have passed many robustness tests, they are known to be computationally
 intensive. The exact amount of time needed to analyze one event depends on
 factors like the duration and frequency of the signal, as well as features of
 the specific waveform model. Typical runtimes for production-level analyses can
-range from hours to weeks. 
+range from hours to weeks.
+This expense precludes iterating quickly on results,
+launching large scale measurement simulations, or obtaining final parameter estimates in low
+latency to inform astronomers for potential followup in real time.%
+\footnote{\corr{Although approximate skymaps can currently be produced in low latency, the same is not true 
+of final estimate of other parameters, like masses and spins, which may inform the probability of electromagnetic emission
+ followup strategy and thus affect followup strategy.}}
 
 Additionally, in the coming decade, there are planned upgrades for existing
 facilities, as well as plans for next-generation detectors such as the Einstein
@@ -755,10 +761,12 @@ time for both events is around 3 minutes. Most of this time is spent on
 just-in-time (JIT) compilation of the code; the actual sampling time is only
 ${\sim}40$ s. We pre-compute the reference waveform parameters used to
 hetetrodyne the likelihood for the two events, which is omitted in the wall-time
-calculation. \corr{In terms of specific configuration of the sampler, we used
-1000 chains for both of the events. We run both the tuning phase and the
-production phase for 20 loops each. Within each phase, the global sampler and
-local sampler are stepped 200 times. This translates into $1.6 \times 10^7$
+calculation.
+
+\corr{We configured our sampler to use
+1000 chains for both of the events. and run both the tuning and production phasesfor 
+20 loops each. Within each phase, the global sampler and
+local sampler are stepped 200 times, which translates into $1.6 \times 10^7$
 likelihood evaluations in total.\footnote{While in principle adding more
 chains makes the algorithm less efficient in terms of the acceptance/evaluation
 ratio, since GPUs can evaluate a fixed number of instructions per cycle, we can
@@ -766,7 +774,7 @@ keep adding chains without paying extra computational cost before we saturate
 the GPU. This results in an improvement in wall time while being less efficient.
 We decide to choose a setting that improves the wall time instead of efficiency.} The
 acceptance rate of the global proposal is about $2\%$ and $5\%$ for GW150914 and
-GW170817 respectively. Note that the setting is chosen to run longer than
+GW170817 respectively. The settings are chosen conservatively to run longer than
 necessary to ensure convergence; we are currently pursing tuning studies to
 understand trade-offs in the algorithms and improve the efficiency further.}
 
@@ -796,10 +804,10 @@ in the configurations files available on github
 runs using \textsc{parallel Bilby} (\textsc{pBilby}) \citep{Smith:2019ucc} to
 distribute the computation over 400 Intel Skylake CPUs for each event. For the
 specific settings chosen, the wall-time duration of each run was ${\sim}2$ h for
-GW150914 and ${\sim}1$ day for GW170817. \corr{We have also benchmarked the
-performance using a ROQ likelihood, which takes about 30 minutes for GW170817.
-Without ROQ, it takes about a week to complete a run. This broadly agrees with
-what is suggested in the literature \citep{Smith:2016qas}}
+GW150914 and ${\sim}1$ day for GW170817. \corr{We have also benchmarked
+performance using an ROQ likelihood, which takes about 30 minutes for GW170817 withour parallelization;
+without ROQ, the same analysis would take about one week to complete. This broadly agrees with
+the ROQ performance boost reported in the literature \citep{Smith:2016qas}}
 
 Figs.~\ref{fig:GW150914} and \ref{fig:GW170817} show that our posteriors are
 consistent with those produced by \textsc{Bilby}.  For a quantitative

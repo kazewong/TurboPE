@@ -596,7 +596,7 @@ and we would have to run more sequential steps to obtain the same amount of
 independent samples in the end---with more chains the problem becomes
 parallelizable and we can obtain the same number of training samples sooner. In
 other words, \corr{being able to use many independent chains helps the normalizing
-flow approximating the target density faster in wall time.}
+flow to approximate the target density in a shorter wall time.}
 
 % GPU helps packing a shit ton of waveform evaluation
 Another benefit of accelerators is the parallel evaluation of waveforms. Since
@@ -611,24 +611,23 @@ algorithm.
 
 \corr{The interplay between \textsc{flowMC} and GPU acceleration is critical to
 the performance of the code. A standard PE run using a nested sampler or
-standard MCMC requires around $10^6$ waveform evaluations, Assuming $10^5$
-frequency bins per waveform, that corresponds to evaluating the waveform model
-at $10^11$ frequency-parameter points. One would think this can be achieved
-within $\sim 100\textrm{s}$ by a A100 GPU given the benchmark mentioned above.
-However, a sampler requires sequential evaluation to accept or reject a sample,
-where what a GPU provide is parallel evaluation of the waveform, i.e. it can run
-many chains in parallel, but not many steps with the same amount of computation.
-This means one cannot just obtain the posterior samples by running the waveform
-model on a GPU with a typical sampler, in the sense that we cannot run many
-chains for one step and expect unbias posterior samples.
-This is precisely why \textsc{flowMC} is necessary for our approach. Since every
-accepted sample generated using the normalizing flow as proposal is nearly independent,
+standard MCMC requires around $10^6$ waveform evaluations. Assuming $10^5$
+frequency bins per waveform, this corresponds to evaluating the waveform model
+at $10^{11}$ frequency-parameter points. One would think this can be achieved
+within $\sim 100\textrm{s}$ by an A100 GPU given the benchmark mentioned above.
+However, typical samplers require sequential evaluations to accept or reject samples,
+where what a GPU provides is parallel evaluation of the waveform i.e., in a fixed amount of time it can run
+many chains in parallel, but not many sequential steps.
+This means one cannot obtain the posterior samples by running the waveform
+model on a GPU with a typical sampler. For example, in the most extreme case this would mean running many
+chains for just one step which would obviously lead to biased posterior samples.
+This is precisely why \textsc{flowMC} is a key ingredient in our approach. Since every
+accepted sample generated using the normalizing flow as the proposal is nearly independent,
 and the sampling from the normalizing flow is an embarrassingly parallel
 process, the name of the game then becomes training the normalizing flow as fast as
 possible. Having many chains helps to produce the necessary amount of samples
-for training the normalizing flow, which means now we can meaningfully harvest
-the benefit of having large throughput of GPU. Without either of this two,
-our approach would be significantly less performant.}
+for training the normalizing flow, which means we can meaningfully harvest
+the benefit of having the large throughput of the GPU.}
 
 \section{Result}
 \label{sec: Result}
@@ -759,16 +758,16 @@ hetetrodyne the likelihood for the two events, which is omitted in the wall-time
 calculation. \corr{In terms of specific configuration of the sampler, we used
 1000 chains for both of the events. We run both the tuning phase and the
 production phase for 20 loops each. Within each phase, the global sampler and
-local sampler are stepped 200 times. This translates into a total number of
-likelihood evaluation is $1.6*10^7$. \footnote{While in principle adding more
-chains makes the algorithm less efficient in terms of acceptance/evaluation
-ratio, since GPUs can evaluate a fixed number of instruction per cycle, we can
+local sampler are stepped 200 times. This translates into $1.6 \times 10^7$
+likelihood evaluations in total.\footnote{While in principle adding more
+chains makes the algorithm less efficient in terms of the acceptance/evaluation
+ratio, since GPUs can evaluate a fixed number of instructions per cycle, we can
 keep adding chains without paying extra computational cost before we saturate
 the GPU. This results in an improvement in wall time while being less efficient.
-We decide to choose a setting that improve wall time instead of efficiency.} The
+We decide to choose a setting that improves the wall time instead of efficiency.} The
 acceptance rate of the global proposal is about $2\%$ and $5\%$ for GW150914 and
 GW170817 respectively. Note that the setting is chosen to run longer than
-necessary to ensure convergence, we are currently pursing tuning studies to
+necessary to ensure convergence; we are currently pursing tuning studies to
 understand trade-offs in the algorithms and improve the efficiency further.}
 
 \begin{figure*}
@@ -800,7 +799,7 @@ specific settings chosen, the wall-time duration of each run was ${\sim}2$ h for
 GW150914 and ${\sim}1$ day for GW170817. \corr{We have also benchmarked the
 performance using a ROQ likelihood, which takes about 30 minutes for GW170817.
 Without ROQ, it takes about a week to complete a run. This broadly agrees with
-what is suggested in the literature \cite{Smith:2016qas}}
+what is suggested in the literature \citep{Smith:2016qas}}
 
 Figs.~\ref{fig:GW150914} and \ref{fig:GW170817} show that our posteriors are
 consistent with those produced by \textsc{Bilby}.  For a quantitative
@@ -924,13 +923,13 @@ parameter estimation, but also for a number of other applications such as Fisher
 matrix computations, template placement and calibrating waveforms to numerical
 relativity
 \citep{Coogan:2022qxs,Iacovelli:2022bbs,Iacovelli:2022mbg,Edwards:2023sak}.
-\corr{Another family of waveform models that could benefit from this approach is
+\corr{Another family of waveform models that could benefit from this approach are
 the effective-one-body (EOB) models \citep{Buonanno:1998gg,PhysRevD.89.061502}.
-However, the EOB family requires solving time-dependent ODEs to compute the
-waveform and the truncation of the ODEs is dynamically determined at runtime.
+However, generating waveforms from the EOB family requires one to solve time-dependent
+ODEs where the trunctation is dynamically determined at runtime.
 JIT in \textsc{Jax} requires the computational graph of a function to be fixed
 at compile time, which means the ODEs solving part of EOB is not compatible with
-\textsc{Jax}, so the models in the EOB family may not benefit as much as the
+\textsc{Jax}. The models in the EOB family therefore may not benefit as much as the
 other families.}
 
 

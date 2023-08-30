@@ -12,6 +12,7 @@
 \definecolor{pyRed}{RGB}{214, 39, 40}
 \newcommand{\te}[1]{\textbf{\color{pyRed}(TE: #1)}}
 \newcommand{\mi}[1]{\textsf{\color{teal}[\textbf{MI:} #1]}}
+\newcommand{\corr}[1]{\textbf{\color{pyRed}(Correction: #1)}}
 
 \newcommand{\flatiron}{\affiliation{Center for Computational Astrophysics,
 Flatiron Institute, New York, NY 10010, USA}}
@@ -98,9 +99,13 @@ tools have passed many robustness tests, they are known to be computationally
 intensive. The exact amount of time needed to analyze one event depends on
 factors like the duration and frequency of the signal, as well as features of
 the specific waveform model. Typical runtimes for production-level analyses can
-range from hours to weeks. This expense precludes iterating quickly on results,
-launching large scale measurement simulations, or obtaining results in low
-latency to inform astronomers for potential followup in real time.
+range from hours to weeks.
+This expense precludes iterating quickly on results,
+launching large scale measurement simulations, or \corr{obtaining final parameter estimates} in low
+latency to inform astronomers for potential followup in real time.%
+\footnote{\corr{Although approximate skymaps can currently be produced in low latency, the same is not true 
+of final estimate of other parameters, like masses and spins, which may inform the probability of electromagnetic emission
+ followup strategy and thus affect followup strategy.}}
 
 Additionally, in the coming decade, there are planned upgrades for existing
 facilities, as well as plans for next-generation detectors such as the Einstein
@@ -147,7 +152,19 @@ The rest of the paper is structured as follows: we review the basics of PE and
 introduce our framework in Sec.~\ref{sec: PE}; we present benchmarking results
 on both simulated and real data in Sec.~\ref{sec: Result}; and, finally, we
 discuss the implications of this work and directions for future development in
-Sec.~\ref{sec: Discussion}.
+Sec.~\ref{sec: Discussion}. \corr{This study was carried out using the
+reproducibility software showyourwork (Luger et al. 2021), which leverages
+continuous integration to programmatically download the data from
+https://zenodo.org, create the figures, and compile the manuscript. Each figure
+caption contains two links: one to the data set stored on Zenodo used in the
+corresponding figure, and the other to the script used to make the figure (at
+the commit corresponding to the current build of the manuscript). The Git
+repository associated to this study is publicly available at
+https://github.com/kazewong/TurboPE, and the release v2.1 allows anyone to
+rebuild the entire manuscript. The repository is mirrored and stored at
+10.5281/zenodo.8184855, including the data and the scripts used to produce the
+figures. The version of \textsc{flowMC} used to produce this work is also stored
+on zenodo at 10.5281/zenodo.7706605}
 
 \section{Gravitational wave parameter estimation}
 \label{sec: PE}
@@ -434,7 +451,7 @@ implemented within \textsc{Jax} or a similar framework; this includes the
 likelihood and, therefore, the waveform approximant.  This means that the
 development of differentiable approximants is essential for leveraging
 gradient-based sampling in GW applications. We currently make use of the
-waveforms implemented in \textsc{ripple} \citep{ripplepaper}.
+waveforms implemented in \textsc{ripple} \citep{Edwards:2023sak}.
 
 \subsection{Normalizing Flow enhanced sampling}
 \label{sec:flow}
@@ -575,29 +592,48 @@ an accelerator is more likely to reduce performance than increase it.
 % More sample helps training normalizing flow
 Yet, in our work, the use of accelerators provides two independent advantages
 that tremendously benefit the parameter estimation process. First, using
-accelerators allows us to run many independent MCMC chains simultaneously,
-which benefits the training of the normalizing flow. Since we generate the data
-we use to train the normalizing flow on the fly, the more independent data we
-can feed to the training process, the higher chance the normalizing flow can
-learn a reasonable representation of the global landscape of the target
-distribution.  If we only used a small number of chains, we would be limited to
-the correlated samples from each chain and we would have to run more sequential
-steps to obtain the same amount of independent samples in the end---with more
-chains the problem becomes parallelizable and we can obtain the same number of
-training samples sooner. In other words, being able to use many independent
-chains helps the normalizing flow learn the global landscape faster in wall
-time.
+accelerators allows us to run many independent MCMC chains simultaneously, which
+benefits the training of the normalizing flow. Since we generate the data we use
+to train the normalizing flow on the fly, the more independent data we can feed
+to the training process, the higher chance the normalizing flow can learn a
+reasonable representation of the target distribution.  If we only used a small
+number of chains, we would be limited to the correlated samples from each chain
+and we would have to run more sequential steps to obtain the same amount of
+independent samples in the end---with more chains the problem becomes
+parallelizable and we can obtain the same number of training samples sooner. In
+other words, \corr{being able to use many independent chains helps the normalizing
+flow to approximate the target density in a shorter wall time.}
 
 % GPU helps packing a shit ton of waveform evaluation
 Another benefit of accelerators is the parallel evaluation of waveforms. Since
 the waveform model we use can be evaluated at any given time or frequency
 independently, this means computing a waveform can be trivially parallelized
 over frequency bins. On an \textsc{Nvidia} A100 GPU, we can evaluate the
-waveform model $\sim \mathcal{O}(10^9)$ times in a second for different
+waveform model $\sim \mathcal{O}(10^9)$ in a second for different
 frequencies or source parameters. Together with the heterodyned likelihood, this
 allows us to run thousands of parallel chains in a PE run. The high throughput
 of waveform evaluations unlocks the potential of the \textsc{flowMC} sampling
-algorithm.
+algorithm. 
+
+\corr{The interplay between \textsc{flowMC} and GPU acceleration is critical to
+the performance of the code. A standard PE run using a nested sampler or
+standard MCMC requires around $10^6$ waveform evaluations. Assuming $10^5$
+frequency bins per waveform, this corresponds to evaluating the waveform model
+at $10^{11}$ frequency-parameter points. One would think this can be achieved
+within $\sim 100\textrm{s}$ by an A100 GPU given the benchmark mentioned above.
+However, typical samplers require sequential evaluations to accept or reject samples,
+where what a GPU provides is parallel evaluation of the waveform i.e., in a fixed amount of time it can run
+many chains in parallel, but not many sequential steps.
+This means one cannot obtain the posterior samples by running the waveform
+model on a GPU with a typical sampler. For example, in the most extreme case this would mean running many
+chains for just one step which would obviously lead to biased posterior samples.
+This is precisely why \textsc{flowMC} is a key ingredient in our approach. Since every
+accepted sample generated using the normalizing flow as the proposal is nearly independent,
+and the sampling from the normalizing flow is an embarrassingly parallel
+process, the name of the game then becomes training the normalizing flow as fast as
+possible. Having many chains helps to produce the necessary amount of samples
+for training the normalizing flow, which means we can meaningfully harvest
+the benefit of having the large throughput of the GPU.}
 
 \section{Result}
 \label{sec: Result}
@@ -628,7 +664,7 @@ projected design PSDs for the LIGO Hanford, LIGO Livingston
 \citep{lalsuite,Shoemaker:T0900288,2012arXiv1202.4031M}. For both injection and
 recovery, we make use of the \textsc{IMRPhenomD} waveform \citep{Khan:2015jqa}
 via the fully-differentiable implementation presented in the \textsc{ripple}
-package \citep{ripplepaper}. We use a neural spline flow model \citep{2019arXiv190604032D}
+package \citep{Edwards:2023sak}. We use a neural spline flow model \citep{2019arXiv190604032D}
 with 10 layers, each with 128 hidden units, and 8 bins per layer as our
 normalizing flow model.
 
@@ -704,24 +740,43 @@ performs properly on simulated data at a similar level as standard tools
 
 \subsection{Real event parameter estimation}
 
-To demonstrate the performance of our parameter estimation pipeline, we apply
-it to two real LIGO-Virgo events: GW150914 and GW170817. We use the priors
-shown in Table \ref{tab:parameters}, and take 4 s of data sampled at 2048 Hz
-starting at 20 Hz for GW150914, and 128 s of data sampled at 4096 Hz starting
-at 23 Hz for GW170817; strain data and PSDs for both events are fetched from
-GWOSC \citep{GWOSC}. We use the same normalizing flow model as the
-injection-recovery study. For our specific choice of sampler settings, we
-produce ${\sim}$2500 and 3500 \emph{effective samples}\footnote{Effective
-samples here refers to the number of independent samples, which is the total
-number of generated samples divided by their correlation length; we compute the
-effective sample size using \textsc{arviz}
-\citep{arviz_2019}, \url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}.
-} for GW150914 and GW170817 respectively. Running on an \textsc{Nvidia} A100
-GPU, the wall time for both events is around 3 minutes. Most of this time is
-spent on just-in-time (JIT) compilation of the code; the actual sampling time
-is only ${\sim}40$ s. We pre-compute the reference waveform parameters used to
-hetetrodyne the likelihood for the two events, which is omitted in the
-wall-time calculation.
+To demonstrate the performance of our parameter estimation pipeline, we apply it
+to two real LIGO-Virgo events: GW150914 and GW170817. We use the priors shown in
+Table \ref{tab:parameters}, and take 4 s of data sampled at 2048 Hz starting at
+20 Hz for GW150914, and 128 s of data sampled at 4096 Hz starting at 23 Hz for
+GW170817; strain data and PSDs for both events are fetched from GWOSC
+\citep{GWOSC}. We use the same normalizing flow model as the injection-recovery
+study. For our specific choice of sampler settings, we produce ${\sim}$2500 and
+3500 \emph{effective samples}\footnote{Effective samples here refers to the
+number of independent samples, which is the total number of generated samples
+divided by their correlation length; we compute the effective sample size using
+\textsc{arviz} \citep{arviz_2019},
+\url{https://python.arviz.org/en/stable/api/generated/arviz.ess.html}. } for
+GW150914 and GW170817 respectively. \corr{Running on a node with an
+\textsc{Nvidia} 80GB A100 GPU and 16 intel skylake CPUs} \footnote{Note that the
+CPU time is hard to benchmark in \textsc{Jax} due to JIT compilation and
+asynchronous dispatch. Overall, we find 4 CPUs to be sufficient for our use
+case. We chose 16 because of the ease of use of the local cluster.}, the wall
+time for both events is around 3 minutes. Most of this time is spent on
+just-in-time (JIT) compilation of the code; the actual sampling time is only
+${\sim}40$ s. We pre-compute the reference waveform parameters used to
+hetetrodyne the likelihood for the two events, which is omitted in the wall-time
+calculation.
+
+\corr{We configured our sampler to use
+1000 chains for both of the events. and run both the tuning and production phasesfor 
+20 loops each. Within each phase, the global sampler and
+local sampler are stepped 200 times, which translates into $1.6 \times 10^7$
+likelihood evaluations in total.\footnote{While in principle adding more
+chains makes the algorithm less efficient in terms of the acceptance/evaluation
+ratio, since GPUs can evaluate a fixed number of instructions per cycle, we can
+keep adding chains without paying extra computational cost before we saturate
+the GPU. This results in an improvement in wall time while being less efficient.
+We decide to choose a setting that improves the wall time instead of efficiency.} The
+acceptance rate of the global proposal is about $2\%$ and $5\%$ for GW150914 and
+GW170817 respectively. The settings are chosen conservatively to run longer than
+necessary to ensure convergence; we are currently pursing tuning studies to
+understand trade-offs in the algorithms and improve the efficiency further.}
 
 \begin{figure*}
     \includegraphics[width=0.99\textwidth]{figures/GW150914.pdf}
@@ -744,15 +799,15 @@ wall-time calculation.
 For comparison, we produce equivalent runs with \textsc{Bilby}, using the same
 exact data and priors.  We use the \textsc{dynesty} sampler
 \citep{2020MNRAS.493.3132S,dynesty}, with 1000 live points and other settings as
-in the configurations files available on github \url{https://github.com/kazewong/TurboPE/tree/main/src}.  We
-carry out these runs using \textsc{parallel Bilby} (\textsc{pBilby})
-\citep{Smith:2019ucc} to distribute the computation over 400 Intel Skylake CPUs
-for each event.  For the specific settings chosen, the wall-time duration of
-each run was ${\sim}2$ h for GW150914 and ${\sim}1$ day for GW170817.
-
-% Describe the distance between flowMC result and Bilby result using
-% Jensen-Shannon divergence, scipy has a function to compute that in
-% scipy.spatial.distance
+in the configurations files available on github
+\url{https://github.com/kazewong/TurboPE/tree/main/src}.  We carry out these
+runs using \textsc{parallel Bilby} (\textsc{pBilby}) \citep{Smith:2019ucc} to
+distribute the computation over 400 Intel Skylake CPUs for each event. For the
+specific settings chosen, the wall-time duration of each run was ${\sim}2$ h for
+GW150914 and ${\sim}1$ day for GW170817. \corr{We have also benchmarked
+performance using an ROQ likelihood, which takes about 30 minutes for GW170817 withour parallelization;
+without ROQ, the same analysis would take about one week to complete. This broadly agrees with
+the ROQ performance boost reported in the literature \citep{Smith:2016qas}}
 
 Figs.~\ref{fig:GW150914} and \ref{fig:GW170817} show that our posteriors are
 consistent with those produced by \textsc{Bilby}.  For a quantitative
@@ -846,9 +901,6 @@ On the other hand, there are traditional tools that make use of our
 understanding of the underlying physics to ease sampling, which relies
 on having good intuition of the problem and tends to not generalize.
 Our method achieves the key advantages of both approaches, without many of their limitations.
-%% [MI: the following is too vague, and we always rely on a reasonable prior,
-%% so I'm removing it.]
-% Both approaches rely on having a somewhat reasonable prior to approach the problem.
 
 The main difference between methods used in industrial products and scientific
 problems is that the latter must address questions that may not have been
@@ -864,20 +916,30 @@ for building scientific tools.
 % Additional traits for having differentiable waveforms
 We are currently working on a number of improvements and extensions to our
 current infrastructure. While the \textsc{IMRPhenomD} waveform approximant is a
-reasonable start, it lacks some qualitative features that other
-state-of-the-art models have, such as precession, subdominants moments of the
-radiation, tides, or eccentricity. It also has a higher mismatch with reference
-numerical relativity waveforms compared to more recent waveform models.
-Currently, we are working on building differentiable implementations of
-\textsc{IMRPhenomXPHM} \citep{Pratten:2020ceb}, a precessing successor to
-\textsc{IMRPhenomD} including subdominant harmonics, as well as the numerical
-relativity surrogate waveforms, including \textsc{NRSur7dq4}
-\citep{Varma:2018mmi}. Going forward, we expect the use of autodifferentiation
-environments like \textsc{Jax} to become more prevalent in the waveform
-development community, increasing the number of differentiable waveform models
-available. This would not only be beneficial for parameter estimation, but also
-for a number of other applications such as Fisher matrix computations, template
-placement and calibrating waveforms to numerical relativity \citep{Coogan:2022qxs,Iacovelli:2022bbs,Iacovelli:2022mbg,ripplepaper}.
+reasonable start, it lacks some qualitative features that other state-of-the-art
+models have, such as precession, subdominants moments of the radiation, tides,
+or eccentricity. It also has a higher mismatch with reference numerical
+relativity waveforms compared to more recent waveform models. Currently, we are
+working on building differentiable implementations of \textsc{IMRPhenomXPHM}
+\citep{Pratten:2020ceb}, a precessing successor to \textsc{IMRPhenomD} including
+subdominant harmonics, as well as the numerical relativity surrogate waveforms,
+including \textsc{NRSur7dq4} \citep{Varma:2018mmi}. Going forward, we expect the
+use of autodifferentiation environments like \textsc{Jax} to become more
+prevalent in the waveform development community, increasing the number of
+differentiable waveform models available. This would not only be beneficial for
+parameter estimation, but also for a number of other applications such as Fisher
+matrix computations, template placement and calibrating waveforms to numerical
+relativity
+\citep{Coogan:2022qxs,Iacovelli:2022bbs,Iacovelli:2022mbg,Edwards:2023sak}.
+\corr{Another family of waveform models that could benefit from this approach are
+the effective-one-body (EOB) models \citep{Buonanno:1998gg,PhysRevD.89.061502}.
+However, generating waveforms from the EOB family requires one to solve time-dependent
+ODEs where the trunctation is dynamically determined at runtime.
+JIT in \textsc{Jax} requires the computational graph of a function to be fixed
+at compile time, which means the ODEs solving part of EOB is not compatible with
+\textsc{Jax}. The models in the EOB family therefore may not benefit as much as the
+other families.}
+
 
 % Access to higher dimensional problem
 While standard CBC analyses go up to 17 dimensions, non-standard GW PE problems
@@ -1003,6 +1065,7 @@ The Flatiron Institute is a division of the Simons Foundation.
 This material is based upon work supported by NSF's LIGO Laboratory which is a major facility fully funded by the National Science Foundation.
 This research has made use of data or software obtained from the Gravitational Wave Open Science Center (gw-openscience.org), a service of LIGO Laboratory, the LIGO Scientific Collaboration, the Virgo Collaboration, and KAGRA. LIGO Laboratory and Advanced LIGO are funded by the United States National Science Foundation (NSF) as well as the Science and Technology Facilities Council (STFC) of the United Kingdom, the Max-Planck-Society (MPS), and the State of Niedersachsen/Germany for support of the construction of Advanced LIGO and construction and operation of the GEO600 detector. Additional support for Advanced LIGO was provided by the Australian Research Council. Virgo is funded, through the European Gravitational Observatory (EGO), by the French Centre National de Recherche Scientifique (CNRS), the Italian Istituto Nazionale di Fisica Nucleare (INFN) and the Dutch Nikhef, with contributions by institutions from Belgium, Germany, Greece, Hungary, Ireland, Japan, Monaco, Poland, Portugal, Spain. The construction and operation of KAGRA are funded by Ministry of Education, Culture, Sports, Science and Technology (MEXT), and Japan Society for the Promotion of Science (JSPS), National Research Foundation (NRF) and Ministry of Science and ICT (MSIT) in Korea, Academia Sinica (AS) and the Ministry of Science and Technology (MoST) in Taiwan.
 T.E.\ is supported by the Horizon Postdoctoral Fellowship.
+\software{scipy \citep{2020SciPy-NMeth}, flowMC \citep{2022arXiv221106397W,Gabrie:2021tlu, kaze_wong_2023_7706605}, ripple package \citep{Edwards:2023sak}, pBilby \citep{Smith:2019ucc}}
 
 \bibliography{bib}
 
